@@ -2,6 +2,7 @@
 
 @section('title', 'Access Denied - PMS')
 
+@section('content')
 <div class="max-w-xl mx-auto my-12 text-center bg-white p-8 rounded-xl shadow-sm border border-slate-200">
     <div class="w-16 h-16 rounded-full bg-red-100 text-red-600 mx-auto flex items-center justify-center mb-4">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -10,9 +11,10 @@
     </div>
     <h1 class="text-2xl font-bold text-slate-900 mb-2">403 - Access Denied</h1>
     <p class="text-sm text-slate-600 mb-6">
-        {{ $exception->getMessage() ?: 'You are not authorized to access this resource under your assigned role.' }}
+        {{ $exception?->getMessage() ?: 'You are not authorized to access this resource under your assigned role.' }}
     </p>
     <a href="{{ route('dashboard') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700">
         Return to Dashboard
     </a>
 </div>
+@endsection

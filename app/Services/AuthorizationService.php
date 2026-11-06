@@ -41,3 +41,4 @@ class AuthorizationService
         return $user->hasRole(UserRole::SYSTEM_ADMINISTRATOR);
     }
 }
+

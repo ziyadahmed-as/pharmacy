@@ -48,3 +48,4 @@ class EnsureRoleAccess
         return $next($request);
     }
 }
+

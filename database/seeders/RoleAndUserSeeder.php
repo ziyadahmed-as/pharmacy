@@ -106,3 +106,4 @@ class RoleAndUserSeeder extends Seeder
         $adminUser->roles()->syncWithoutDetaching([$adminRole->id]);
     }
 }
+

@@ -26,3 +26,4 @@ class EnsurePasswordIsChanged
         return $next($request);
     }
 }
+

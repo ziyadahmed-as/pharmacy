@@ -55,3 +55,4 @@ class AuditLog extends Model
         throw new RuntimeException('Audit log entries are immutable and cannot be deleted.');
     }
 }
+

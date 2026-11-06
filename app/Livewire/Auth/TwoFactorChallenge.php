@@ -67,3 +67,4 @@ class TwoFactorChallenge extends Component
             ->layout('layouts.guest', ['title' => 'Two-Factor Verification - PMS']);
     }
 }
+

@@ -39,3 +39,4 @@ enum UserRole: string
         return $this !== self::SYSTEM_ADMINISTRATOR;
     }
 }
+

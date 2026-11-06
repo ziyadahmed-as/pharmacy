@@ -50,49 +50,51 @@
                     </div>
 
                     <!-- Role-Aware Navigation Links -->
-                    <nav class="hidden md:flex space-x-6 items-center">
-                        <a href="{{ route('dashboard') }}" class="text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-teal-600 font-semibold' : 'text-slate-600 hover:text-slate-900' }}">
-                            Dashboard
-                        </a>
+                    @if(auth()->check())
+                        <nav class="hidden md:flex space-x-6 items-center">
+                            <a href="{{ route('dashboard') }}" class="text-sm font-medium {{ request()->routeIs('dashboard') ? 'text-teal-600 font-semibold' : 'text-slate-600 hover:text-slate-900' }}">
+                                Dashboard
+                            </a>
 
-                        @if(auth()->user()->canAccessBusinessData())
-                            <span class="text-xs bg-emerald-100 text-emerald-800 font-medium px-2 py-0.5 rounded-full" title="Authorized for clinical and operational modules">
-                                Pharmacy Operations
-                            </span>
-                        @endif
-
-                        @can('manage-system')
-                            <span class="text-xs bg-indigo-100 text-indigo-800 font-medium px-2 py-0.5 rounded-full" title="System Administration scope">
-                                System Administration
-                            </span>
-                        @endcan
-                    </nav>
-
-                    <!-- User Information & Logout -->
-                    <div class="flex items-center space-x-4">
-                        <div class="text-right">
-                            <div class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</div>
-                            <div class="text-xs text-slate-500 flex items-center justify-end space-x-1">
-                                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-                                <span>
-                                    {{ auth()->user()->roles->pluck('name')->join(', ') ?: 'No Role' }}
+                            @if(auth()->user()->canAccessBusinessData())
+                                <span class="text-xs bg-emerald-100 text-emerald-800 font-medium px-2 py-0.5 rounded-full" title="Authorized for clinical and operational modules">
+                                    Pharmacy Operations
                                 </span>
-                            </div>
-                        </div>
+                            @endif
 
-                        <!-- Logout Form -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" 
-                                    class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition"
-                                    title="Sign out of your session">
-                                <svg class="w-4 h-4 mr-1 text-slate-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                                </svg>
-                                Log out
-                            </button>
-                        </form>
-                    </div>
+                            @can('manage-system')
+                                <span class="text-xs bg-indigo-100 text-indigo-800 font-medium px-2 py-0.5 rounded-full" title="System Administration scope">
+                                    System Administration
+                                </span>
+                            @endcan
+                        </nav>
+
+                        <!-- User Information & Logout -->
+                        <div class="flex items-center space-x-4">
+                            <div class="text-right">
+                                <div class="text-sm font-semibold text-slate-900">{{ auth()->user()->name }}</div>
+                                <div class="text-xs text-slate-500 flex items-center justify-end space-x-1">
+                                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
+                                    <span>
+                                        {{ auth()->user()->roles->pluck('name')->join(', ') ?: 'No Role' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Logout Form -->
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" 
+                                        class="inline-flex items-center px-3 py-1.5 border border-slate-300 shadow-sm text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition"
+                                        title="Sign out of your session">
+                                    <svg class="w-4 h-4 mr-1 text-slate-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                    </svg>
+                                    Log out
+                                </button>
+                            </form>
+                        </div>
+                    @endif
                 </div>
             </div>
         </header>
@@ -112,7 +114,11 @@
                 </div>
             @endif
 
-            {{ $slot }}
+            @if(isset($slot))
+                {{ $slot }}
+            @else
+                @yield('content')
+            @endif
         </main>
 
         <!-- Inactivity auto-logout warning & client-side watchdog -->

@@ -45,3 +45,4 @@ class Login extends Component
             ->layout('layouts.guest', ['title' => 'Sign In - Pharmacy Management System']);
     }
 }
+

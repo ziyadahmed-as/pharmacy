@@ -136,3 +136,4 @@ sequenceDiagram
    - Authenticated Layout & Role-aware navigation
    - Access Denied view
 6. **Automated Feature & Security Test Suite**: Testing all 18 specified scenarios + security controls.
+

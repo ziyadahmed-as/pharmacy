@@ -50,3 +50,4 @@ class EnsureSessionNotExpired
         return $next($request);
     }
 }
+

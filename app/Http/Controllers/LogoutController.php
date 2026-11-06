@@ -18,3 +18,4 @@ class LogoutController extends Controller
         return redirect()->route('login');
     }
 }
+

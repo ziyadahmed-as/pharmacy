@@ -66,3 +66,4 @@ class ForcePasswordChange extends Component
             ->layout('layouts.app', ['title' => 'Password Change Required']);
     }
 }
+

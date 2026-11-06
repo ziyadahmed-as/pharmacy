@@ -16,3 +16,4 @@ class Dashboard extends Component
         ])->layout('layouts.app', ['title' => 'Dashboard - PMS']);
     }
 }
+
