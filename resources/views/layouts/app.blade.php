@@ -63,6 +63,10 @@
                             @endif
 
                             @can('manage-system')
+                                <a href="{{ route('admin.account-recovery') }}" class="text-sm font-medium {{ request()->routeIs('admin.account-recovery*') ? 'text-indigo-600 font-semibold' : 'text-slate-600 hover:text-slate-900' }}">
+                                    Account Recovery (UC-36)
+                                </a>
+
                                 <span class="text-xs bg-indigo-100 text-indigo-800 font-medium px-2 py-0.5 rounded-full" title="System Administration scope">
                                     System Administration
                                 </span>
@@ -121,7 +125,7 @@
             @endif
         </main>
 
-        <!-- Inactivity auto-logout warning & client-side watchdog -->
+        <!-- Footer -->
         <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-xs text-slate-400 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
                 <div>Pharmacy Management System (PMS) • Standard v1.1</div>

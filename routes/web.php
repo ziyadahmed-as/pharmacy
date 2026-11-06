@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\LogoutController;
+use App\Livewire\Admin\AccountRecoveryDashboard;
+use App\Livewire\Admin\PerformAccountRecovery;
 use App\Livewire\Auth\ForcePasswordChange;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\TwoFactorChallenge;
@@ -37,6 +39,15 @@ Route::middleware(['auth', 'account.active'])->group(function () {
     Route::middleware('password.changed')->group(function () {
         Route::get('/dashboard', Dashboard::class)
             ->name('dashboard');
+
+        // UC-36: Administrative Account Recovery & Unlock Workflows (System Administrator only)
+        Route::middleware('role:system_administrator')->prefix('admin')->group(function () {
+            Route::get('/account-recovery', AccountRecoveryDashboard::class)
+                ->name('admin.account-recovery');
+
+            Route::get('/account-recovery/create/{userId?}', PerformAccountRecovery::class)
+                ->name('admin.account-recovery.create');
+        });
 
         // Role-guarded test routes to verify role authorization
         Route::get('/pharmacy/clinical-data', function () {

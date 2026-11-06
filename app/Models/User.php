@@ -24,9 +24,11 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
+        'account_status',
         'failed_login_attempts',
         'locked_at',
         'must_change_password',
+        'password_reset_at',
         'two_factor_enabled',
         'two_factor_secret',
         'last_login_at',
@@ -59,6 +61,7 @@ class User extends Authenticatable
             'failed_login_attempts' => 'integer',
             'locked_at' => 'datetime',
             'must_change_password' => 'boolean',
+            'password_reset_at' => 'datetime',
             'two_factor_enabled' => 'boolean',
             'two_factor_secret' => 'encrypted',
             'last_login_at' => 'datetime',
@@ -84,11 +87,56 @@ class User extends Authenticatable
     }
 
     /**
+     * Identity verifications performed on this user.
+     */
+    public function identityVerifications(): HasMany
+    {
+        return $this->hasMany(IdentityVerification::class);
+    }
+
+    /**
      * Check if user is locked.
      */
     public function isLocked(): bool
     {
         return $this->locked_at !== null;
+    }
+
+    /**
+     * Determine the canonical account status.
+     * States: 'active', 'locked', 'pending_approval', 'deactivated'
+     */
+    public function getStatusAttribute(): string
+    {
+        if (! $this->is_active) {
+            return 'deactivated';
+        }
+
+        if ($this->account_status === 'pending_approval') {
+            return 'pending_approval';
+        }
+
+        if ($this->isLocked()) {
+            return 'locked';
+        }
+
+        return 'active';
+    }
+
+    /**
+     * Check if user can have password reset via UC-36.
+     */
+    public function isEligibleForPasswordReset(): bool
+    {
+        return in_array($this->status, ['active', 'locked'], true);
+    }
+
+    /**
+     * Check if user can be unlocked via UC-36.
+     */
+    public function isEligibleForUnlock(): bool
+    {
+        return $this->status === 'locked';
     }
 
     /**
