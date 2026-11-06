@@ -139,3 +139,4 @@ class PerformAccountRecovery extends Component
         ])->layout('layouts.app', ['title' => 'Process Account Recovery - PMS Admin']);
     }
 }
+

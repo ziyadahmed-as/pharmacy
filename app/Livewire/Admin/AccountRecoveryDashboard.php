@@ -49,3 +49,4 @@ class AccountRecoveryDashboard extends Component
         ])->layout('layouts.app', ['title' => 'Account Recovery & Identity Verification - PMS Admin']);
     }
 }
+

@@ -72,3 +72,4 @@ System Administrator (SA)
 - One-time reveal mechanism displays the generated credential to the SA once on the screen; refreshing the page or leaving it permanently clears it from memory.
 - Sessions are invalidated across devices for the affected user upon password reset.
 - Deactivated accounts or accounts linked to ended employment cannot be reactivated or unlocked via UC-36.
+

@@ -232,3 +232,4 @@ test('Livewire recovery wizard handles verification failure and stops operation'
     expect($this->staff->fresh()->is_active)->toBeTrue();
     expect($this->staff->fresh()->must_change_password)->toBeFalse();
 });
+

@@ -47,3 +47,4 @@ class IdentityVerification extends Model
         return $this->outcome === 'verified';
     }
 }
+
