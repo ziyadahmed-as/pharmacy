@@ -4,7 +4,7 @@
 ### 1. Architectural Overview
 The Pharmacy Management System adopts a **Modular Monolith** architecture with strict separation of concerns, built upon Laravel 12 and Livewire 3:
 - **Presentation Layer**: Livewire 3 Components (`Login`, `TwoFactorChallenge`, `ForcePasswordChange`) using Tailwind CSS.
-- **Application & Service Layer**: `AuthenticationService`, `AuthorizationService`, `AuditService` orchestrating business workflows.
+- **Application & Service Layer**: `Actions` (LogIn, ResetPassword, ...), `ApprovalService`, `AuditLogger` orchestrating business workflows.
 - **Domain & Data Layer**: Eloquent Models (`User`, `Role`, `AuditLog`) with database transactions, atomic operations, and strict constraints.
 - **Middleware & Security Layer**: Dedicated HTTP Middleware (`EnsureAccountIsActive`, `EnsurePasswordIsChanged`, `EnsureRoleAccess`) and session lifecycle guards.
 
@@ -73,7 +73,7 @@ The system enforces 4 principal roles (slugs):
 - `pharmacy_staff` (PS): Frontline operations (dispensing, sales).
 - `pharmacy_manager` (PM): Pharmacy operations supervision, staff monitoring. MFA configurable.
 - `owner` (OW): Business owner, executive authority.
-- `system_administrator` (SA): Technical administration, security management. MFA configurable. Strictly denied access to patient, prescription, sales, or financial data.
+- `system_admin` (SA): Technical administration, security management. MFA configurable. Strictly denied access to patient, prescription, sales, or financial data.
 
 ### 4. Authentication Workflow
 ```mermaid
@@ -81,7 +81,7 @@ sequenceDiagram
     actor User as User / Actor
     participant View as Livewire Login Component
     participant AuthSvc as AuthenticationService
-    participant Audit as AuditService
+    participant Audit as AuditLogger
     participant DB as MySQL Database / Users Table
     participant Session as Laravel Session
 
@@ -127,7 +127,7 @@ sequenceDiagram
 ### 5. Implementation Phases
 1. **Database Schema & Migrations**: Update `users` table, create `roles`, `user_roles`, and `audit_logs` tables.
 2. **Domain Models & Enums**: `UserRole` Enum, `User`, `Role`, `AuditLog` models with immutable safeguards.
-3. **Application Services**: `AuthenticationService`, `AuthorizationService`, `AuditService`.
+3. **Application Services**: `Actions` (LogIn, ResetPassword, ...), `ApprovalService`, `AuditLogger`.
 4. **Middleware & Gates**: `EnsureAccountIsActive`, `EnsurePasswordIsChanged`, `EnsureRoleAccess`, and Gates.
 5. **Livewire 3 UI Components**:
    - `App\Livewire\Auth\Login`

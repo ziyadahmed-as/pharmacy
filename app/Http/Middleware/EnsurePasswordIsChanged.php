@@ -9,21 +9,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsurePasswordIsChanged
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = Auth::user();
 
-        if ($user && $user->must_change_password) {
-            // Allow access to password force-change routes and logout
-            if (! $request->routeIs('password.force-change') && ! $request->routeIs('logout')) {
-                return redirect()->route('password.force-change');
-            }
+        if ($user && $user->must_change_password && ! $request->routeIs('password.force-change', 'logout', 'locale.switch')) {
+            return redirect()->route('password.force-change');
         }
 
         return $next($request);
     }
 }
-

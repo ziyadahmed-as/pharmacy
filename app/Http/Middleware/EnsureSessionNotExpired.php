@@ -2,52 +2,37 @@
 
 namespace App\Http\Middleware;
 
-use App\Services\AuditService;
+use App\Actions\Auth\LogOut;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Server-side idle logout (UC-33 step 4, AC-18). Limit from setting
+ * security.idle_timeout_minutes. Logs auth.logout.idle.
+ */
 class EnsureSessionNotExpired
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next): Response
     {
         if (Auth::check()) {
-            $timeoutMinutes = config('pms_auth.session_inactivity_timeout', 15);
-            $maxIdleSeconds = $timeoutMinutes * 60;
-            $lastActivity = $request->session()->get('auth.last_activity');
+            $limit = max(1, (int) setting('security.idle_timeout_minutes', 15)) * 60;
+            $last = $request->session()->get('auth.last_activity');
 
-            if ($lastActivity && (time() - $lastActivity > $maxIdleSeconds)) {
-                $user = Auth::user();
+            if ($last && (time() - $last) > $limit) {
+                app(LogOut::class)->execute('idle');
 
-                AuditService::record(
-                    action: 'session_expired_inactivity',
-                    category: 'authentication',
-                    description: "User session expired due to {$timeoutMinutes} minutes of inactivity",
-                    metadata: [
-                        'username' => $user?->username,
-                        'idle_seconds' => time() - $lastActivity,
-                    ],
-                    user: $user
-                );
+                if ($request->expectsJson() || $request->header('X-Livewire')) {
+                    abort(419, __('auth.idle_logout'));
+                }
 
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-
-                return redirect()->route('login')->withErrors([
-                    'username' => 'Your session has expired due to inactivity. Please log in again.',
-                ]);
+                return redirect()->route('login')->withErrors(['username' => __('auth.idle_logout')]);
             }
 
-            // Update last activity timestamp
             $request->session()->put('auth.last_activity', time());
         }
 
         return $next($request);
     }
 }
-

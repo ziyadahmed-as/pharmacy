@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\UserRole;
+use App\Enums\Role as RoleEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,15 +11,8 @@ class Role extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'name',
-        'slug',
-        'description',
-    ];
+    protected $fillable = ['name', 'slug', 'description'];
 
-    /**
-     * Users associated with this role.
-     */
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'user_roles')
@@ -27,10 +20,7 @@ class Role extends Model
             ->withTimestamps();
     }
 
-    /**
-     * Check if the role matches a specific enum instance.
-     */
-    public function isRole(UserRole $role): bool
+    public function isRole(RoleEnum $role): bool
     {
         return $this->slug === $role->value;
     }

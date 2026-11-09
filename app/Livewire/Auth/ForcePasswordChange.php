@@ -2,68 +2,53 @@
 
 namespace App\Livewire\Auth;
 
-use App\Services\AuditService;
+use App\Actions\Auth\ChangePassword;
+use App\Services\PasswordPolicy;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 class ForcePasswordChange extends Component
 {
     public string $current_password = '';
-    public string $password = '';
-    public string $password_confirmation = '';
 
-    protected function rules(): array
-    {
-        return [
-            'current_password' => ['required', 'string'],
-            'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
-        ];
-    }
+    public string $password = '';
+
+    public string $password_confirmation = '';
 
     public function mount()
     {
-        $user = Auth::user();
-
-        if (! $user || ! $user->must_change_password) {
+        if (! Auth::user()?->must_change_password) {
             return redirect()->route('dashboard');
         }
     }
 
-    public function updatePassword()
+    public function updatePassword(ChangePassword $change)
     {
-        $this->validate();
+        $this->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'confirmed'],
+        ]);
 
-        $user = Auth::user();
+        try {
+            $change->execute(Auth::user(), $this->current_password, $this->password);
+        } catch (ValidationException $e) {
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError($field, $messages[0]);
+            }
+            $this->reset(['current_password', 'password', 'password_confirmation']);
 
-        if (! Hash::check($this->current_password, $user->password)) {
-            $this->addError('current_password', 'The current password provided is incorrect.');
             return;
         }
 
-        $user->update([
-            'password' => Hash::make($this->password),
-            'must_change_password' => false,
-        ]);
-
-        AuditService::record(
-            action: 'password_change_forced_completed',
-            category: 'security',
-            description: 'User successfully completed forced password change',
-            metadata: ['username' => $user->username],
-            user: $user
-        );
-
-        session()->flash('status', 'Password successfully changed. You may now continue using the system.');
+        session()->flash('status', __('auth.password_changed'));
 
         return redirect()->route('dashboard');
     }
 
     public function render()
     {
-        return view('livewire.auth.force-password-change')
-            ->layout('layouts.app', ['title' => 'Password Change Required']);
+        return view('livewire.auth.force-password-change', ['min' => PasswordPolicy::minLength()])
+            ->layout('layouts.app', ['title' => __('auth.force_change_title')]);
     }
 }
-
