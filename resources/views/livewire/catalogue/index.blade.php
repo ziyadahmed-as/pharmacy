@@ -5,9 +5,16 @@
             <p class="text-sm text-gray-500">{{ __('catalogue.subtitle') }}</p>
         </div>
         @if ($canManage || $canEditBasic)
-            <a href="{{ route('catalogue.create') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md shadow-sm transition">
-                + {{ __('catalogue.add_product') }}
-            </a>
+            <div class="space-x-2">
+                @if ($canManage)
+                    <a href="{{ route('catalogue.import') }}" class="px-3 py-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium rounded-md shadow-sm transition">
+                        📥 {{ __('catalogue.import_title') }}
+                    </a>
+                @endif
+                <a href="{{ route('catalogue.create') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md shadow-sm transition">
+                    + {{ __('catalogue.add_product') }}
+                </a>
+            </div>
         @endif
     </div>
 
