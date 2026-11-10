@@ -17,6 +17,9 @@ return [
     'stock_ledger' => 'የክምችት እንቅስቃሴ መዝገብ',
     'quarantine' => 'የተለየ ክምችት',
     'receive_stock' => 'ክምችት ተረከብ',
+    'open_shift' => 'ፈረቃ ክፈት',
+    'shifts' => 'የገንዘብ ፈረቃዎች',
+    'tills' => 'ካሳዎች',
     'group' => [
         'catalogue' => 'ካታሎግ',
         'inventory' => 'ክምችት',

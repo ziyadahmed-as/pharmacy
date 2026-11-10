@@ -17,6 +17,9 @@ return [
     'stock_ledger' => 'Stock ledger',
     'quarantine' => 'Quarantine stock',
     'receive_stock' => 'Receive stock',
+    'open_shift' => 'Open shift',
+    'shifts' => 'Cash shifts',
+    'tills' => 'Tills',
     'group' => [
         'catalogue' => 'Catalogue',
         'inventory' => 'Inventory',

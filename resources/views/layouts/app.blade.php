@@ -29,6 +29,7 @@
     $idleMinutes = max(1, (int) setting('security.idle_timeout_minutes', 15));
     $unread = $authUser ? \Illuminate\Support\Facades\DB::table('notifications')->where('notifiable_type', $authUser->getMorphClass())->where('notifiable_id', $authUser->getKey())->whereNull('read_at')->count() : 0;
     $initials = $authUser ? collect(explode(' ', $authUser->name))->map(fn($w) => strtoupper(substr($w,0,1)))->take(2)->implode('') : '?';
+    $currentShift = $authUser ? \App\Services\CurrentShift::forUser($authUser) : null;
 @endphp
 <body class="h-full font-sans antialiased text-slate-800"
       x-data="{ sidebarOpen: false, userMenuOpen: false, ...idleGuard({{ $idleMinutes * 60 }}, 60) }"
@@ -135,6 +136,22 @@
             {{-- Right: actions --}}
             @if ($authUser)
             <div class="flex items-center gap-2">
+                @if ($currentShift)
+                    <div class="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-800 shadow-sm" title="{{ __('shifts.shift_open') }}: {{ $currentShift->till->name }}">
+                        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="font-semibold">{{ $currentShift->till->name }}</span>
+                        <span class="text-emerald-600 font-mono">({{ number_format($currentShift->opening_float / 100, 2) }} ETB)</span>
+                    </div>
+                @elseif ($authUser->hasPermission('shifts.open'))
+                    <a href="{{ route('shifts.open') }}"
+                       class="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-medium text-amber-800 hover:bg-amber-100 transition shadow-sm"
+                       title="{{ __('shifts.no_open_shift') }}">
+                        <span class="h-2 w-2 rounded-full bg-amber-400"></span>
+                        <span>{{ __('shifts.no_open_shift') }}</span>
+                        <span class="underline text-amber-900 font-semibold ml-0.5">{{ __('shifts.open_shift') }}</span>
+                    </a>
+                @endif
+
                 <x-language-switcher />
 
                 {{-- Notification Bell --}}

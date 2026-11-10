@@ -55,7 +55,8 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Pharmacy Manager',
                 'username' => 'manager_user',
-                'email' => 'manager_user@pms.local',
+                'email' => '
+                ',
                 'password' => 'password',
                 'role' => RoleEnum::PharmacyManager->value,
             ],

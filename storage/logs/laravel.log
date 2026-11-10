@@ -547,3 +547,6 @@
 #36 {main}
 "} 
 [2026-11-10 09:04:55] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
+[2026-11-10 10:30:17] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
+[2026-11-10 10:31:02] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
+[2026-11-10 11:01:29] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 

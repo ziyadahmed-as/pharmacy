@@ -24,8 +24,10 @@ use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
 use App\Livewire\Quarantine as QuarantineUi;
 use App\Livewire\Settings as SettingsUi;
+use App\Livewire\Shifts as ShiftsUi;
 use App\Livewire\Staff as StaffUi;
 use App\Livewire\Stock as StockUi;
+use App\Livewire\Tills as TillsUi;
 use App\Livewire\Users as UsersUi;
 use Illuminate\Support\Facades\Route;
 
@@ -99,6 +101,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             // UC-08: Quarantine Stock
             Route::get('/inventory/quarantine', QuarantineUi\Index::class)->middleware('can:stock.view')->name('inventory.quarantine');
+
+            // UC-12: Cash Shifts & Tills
+            Route::get('/shifts/open', ShiftsUi\Open::class)->middleware('can:shifts.open')->name('shifts.open');
+            Route::get('/tills', TillsUi\Index::class)->middleware('can:tills.manage')->name('tills.index');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

@@ -56,6 +56,10 @@ final class Permissions
             'stock.view' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $PS, $OW]],
             'cost.view' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $OW]],
             'stock.adjust.request' => ['module' => 'inventory', 'active' => false, 'roles' => [$PM, $PS]],
+            // --- Sales & Shifts (Stage 3) ---
+            'shifts.open' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS, $OW]],
+            'shifts.view' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS, $OW]],
+            'tills.manage' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $OW]],
             'sales.sell' => ['module' => 'sales', 'active' => false, 'roles' => [$PM, $PS]],
             'sales.void.request' => ['module' => 'sales', 'active' => false, 'roles' => [$PM, $PS]],
             'backup.run' => ['module' => 'administration', 'active' => false, 'roles' => [$SA]],

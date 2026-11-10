@@ -55,7 +55,10 @@ final class Navigation
                 ['label' => 'nav.quarantine', 'route' => 'inventory.quarantine', 'any' => ['stock.view']],
                 ['label' => 'nav.receive_stock', 'route' => 'inventory.receive', 'any' => ['stock.receive']],
             ]],
-            ['key' => 'sales', 'items' => []],
+            ['key' => 'sales', 'items' => [
+                ['label' => 'nav.open_shift', 'route' => 'shifts.open', 'any' => ['shifts.open']],
+                ['label' => 'nav.tills', 'route' => 'tills.index', 'any' => ['tills.manage']],
+            ]],
             ['key' => 'prescriptions', 'items' => []],
             ['key' => 'customers', 'items' => []],
             ['key' => 'finance', 'items' => []],
