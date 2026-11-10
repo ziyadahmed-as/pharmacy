@@ -1,23 +1,24 @@
-<div class="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-    <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-5">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
         <div>
-            <h3 class="text-lg font-semibold text-gray-900">{{ __('catalogue.selling_price') }}</h3>
-            <p class="text-sm text-gray-500">{{ __('catalogue.selling_price_description') }}</p>
+            <h3 class="text-base font-bold text-slate-900">{{ __('catalogue.selling_price') }}</h3>
+            <p class="text-xs text-slate-500 mt-0.5">{{ __('catalogue.selling_price_description') }}</p>
         </div>
         @if ($canSetPrice)
             <button 
                 type="button" 
                 wire:click="openChangeModal" 
-                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md shadow-sm transition">
+                class="inline-flex items-center gap-1.5 rounded-xl bg-teal-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition">
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                 {{ __('catalogue.change_price') }}
             </button>
         @endif
     </div>
 
     @if ($product->units->isNotEmpty())
-        <div class="mt-4 flex items-center space-x-2">
-            <label class="text-sm font-medium text-gray-700">{{ __('catalogue.unit') }}:</label>
-            <select wire:model.live="selectedUnitId" class="text-sm rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+        <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold uppercase tracking-wider text-slate-500">{{ __('catalogue.unit') }}:</label>
+            <select wire:model.live="selectedUnitId" class="text-xs font-medium rounded-lg border border-slate-300 py-1.5 px-2.5 focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
                 <option value="">{{ __('catalogue.base_unit') }} ({{ $product->unit }})</option>
                 @foreach ($product->units as $unit)
                     <option value="{{ $unit->id }}">{{ $unit->name }} (x{{ $unit->factor }})</option>
@@ -26,50 +27,50 @@
         </div>
     @endif
 
-    <!-- Current Price Display -->
-    <div class="mt-6 p-4 bg-gray-50 rounded-lg flex items-baseline justify-between">
+    <!-- Current Price Display Card -->
+    <div class="rounded-xl border border-teal-100 bg-gradient-to-br from-teal-50/70 to-teal-50/20 p-5 flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">
         <div>
-            <span class="text-xs uppercase font-medium tracking-wider text-gray-500">{{ __('catalogue.current_effective_price') }}</span>
-            <div class="text-3xl font-bold text-gray-900 mt-1">
+            <span class="text-xs font-semibold uppercase tracking-wider text-teal-800">{{ __('catalogue.current_effective_price') }}</span>
+            <div class="text-3xl font-extrabold text-teal-950 mt-1">
                 @if ($currentPrice)
-                    {{ number_format($currentPrice->price / 100, 2) }} <span class="text-sm font-normal text-gray-500">ETB</span>
+                    {{ number_format($currentPrice->price / 100, 2) }} <span class="text-sm font-normal text-teal-700">ETB</span>
                 @else
-                    <span class="text-gray-400 font-normal text-xl">{{ __('catalogue.no_price_set') }}</span>
+                    <span class="text-slate-400 font-normal text-xl">{{ __('catalogue.no_price_set') }}</span>
                 @endif
             </div>
         </div>
         @if ($currentPrice)
-            <div class="text-right text-xs text-gray-500">
-                <div>{{ __('catalogue.effective_from') }}: {{ local_time($currentPrice->effective_from) }}</div>
-                <div>{{ __('catalogue.reason') }}: {{ $currentPrice->reason }}</div>
+            <div class="text-xs text-teal-800 space-y-0.5">
+                <div><span class="text-teal-600 font-medium">{{ __('catalogue.effective_from') }}:</span> {{ local_time($currentPrice->effective_from) }}</div>
+                <div><span class="text-teal-600 font-medium">{{ __('catalogue.reason') }}:</span> {{ $currentPrice->reason }}</div>
             </div>
         @endif
     </div>
 
     <!-- Price History -->
-    <div class="mt-6">
-        <h4 class="text-sm font-medium text-gray-900 mb-3">{{ __('catalogue.price_history') }}</h4>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead>
-                    <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">
-                        <th class="px-4 py-2">{{ __('catalogue.price') }}</th>
-                        <th class="px-4 py-2">{{ __('catalogue.effective_from') }}</th>
-                        <th class="px-4 py-2">{{ __('catalogue.reason') }}</th>
-                        <th class="px-4 py-2">{{ __('catalogue.set_by') }}</th>
+    <div>
+        <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2.5">{{ __('catalogue.price_history') }}</h4>
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200 text-xs">
+                <thead class="bg-slate-50/75 uppercase tracking-wider text-slate-500">
+                    <tr>
+                        <th class="px-3.5 py-2.5 text-left font-semibold">{{ __('catalogue.price') }}</th>
+                        <th class="px-3.5 py-2.5 text-left font-semibold">{{ __('catalogue.effective_from') }}</th>
+                        <th class="px-3.5 py-2.5 text-left font-semibold">{{ __('catalogue.reason') }}</th>
+                        <th class="px-3.5 py-2.5 text-left font-semibold">{{ __('catalogue.set_by') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 bg-white">
+                <tbody class="divide-y divide-slate-100 bg-white">
                     @forelse ($history as $h)
-                        <tr>
-                            <td class="px-4 py-2 font-medium text-gray-900">{{ number_format($h->price / 100, 2) }} ETB</td>
-                            <td class="px-4 py-2 text-gray-600">{{ local_time($h->effective_from) }}</td>
-                            <td class="px-4 py-2 text-gray-600">{{ $h->reason }}</td>
-                            <td class="px-4 py-2 text-gray-600">{{ $h->user?->name ?? '—' }}</td>
+                        <tr class="hover:bg-slate-50/60 transition">
+                            <td class="px-3.5 py-2.5 font-bold text-slate-900">{{ number_format($h->price / 100, 2) }} ETB</td>
+                            <td class="px-3.5 py-2.5 text-slate-600">{{ local_time($h->effective_from) }}</td>
+                            <td class="px-3.5 py-2.5 text-slate-600">{{ $h->reason }}</td>
+                            <td class="px-3.5 py-2.5 text-slate-600">{{ $h->user?->name ?? '—' }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-4 py-3 text-center text-gray-500 italic">{{ __('catalogue.no_price_history') }}</td>
+                            <td colspan="4" class="px-3.5 py-4 text-center text-slate-400 italic">{{ __('catalogue.no_price_history') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -79,34 +80,39 @@
 
     <!-- Modal Form -->
     @if ($showChangeModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">{{ __('catalogue.change_selling_price') }}</h3>
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
+            <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <h3 class="text-base font-bold text-slate-900">{{ __('catalogue.change_selling_price') }}</h3>
+                    <button type="button" wire:click="$set('showChangeModal', false)" class="text-slate-400 hover:text-slate-600">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
 
-                <form wire:submit.prevent="savePrice" class="space-y-4">
+                <form wire:submit.prevent="savePrice" class="mt-4 space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">{{ __('catalogue.new_price') }} (ETB)</label>
-                        <input type="number" step="0.01" wire:model="price" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="0.00" required>
-                        @error('price') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.new_price') }} (ETB) <span class="text-rose-500">*</span></label>
+                        <input type="number" step="0.01" wire:model="price" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition" placeholder="0.00" required>
+                        @error('price') <span class="text-rose-600 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">{{ __('catalogue.effective_from') }}</label>
-                        <input type="datetime-local" wire:model="effectiveFrom" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" required>
-                        @error('effectiveFrom') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.effective_from') }} <span class="text-rose-500">*</span></label>
+                        <input type="datetime-local" wire:model="effectiveFrom" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition" required>
+                        @error('effectiveFrom') <span class="text-rose-600 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">{{ __('catalogue.reason') }}</label>
-                        <input type="text" wire:model="reason" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm" placeholder="e.g. Supplier price adjustment" required>
-                        @error('reason') <span class="text-red-600 text-xs mt-1 block">{{ $message }}</span> @enderror
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.reason') }} <span class="text-rose-500">*</span></label>
+                        <input type="text" wire:model="reason" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition" placeholder="e.g. Supplier price adjustment" required>
+                        @error('reason') <span class="text-rose-600 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="flex justify-end space-x-3 mt-6">
-                        <button type="button" wire:click="$set('showChangeModal', false)" class="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50">
+                    <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+                        <button type="button" wire:click="$set('showChangeModal', false)" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
                             {{ __('common.cancel') }}
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md shadow-sm">
+                        <button type="submit" class="rounded-xl bg-teal-600 px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 transition">
                             {{ __('common.save') }}
                         </button>
                     </div>
@@ -115,4 +121,3 @@
         </div>
     @endif
 </div>
-
