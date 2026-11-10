@@ -8,10 +8,16 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Drop any partially created tables if a previous migration attempt failed
+        Schema::dropIfExists('product_prices');
+        Schema::dropIfExists('product_units');
+        Schema::dropIfExists('products');
+        Schema::dropIfExists('categories');
+
         // UC-01 Categories
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name', 150)->unique();
             $table->string('description')->nullable();
             $table->timestamps();
         });
@@ -19,16 +25,16 @@ return new class extends Migration
         // UC-01 Products
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('brand');
-            $table->string('generic_name'); // INN
-            $table->string('strength')->nullable();
-            $table->string('dosage_form')->nullable();
-            $table->string('pack_size')->nullable();
-            $table->string('unit')->default('piece');
-            $table->string('manufacturer')->nullable();
+            $table->string('brand', 150);
+            $table->string('generic_name', 150); // INN
+            $table->string('strength', 60)->nullable();
+            $table->string('dosage_form', 60)->nullable();
+            $table->string('pack_size', 60)->nullable();
+            $table->string('unit', 30)->default('piece');
+            $table->string('manufacturer', 150)->nullable();
             $table->foreignId('category_id')->nullable()->constrained('categories')->nullOnDelete();
-            $table->string('barcode')->nullable()->unique();
-            $table->string('storage_condition')->nullable();
+            $table->string('barcode', 100)->nullable()->unique();
+            $table->string('storage_condition', 150)->nullable();
             $table->enum('classification', ['rx', 'otc', 'controlled', 'non_drug'])->default('otc');
             $table->boolean('loose_allowed')->default(false);
             $table->unsignedInteger('reorder_level')->default(0);
@@ -38,7 +44,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            // Index for search performance and duplicate check
+            // Index for search performance and duplicate check (specified key lengths safe for MySQL utf8mb4)
             $table->index(['brand', 'strength', 'dosage_form', 'pack_size'], 'idx_products_duplicate_lookup');
             $table->index(['generic_name', 'brand', 'barcode', 'is_active'], 'idx_products_search');
         });

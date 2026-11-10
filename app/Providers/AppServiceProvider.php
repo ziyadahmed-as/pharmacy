@@ -16,6 +16,7 @@ use App\Services\ExpiredBatchQuarantinerService;
 use App\Services\SettingsRepository;
 use App\Support\Permissions;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -42,6 +43,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Schema::defaultStringLength(191);
+
         // One gate per active permission, built from the registry (BRD matrix 4.3).
         foreach (Permissions::activeNames() as $permission) {
             Gate::define($permission, fn (User $user) => $user->hasPermission($permission));

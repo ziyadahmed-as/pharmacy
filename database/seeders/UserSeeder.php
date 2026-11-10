@@ -106,6 +106,18 @@ class UserSeeder extends Seeder
                     'user_id' => $user->id,
                 ]);
             }
+
+            // Create Staff record for non-admin accounts if not already linked
+            if ($data['role'] !== RoleEnum::SystemAdmin->value && ! Staff::where('user_id', $user->id)->exists()) {
+                Staff::create([
+                    'name' => $data['name'],
+                    'phone' => '+251911000000',
+                    'title' => ucwords(str_replace('_', ' ', $data['role'])),
+                    'hire_date' => now()->subYear()->format('Y-m-d'),
+                    'status' => 'active',
+                    'user_id' => $user->id,
+                ]);
+            }
         }
     }
 }
