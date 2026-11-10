@@ -154,7 +154,8 @@ class StockOnHandQuery
             }
 
             if ($canViewCost && $batch->unit_cost !== null) {
-                $totalValuation += (int) ($batchQty * $batch->unit_cost);
+                $batchSellableQty = $batch->stocks->where('status', 'sellable')->sum('quantity');
+                $totalValuation += (int) ($batchSellableQty * $batch->unit_cost);
             }
         }
 

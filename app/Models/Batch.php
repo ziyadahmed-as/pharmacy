@@ -43,4 +43,9 @@ class Batch extends Model
     {
         return $this->hasMany(StockMovement::class);
     }
+
+    public function quarantineRecords(): HasMany
+    {
+        return $this->hasMany(QuarantineRecord::class);
+    }
 }

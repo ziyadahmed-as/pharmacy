@@ -74,4 +74,3 @@ class StockAlert extends Model
         return $type ? $query->where('type', $type) : $query;
     }
 }
-

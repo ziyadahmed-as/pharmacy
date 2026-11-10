@@ -95,7 +95,9 @@ class StockExportController extends Controller
                 }
 
                 foreach ($batch->stocks as $stock) {
-                    $valEtb = $batch->unit_cost !== null ? number_format(($stock->quantity * $batch->unit_cost) / 100, 2) : '0.00';
+                    $valEtb = ($stock->status === 'sellable' && $batch->unit_cost !== null)
+                        ? number_format(($stock->quantity * $batch->unit_cost) / 100, 2)
+                        : '0.00';
                     $rows[] = [
                         $p->brand,
                         $p->generic_name,

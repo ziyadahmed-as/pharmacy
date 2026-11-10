@@ -22,6 +22,7 @@ use App\Livewire\Dashboard;
 use App\Livewire\Inventory\Receive;
 use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
+use App\Livewire\Quarantine as QuarantineUi;
 use App\Livewire\Settings as SettingsUi;
 use App\Livewire\Staff as StaffUi;
 use App\Livewire\Stock as StockUi;
@@ -95,6 +96,9 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-05: Stock Alerts & Reorder List
             Route::get('/inventory/alerts', AlertsUi\Index::class)->middleware('can:stock.view')->name('inventory.alerts');
             Route::get('/inventory/reorder/export/{format}', [StockExportController::class, 'reorderList'])->whereIn('format', ['csv', 'pdf'])->name('inventory.reorder.export');
+
+            // UC-08: Quarantine Stock
+            Route::get('/inventory/quarantine', QuarantineUi\Index::class)->middleware('can:stock.view')->name('inventory.quarantine');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

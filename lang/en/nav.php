@@ -15,6 +15,7 @@ return [
     'stock_alerts' => 'Stock alerts & reorder',
     'stock_on_hand' => 'Stock on hand',
     'stock_ledger' => 'Stock ledger',
+    'quarantine' => 'Quarantine stock',
     'receive_stock' => 'Receive stock',
     'group' => [
         'catalogue' => 'Catalogue',
