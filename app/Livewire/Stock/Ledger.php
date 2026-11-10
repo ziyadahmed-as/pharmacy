@@ -90,4 +90,3 @@ class Ledger extends Component
         ])->layout('layouts.app', ['title' => __('nav.stock_ledger')]);
     }
 }
-
