@@ -24,6 +24,14 @@ it('signs in a valid active user and audits auth.login.success with the role use
     expect($log)->not->toBeNull()->and($log->user_id)->toBe($user->id)->and($log->role_used)->toBe('pharmacy_staff');
 });
 
+it('signs in a valid active user using email as well as username', function () {
+    $user = ps(['username' => 'amina', 'email' => 'amina@pms.local', 'password' => 'Correct-Horse-1']);
+
+    Livewire::test(Login::class)->set('username', 'amina@pms.local')->set('password', 'Correct-Horse-1')->call('login')->assertRedirect(route('dashboard'));
+
+    $this->assertAuthenticatedAs($user);
+});
+
 it('refuses a wrong password and gives the same generic text for an unknown username', function () {
     ps(['username' => 'amina', 'password' => 'Correct-Horse-1']);
 

@@ -3,7 +3,7 @@
 return [
     'login_title' => 'Sign in',
     'login_subtitle' => 'Sign in to your named staff account',
-    'username' => 'Username',
+    'username' => 'Username or Email',
     'password' => 'Password',
     'show' => 'Show',
     'hide' => 'Hide',

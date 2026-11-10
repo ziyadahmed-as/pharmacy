@@ -18,7 +18,7 @@ class Login extends Component
     protected function rules(): array
     {
         return [
-            'username' => ['required', 'string', 'max:50'],
+            'username' => ['required', 'string', 'max:100'],
             'password' => ['required', 'string'],
         ];
     }

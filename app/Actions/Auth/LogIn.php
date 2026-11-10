@@ -29,7 +29,9 @@ class LogIn
     {
         $generic = ValidationException::withMessages(['username' => __('auth.failed')]);
 
-        $user = User::where('username', $username)->first();
+        $user = User::where('username', $username)
+            ->orWhere('email', $username)
+            ->first();
 
         if (! $user) {
             AuditLogger::record('auth.login.failed', null, [], [], ['attempted_username' => $username, 'reason' => 'unknown_user']);

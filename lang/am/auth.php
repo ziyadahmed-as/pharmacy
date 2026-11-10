@@ -3,7 +3,7 @@
 return [
     'login_title' => 'ግባ',
     'login_subtitle' => 'በራስዎ የሠራተኛ መለያ ይግቡ',
-    'username' => 'የተጠቃሚ ስም',
+    'username' => 'የተጠቃሚ ስም ወይም ኢሜይል',
     'password' => 'የይለፍ ቃል',
     'show' => 'አሳይ',
     'hide' => 'ደብቅ',
