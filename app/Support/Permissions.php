@@ -44,9 +44,10 @@ final class Permissions
             // --- Staff (Stage 1, active) ---
             'staff.manage' => ['module' => 'staff', 'active' => true, 'roles' => [$OW, $PM]],
             'staff.view.own' => ['module' => 'staff', 'active' => true, 'roles' => [$PS]],
-            // --- Later stages (declared, inactive) ---
-            'catalogue.manage' => ['module' => 'catalogue', 'active' => false, 'roles' => [$OW, $PM]],
-            'price.set' => ['module' => 'catalogue', 'active' => false, 'roles' => [$OW, $PM]],
+            // --- Catalogue & Prices (Stage 2) ---
+            'catalogue.manage' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM]],
+            'price.set' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM]],
+            'price.view' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM, $PS]],
             'stock.receive' => ['module' => 'inventory', 'active' => false, 'roles' => [$PM, $PS]],
             'stock.receipt.confirm' => ['module' => 'inventory', 'active' => false, 'roles' => [$PM]],
             'stock.adjust.request' => ['module' => 'inventory', 'active' => false, 'roles' => [$PM, $PS]],

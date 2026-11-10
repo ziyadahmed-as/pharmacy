@@ -24,8 +24,8 @@ it('gives the SA no permission that touches business data', function () {
     expect(array_intersect($sa, $business))->toBe([]);
 });
 
-it('keeps every later-stage permission inactive in Stage 1', function () {
-    foreach (['catalogue.manage', 'sales.sell', 'stock.receive', 'backup.run', 'reports.financial'] as $p) {
+it('keeps every later-stage permission inactive in Stage 1 except Stage 2 active permissions', function () {
+    foreach (['sales.sell', 'stock.receive', 'backup.run', 'reports.financial'] as $p) {
         expect(Permissions::matrix()[$p]['active'])->toBeFalse($p);
         expect(Gate::has($p))->toBeFalse($p);
     }

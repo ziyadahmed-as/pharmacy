@@ -10,8 +10,8 @@ use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature');
-pest()->extend(TestCase::class)->in('Arch', 'Unit');
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Feature', 'Arch');
+pest()->extend(TestCase::class)->in('Unit');
 
 /** Tests depend on seeded roles only (AGENTS.md section 10). */
 function seedRoles(): void
