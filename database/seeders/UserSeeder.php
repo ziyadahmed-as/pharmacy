@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\Role as RoleEnum;
 use App\Models\Role;
+use App\Models\Staff;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -19,28 +20,56 @@ class UserSeeder extends Seeder
             [
                 'name' => 'System Admin',
                 'username' => 'admin',
-                'email' => 'admin@example.com',
+                'email' => 'admin@pms.local',
+                'password' => 'password',
+                'role' => RoleEnum::SystemAdmin->value,
+            ],
+            [
+                'name' => 'System Administrator',
+                'username' => 'sysadmin',
+                'email' => 'sysadmin@pms.local',
                 'password' => 'password',
                 'role' => RoleEnum::SystemAdmin->value,
             ],
             [
                 'name' => 'Pharmacy Owner',
+                'username' => 'owner',
+                'email' => 'owner@pms.local',
+                'password' => 'password',
+                'role' => RoleEnum::Owner->value,
+            ],
+            [
+                'name' => 'Pharmacy Owner',
                 'username' => 'owner_user',
-                'email' => 'owner@example.com',
+                'email' => 'owner_user@pms.local',
                 'password' => 'password',
                 'role' => RoleEnum::Owner->value,
             ],
             [
                 'name' => 'Pharmacy Manager',
+                'username' => 'manager',
+                'email' => 'manager@pms.local',
+                'password' => 'password',
+                'role' => RoleEnum::PharmacyManager->value,
+            ],
+            [
+                'name' => 'Pharmacy Manager',
                 'username' => 'manager_user',
-                'email' => 'manager@example.com',
+                'email' => 'manager_user@pms.local',
                 'password' => 'password',
                 'role' => RoleEnum::PharmacyManager->value,
             ],
             [
                 'name' => 'Pharmacy Staff',
+                'username' => 'staff',
+                'email' => 'staff@pms.local',
+                'password' => 'password',
+                'role' => RoleEnum::PharmacyStaff->value,
+            ],
+            [
+                'name' => 'Pharmacy Staff',
                 'username' => 'staff_user',
-                'email' => 'staff@example.com',
+                'email' => 'staff_user@pms.local',
                 'password' => 'password',
                 'role' => RoleEnum::PharmacyStaff->value,
             ],
@@ -64,6 +93,18 @@ class UserSeeder extends Seeder
                 if ($role && ! $user->roles()->where('role_id', $role->id)->exists()) {
                     $user->roles()->attach($role->id);
                 }
+            }
+
+            // Create Staff record for non-admin accounts if not already linked
+            if ($data['role'] !== RoleEnum::SystemAdmin->value && ! Staff::where('user_id', $user->id)->exists()) {
+                Staff::create([
+                    'name' => $data['name'],
+                    'phone' => '+251911000000',
+                    'title' => ucwords(str_replace('_', ' ', $data['role'])),
+                    'hire_date' => now()->subYear()->format('Y-m-d'),
+                    'status' => 'active',
+                    'user_id' => $user->id,
+                ]);
             }
         }
     }
