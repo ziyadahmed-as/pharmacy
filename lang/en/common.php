@@ -22,6 +22,8 @@ return [
     'name' => 'Name',
     'date' => 'Date',
     'time' => 'Time',
+    'from_date' => 'From Date',
+    'to_date' => 'To Date',
     'reason' => 'Reason',
     'note' => 'Note',
     'comment' => 'Comment',
@@ -41,4 +43,5 @@ return [
     'remove' => 'Remove',
     'active' => 'Active',
     'inactive' => 'Inactive',
+    'clear_filter' => 'Clear filter',
 ];

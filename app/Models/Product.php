@@ -58,6 +58,11 @@ class Product extends Model
         return $this->hasMany(ProductPrice::class);
     }
 
+    public function batches(): HasMany
+    {
+        return $this->hasMany(Batch::class);
+    }
+
     public function latestPrice(): HasOne
     {
         return $this->hasOne(ProductPrice::class)->latestOfMany('effective_from');

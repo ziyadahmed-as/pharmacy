@@ -22,6 +22,8 @@ return [
     'name' => 'ስም',
     'date' => 'ቀን',
     'time' => 'ሰዓት',
+    'from_date' => 'ከቀን',
+    'to_date' => 'እስከ ቀን',
     'reason' => 'ምክንያት',
     'note' => 'ማስታወሻ',
     'comment' => 'አስተያየት',
@@ -41,4 +43,5 @@ return [
     'remove' => 'አስወግድ',
     'active' => 'ንቁ',
     'inactive' => 'ቦዝኗል',
+    'clear_filter' => 'ማጣሪያውን አጽዳ',
 ];

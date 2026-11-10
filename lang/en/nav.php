@@ -11,6 +11,10 @@ return [
     'account_recovery' => 'Account recovery',
     'audit' => 'Audit log',
     'settings' => 'Settings',
+    'catalogue' => 'Product Catalogue',
+    'stock_on_hand' => 'Stock on hand',
+    'stock_ledger' => 'Stock ledger',
+    'receive_stock' => 'Receive stock',
     'group' => [
         'catalogue' => 'Catalogue',
         'inventory' => 'Inventory',

@@ -11,6 +11,10 @@ return [
     'account_recovery' => 'የመለያ ማገገሚያ',
     'audit' => 'የኦዲት መዝገብ',
     'settings' => 'ቅንብሮች',
+    'catalogue' => 'የምርት ካታሎግ',
+    'stock_on_hand' => 'በመጋዘን ያለ ክምችት',
+    'stock_ledger' => 'የክምችት እንቅስቃሴ መዝገብ',
+    'receive_stock' => 'ክምችት ተረከብ',
     'group' => [
         'catalogue' => 'ካታሎግ',
         'inventory' => 'ክምችት',

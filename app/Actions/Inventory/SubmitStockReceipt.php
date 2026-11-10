@@ -132,7 +132,9 @@ class SubmitStockReceipt
                     'manufacturing_date' => ! empty($line['manufacturing_date']) ? Carbon::parse($line['manufacturing_date']) : null,
                     'expiry_date' => Carbon::parse($line['expiry_date']),
                     'quantity' => (int) $line['quantity'],
-                    'unit_cost' => isset($line['unit_cost']) && $actor->hasPermission('cost.view') ? (int) round(((float) $line['unit_cost']) * 100) : null,
+                    'unit_cost' => isset($line['unit_cost']) && $actor->hasPermission('cost.view')
+                        ? (is_int($line['unit_cost']) ? $line['unit_cost'] : (int) round(((float) $line['unit_cost']) * 100))
+                        : null,
                     'flag' => in_array($flag, ['ok', 'short', 'over', 'damaged'], true) ? $flag : 'ok',
                 ]);
             }

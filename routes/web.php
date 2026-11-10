@@ -5,6 +5,7 @@ use App\Http\Controllers\KeepAliveController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\StaffPhotoController;
+use App\Http\Controllers\StockExportController;
 use App\Livewire\Approvals as ApprovalsUi;
 use App\Livewire\Audit as AuditUi;
 use App\Livewire\Auth\ChooseActingRole;
@@ -22,6 +23,7 @@ use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
 use App\Livewire\Settings as SettingsUi;
 use App\Livewire\Staff as StaffUi;
+use App\Livewire\Stock as StockUi;
 use App\Livewire\Users as UsersUi;
 use Illuminate\Support\Facades\Route;
 
@@ -82,6 +84,12 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-04: Stock Receipts
             Route::get('/inventory/receive', Receive::class)->middleware('can:stock.receive')->name('inventory.receive');
             Route::get('/inventory/receipts/{receipt}', ShowReceipt::class)->middleware('can:stock.receive')->name('inventory.receipts.show');
+
+            // UC-11: Stock on Hand & Ledger
+            Route::get('/inventory/stock', StockUi\Index::class)->middleware('can:stock.view')->name('inventory.stock');
+            Route::get('/inventory/stock/export/{format}', [StockExportController::class, 'stockOnHand'])->whereIn('format', ['csv', 'pdf'])->name('inventory.stock.export');
+            Route::get('/inventory/ledger', StockUi\Ledger::class)->middleware('can:stock.view')->name('inventory.ledger');
+            Route::get('/inventory/ledger/export/{format}', [StockExportController::class, 'ledger'])->whereIn('format', ['csv', 'pdf'])->name('inventory.ledger.export');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');
