@@ -37,4 +37,8 @@ return [
     'forbidden_title' => 'መዳረሻ ተከልክሏል',
     'forbidden_body' => 'ሚናዎ ይህን ገጽ እንዲከፍቱ አይፈቅድም።',
     'back_to_dashboard' => 'ወደ ዳሽቦርድ ተመለስ',
+    'back_to_list' => 'ወደ ዝርዝሩ ተመለስ',
+    'remove' => 'አስወግድ',
+    'active' => 'ንቁ',
+    'inactive' => 'ቦዝኗል',
 ];

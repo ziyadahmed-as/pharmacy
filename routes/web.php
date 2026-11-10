@@ -66,6 +66,12 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/audit', AuditUi\Index::class)->name('audit.index');
             Route::get('/audit/export/{format}', AuditExportController::class)->whereIn('format', ['csv', 'pdf'])->name('audit.export');
 
+            // UC-01: Product Catalogue
+            Route::get('/catalogue', \App\Livewire\Catalogue\Index::class)->middleware('can:catalogue.view')->name('catalogue.index');
+            Route::get('/catalogue/create', \App\Livewire\Catalogue\Form::class)->middleware('can:catalogue.edit_basic')->name('catalogue.create');
+            Route::get('/catalogue/{product}', \App\Livewire\Catalogue\Show::class)->middleware('can:catalogue.view')->name('catalogue.show');
+            Route::get('/catalogue/{product}/edit', \App\Livewire\Catalogue\Form::class)->middleware('can:catalogue.edit_basic')->name('catalogue.edit');
+
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');
 

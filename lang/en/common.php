@@ -37,4 +37,8 @@ return [
     'forbidden_title' => 'Access denied',
     'forbidden_body' => 'Your role does not allow you to open this page.',
     'back_to_dashboard' => 'Back to dashboard',
+    'back_to_list' => 'Back to list',
+    'remove' => 'Remove',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
 ];

@@ -46,6 +46,8 @@ final class Permissions
             'staff.view.own' => ['module' => 'staff', 'active' => true, 'roles' => [$PS]],
             // --- Catalogue & Prices (Stage 2) ---
             'catalogue.manage' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM]],
+            'catalogue.edit_basic' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM, $PS]],
+            'catalogue.view' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM, $PS]],
             'price.set' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM]],
             'price.view' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM, $PS]],
             'stock.receive' => ['module' => 'inventory', 'active' => false, 'roles' => [$PM, $PS]],
