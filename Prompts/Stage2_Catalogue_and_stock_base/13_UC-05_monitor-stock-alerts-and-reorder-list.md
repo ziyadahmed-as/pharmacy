@@ -9,6 +9,7 @@
 | Suggested branch | `uc-05-monitor-stock-alerts-and-reorder-list` |
 
 **How to use this file**
+
 1. Put `AGENTS.md` (in the parent folder) in the root of your repository.
 2. Make sure the use cases listed under "Depends on" are merged and green.
 3. Create the branch above, paste the prompt below into your coding agent, and let it work.

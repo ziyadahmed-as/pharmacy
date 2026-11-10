@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\LedgerQuery;
+use App\Services\ReorderListQuery;
 use App\Services\SimplePdf;
 use App\Services\StockOnHandQuery;
 use Illuminate\Http\Request;
@@ -191,6 +192,70 @@ class StockExportController extends Controller
 
         if ($format === 'pdf') {
             $pdf = SimplePdf::table('PMS Stock Movement Ledger', array_merge([$header], $rows));
+
+            return response($pdf, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => "attachment; filename=\"{$name}.pdf\"",
+            ]);
+        }
+
+        return new StreamedResponse(function () use ($header, $rows) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, $header);
+            foreach ($rows as $row) {
+                fputcsv($out, array_map(fn ($c) => preg_match('/^[=+\-@]/', (string) $c) ? "'".$c : $c, $row));
+            }
+            fclose($out);
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$name}.csv\"",
+        ]);
+    }
+
+    public function reorderList(Request $request, string $format)
+    {
+        $viewer = $request->user();
+        $this->authorizeExport($viewer);
+
+        $items = ReorderListQuery::get();
+
+        $header = [
+            'Product / Brand',
+            'Generic Name',
+            'Category',
+            'Preferred Supplier',
+            'On Hand',
+            'Reorder Level',
+            'Max Level',
+            'Suggested Order Qty',
+            'Status',
+        ];
+
+        $rows = [];
+        foreach ($items as $item) {
+            $rows[] = [
+                $item['product']->brand,
+                $item['product']->generic_name,
+                $item['product']->category?->name ?? '',
+                $item['preferred_supplier'],
+                (string) $item['on_hand'],
+                (string) $item['reorder_level'],
+                $item['max_level'] !== null ? (string) $item['max_level'] : '-',
+                (string) $item['suggested_qty'],
+                $item['is_critical'] ? 'CRITICAL (Below Min)' : 'Low Stock',
+            ];
+        }
+
+        AuditLogger::record('reorder.export', null, [], [], [
+            'format' => $format,
+            'rows' => count($rows),
+        ]);
+
+        $name = 'reorder-list-'.now()->timezone(config('pms.timezone'))->format('Ymd-His');
+
+        if ($format === 'pdf') {
+            $pdf = SimplePdf::table('PMS Reorder List (Orders placed outside PMS)', array_merge([$header], $rows));
 
             return response($pdf, 200, [
                 'Content-Type' => 'application/pdf',

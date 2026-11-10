@@ -12,6 +12,7 @@ return [
     'audit' => 'የኦዲት መዝገብ',
     'settings' => 'ቅንብሮች',
     'catalogue' => 'የምርት ካታሎግ',
+    'stock_alerts' => 'የክምችት ማስጠንቀቂያዎች እና ማዘዣ',
     'stock_on_hand' => 'በመጋዘን ያለ ክምችት',
     'stock_ledger' => 'የክምችት እንቅስቃሴ መዝገብ',
     'receive_stock' => 'ክምችት ተረከብ',

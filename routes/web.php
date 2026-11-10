@@ -6,6 +6,7 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\StaffPhotoController;
 use App\Http\Controllers\StockExportController;
+use App\Livewire\Alerts as AlertsUi;
 use App\Livewire\Approvals as ApprovalsUi;
 use App\Livewire\Audit as AuditUi;
 use App\Livewire\Auth\ChooseActingRole;
@@ -90,6 +91,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/inventory/stock/export/{format}', [StockExportController::class, 'stockOnHand'])->whereIn('format', ['csv', 'pdf'])->name('inventory.stock.export');
             Route::get('/inventory/ledger', StockUi\Ledger::class)->middleware('can:stock.view')->name('inventory.ledger');
             Route::get('/inventory/ledger/export/{format}', [StockExportController::class, 'ledger'])->whereIn('format', ['csv', 'pdf'])->name('inventory.ledger.export');
+
+            // UC-05: Stock Alerts & Reorder List
+            Route::get('/inventory/alerts', AlertsUi\Index::class)->middleware('can:stock.view')->name('inventory.alerts');
+            Route::get('/inventory/reorder/export/{format}', [StockExportController::class, 'reorderList'])->whereIn('format', ['csv', 'pdf'])->name('inventory.reorder.export');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');
