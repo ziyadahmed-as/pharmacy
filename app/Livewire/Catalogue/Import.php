@@ -150,3 +150,4 @@ class Import extends Component
         ])->layout('layouts.app', ['title' => __('catalogue.import_title')]);
     }
 }
+

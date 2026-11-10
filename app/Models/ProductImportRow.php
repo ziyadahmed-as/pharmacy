@@ -32,3 +32,4 @@ class ProductImportRow extends Model
         return $this->belongsTo(ProductImport::class, 'product_import_id');
     }
 }
+

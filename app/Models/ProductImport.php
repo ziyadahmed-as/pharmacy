@@ -38,3 +38,4 @@ class ProductImport extends Model
         return $this->hasMany(ProductImportRow::class);
     }
 }
+

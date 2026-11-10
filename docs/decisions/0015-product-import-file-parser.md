@@ -13,3 +13,4 @@ We implement a zero-dependency, high-performance streaming file reader:
 - Fully compatible with Laravel 12 and PHP 8.2+.
 - No third-party dependency maintenance risks or vendor lock-in.
 - Handles arbitrary file encodings, delimiters, and streaming for tens of thousands of rows under memory constraints.
+
