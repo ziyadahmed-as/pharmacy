@@ -64,3 +64,4 @@ class ProductPrice extends Model
         return $this->belongsTo(User::class, 'set_by');
     }
 }
+

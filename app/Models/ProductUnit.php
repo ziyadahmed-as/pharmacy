@@ -34,3 +34,4 @@ class ProductUnit extends Model
         return $this->hasMany(ProductPrice::class, 'unit_id');
     }
 }
+

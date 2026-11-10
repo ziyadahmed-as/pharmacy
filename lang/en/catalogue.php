@@ -20,3 +20,4 @@ return [
     'price_must_be_positive' => 'The selling price must be a positive amount greater than zero.',
     'price_reason_required' => 'A reason for changing the price is required.',
 ];
+

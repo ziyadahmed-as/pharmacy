@@ -150,3 +150,4 @@ test('bulk set selling prices works transactionally', function () {
         ->and(PriceResolver::at($p1)->price)->toBe(1200)
         ->and(PriceResolver::at($p2)->price)->toBe(1800);
 });
+

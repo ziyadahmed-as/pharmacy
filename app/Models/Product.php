@@ -63,3 +63,4 @@ class Product extends Model
         return $this->hasOne(ProductPrice::class)->latestOfMany('effective_from');
     }
 }
+

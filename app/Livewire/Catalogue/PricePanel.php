@@ -99,3 +99,4 @@ class PricePanel extends Component
         ]);
     }
 }
+

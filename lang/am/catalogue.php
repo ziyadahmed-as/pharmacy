@@ -20,3 +20,4 @@ return [
     'price_must_be_positive' => 'የመሸጫ ዋጋው ከዜሮ በላይ አዎንታዊ ቁጥር መሆን አለበት።',
     'price_reason_required' => 'ዋጋ ለመቀየር ምክንያት መጥቀስ ግዴታ ነው።',
 ];
+

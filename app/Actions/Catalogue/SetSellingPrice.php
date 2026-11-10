@@ -84,3 +84,4 @@ class SetSellingPrice
         return $newPriceRecord;
     }
 }
+
