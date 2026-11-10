@@ -6,8 +6,6 @@ use App\Models\Product;
 use App\Models\ProductPrice;
 use App\Models\ProductUnit;
 use App\Models\User;
-use App\Services\AuditLogger;
-use App\Services\PriceResolver;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,9 +19,9 @@ use Illuminate\Validation\ValidationException;
 class BulkSetSellingPrices
 {
     /**
-     * @param array<int, array{product: Product, price: int, effective_from: CarbonInterface, reason: string, unit?: ProductUnit|null}> $items
-     * @param User|null $user
+     * @param  array<int, array{product: Product, price: int, effective_from: CarbonInterface, reason: string, unit?: ProductUnit|null}>  $items
      * @return array<int, ProductPrice>
+     *
      * @throws ValidationException
      */
     public function execute(array $items, ?User $user = null): array
@@ -39,7 +37,7 @@ class BulkSetSellingPrices
         $results = [];
 
         DB::transaction(function () use ($items, $actor, &$results) {
-            $setter = new SetSellingPrice();
+            $setter = new SetSellingPrice;
             foreach ($items as $item) {
                 $results[] = $setter->execute(
                     $item['product'],
@@ -55,4 +53,3 @@ class BulkSetSellingPrices
         return $results;
     }
 }
-

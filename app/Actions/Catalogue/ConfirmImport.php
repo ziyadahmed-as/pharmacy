@@ -3,12 +3,9 @@
 namespace App\Actions\Catalogue;
 
 use App\Models\Category;
-use App\Models\Product;
 use App\Models\ProductImport;
-use App\Models\ProductImportRow;
 use App\Models\User;
 use App\Services\AuditLogger;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -23,10 +20,9 @@ use Illuminate\Validation\ValidationException;
 class ConfirmImport
 {
     /**
-     * @param ProductImport $import
-     * @param bool $cancel If true, aborts and saves nothing (A2)
-     * @param User|null $user
+     * @param  bool  $cancel  If true, aborts and saves nothing (A2)
      * @return array{status: string, saved_count: int, rejected_count: int}
+     *
      * @throws ValidationException
      */
     public function execute(ProductImport $import, bool $cancel = false, ?User $user = null): array
@@ -71,8 +67,8 @@ class ConfirmImport
         $rejectedCount = 0;
 
         DB::transaction(function () use ($import, $actor, &$savedCount, &$rejectedCount) {
-            $saveProductAction = new SaveProduct();
-            $setSellingPriceAction = new SetSellingPrice();
+            $saveProductAction = new SaveProduct;
+            $setSellingPriceAction = new SetSellingPrice;
 
             // Cache categories
             $categoriesCache = [];
@@ -122,7 +118,7 @@ class ConfirmImport
                             $product,
                             $minorPrice,
                             now(),
-                            'Initial price from file import ' . $import->file_name,
+                            'Initial price from file import '.$import->file_name,
                             null,
                             $actor
                         );
@@ -172,4 +168,3 @@ class ConfirmImport
         ];
     }
 }
-

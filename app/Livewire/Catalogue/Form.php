@@ -6,7 +6,6 @@ use App\Actions\Catalogue\DuplicateProductException;
 use App\Actions\Catalogue\SaveProduct;
 use App\Models\Category;
 use App\Models\Product;
-use App\Models\ProductUnit;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -18,26 +17,42 @@ class Form extends Component
     public ?int $productId = null;
 
     public string $brand = '';
+
     public string $generic_name = '';
+
     public string $strength = '';
+
     public string $dosage_form = '';
+
     public string $pack_size = '';
+
     public string $unit = 'piece';
+
     public string $manufacturer = '';
+
     public ?int $category_id = null;
+
     public string $barcode = '';
+
     public string $storage_condition = '';
+
     public string $classification = 'otc';
+
     public bool $loose_allowed = false;
+
     public int $reorder_level = 0;
+
     public int $max_level = 0;
+
     public int $min_level = 0;
+
     public string $preferred_supplier_name = '';
 
     public array $units = [];
 
     // Duplicate detection state
     public ?int $duplicateProductId = null;
+
     public ?string $duplicateMessage = null;
 
     public function mount(?Product $product = null): void

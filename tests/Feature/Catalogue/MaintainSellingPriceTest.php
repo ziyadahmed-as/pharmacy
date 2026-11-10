@@ -29,7 +29,7 @@ test('PM and Owner can set a selling price (AC-16)', function () {
     $product = makeProduct();
     $pmUser = pm();
     $ownerUser = owner();
-    $action = new SetSellingPrice();
+    $action = new SetSellingPrice;
 
     $effective = now();
     $price1 = $action->execute($product, 2500, $effective, 'Initial price', null, $pmUser);
@@ -46,7 +46,7 @@ test('PM and Owner can set a selling price (AC-16)', function () {
 
 test('zero or negative price is refused (E2)', function () {
     $product = makeProduct();
-    $action = new SetSellingPrice();
+    $action = new SetSellingPrice;
 
     expect(fn () => $action->execute($product, 0, now(), 'Free promo', null, pm()))
         ->toThrow(ValidationException::class);
@@ -58,7 +58,7 @@ test('zero or negative price is refused (E2)', function () {
 test('staff change denied including direct call (AC-16)', function () {
     $product = makeProduct();
     $staffUser = ps();
-    $action = new SetSellingPrice();
+    $action = new SetSellingPrice;
 
     expect(fn () => $action->execute($product, 1500, now(), 'Staff override', null, $staffUser))
         ->toThrow(ValidationException::class);
@@ -67,7 +67,7 @@ test('staff change denied including direct call (AC-16)', function () {
 test('system administrator change denied', function () {
     $product = makeProduct();
     $saUser = sa();
-    $action = new SetSellingPrice();
+    $action = new SetSellingPrice;
 
     expect(fn () => $action->execute($product, 1500, now(), 'SA override', null, $saUser))
         ->toThrow(ValidationException::class);
@@ -75,7 +75,7 @@ test('system administrator change denied', function () {
 
 test('history is preserved and resolver returns the right price before and after effective time (AC-17)', function () {
     $product = makeProduct();
-    $action = new SetSellingPrice();
+    $action = new SetSellingPrice;
     $pmUser = pm();
 
     $t1 = Carbon::parse('2026-11-01 10:00:00');
@@ -104,7 +104,7 @@ test('history is preserved and resolver returns the right price before and after
 test('unit specific price resolution works correctly', function () {
     $product = makeProduct();
     $unitBox = ProductUnit::create(['product_id' => $product->id, 'name' => 'box', 'factor' => 10]);
-    $action = new SetSellingPrice();
+    $action = new SetSellingPrice;
     $pmUser = pm();
 
     $now = now();
@@ -117,7 +117,7 @@ test('unit specific price resolution works correctly', function () {
 
 test('audit entry records price.changed with old and new values', function () {
     $product = makeProduct();
-    $action = new SetSellingPrice();
+    $action = new SetSellingPrice;
     $pmUser = pm();
 
     $t1 = now()->subDays(1);
@@ -137,7 +137,7 @@ test('audit entry records price.changed with old and new values', function () {
 test('bulk set selling prices works transactionally', function () {
     $p1 = makeProduct(['brand' => 'Medicine A']);
     $p2 = makeProduct(['brand' => 'Medicine B']);
-    $bulk = new BulkSetSellingPrices();
+    $bulk = new BulkSetSellingPrices;
 
     $items = [
         ['product' => $p1, 'price' => 1200, 'effective_from' => now(), 'reason' => 'Bulk import'],
@@ -150,4 +150,3 @@ test('bulk set selling prices works transactionally', function () {
         ->and(PriceResolver::at($p1)->price)->toBe(1200)
         ->and(PriceResolver::at($p2)->price)->toBe(1800);
 });
-

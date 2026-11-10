@@ -1,7 +1,11 @@
 <?php
 
 use App\Models\AuditLog;
+use App\Models\Batch;
+use App\Models\Product;
 use App\Models\Staff;
+use App\Models\StockMovement;
+use App\Models\User;
 use App\Services\AuditLogger;
 use App\Support\RoleCombinationRule;
 use Illuminate\Database\QueryException;
@@ -64,4 +68,59 @@ it('keeps the SA role exclusive (C-4)', function () {
         ->and(RoleCombinationRule::allows(['system_admin', 'owner']))->toBeFalse()
         ->and(RoleCombinationRule::allows(['owner', 'pharmacy_manager']))->toBeTrue()
         ->and(RoleCombinationRule::allows([]))->toBeFalse();
+});
+
+it('refuses StockMovement updates and deletes (append-only ledger)', function () {
+    $user = User::factory()->create();
+    $product = Product::create([
+        'brand' => 'Arch Test Product',
+        'generic_name' => 'Arch Test',
+        'classification' => 'otc',
+        'is_active' => true,
+    ]);
+    $batch = Batch::create([
+        'product_id' => $product->id,
+        'batch_no' => 'ARCH-B1',
+        'expiry_date' => now()->addYear()->format('Y-m-d'),
+    ]);
+    $movement = new StockMovement([
+        'batch_id' => $batch->id,
+        'type' => 'receipt',
+        'quantity' => 10,
+        'balance_after' => 10,
+        'stock_status' => 'sellable',
+        'source_type' => 'stock_receipt',
+        'source_id' => 1,
+        'user_id' => $user->id,
+        'created_at' => now(),
+    ]);
+    $movement->saveQuietly();
+
+    expect(fn () => $movement->update(['quantity' => 20]))->toThrow(RuntimeException::class);
+    expect(fn () => $movement->delete())->toThrow(RuntimeException::class);
+});
+
+it('only allows StockMovementService to write BatchStock across the application', function () {
+    // Scan all PHP files in app/ for direct creation/updating of BatchStock outside of StockMovementService
+    $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(app_path()));
+    $violators = [];
+
+    foreach ($files as $file) {
+        if (! $file->isFile() || $file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $path = $file->getRealPath();
+        if (str_contains($path, 'StockMovementService.php') || str_contains($path, 'BatchStock.php') || str_contains($path, 'Batch.php')) {
+            continue;
+        }
+
+        $contents = file_get_contents($path);
+        if (preg_match('/BatchStock::(create|update|insert|upsert|firstOrCreate)/i', $contents) ||
+            preg_match('/\$batchStock->(save|update|delete)/i', $contents)) {
+            $violators[] = $file->getFilename();
+        }
+    }
+
+    expect($violators)->toBe([]);
 });

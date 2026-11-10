@@ -20,13 +20,8 @@ use Illuminate\Validation\ValidationException;
 class SetSellingPrice
 {
     /**
-     * @param Product $product
-     * @param int $price Price in minor units (e.g. santim)
-     * @param CarbonInterface $effectiveFrom
-     * @param string $reason
-     * @param ProductUnit|null $unit
-     * @param User|null $user
-     * @return ProductPrice
+     * @param  int  $price  Price in minor units (e.g. santim)
+     *
      * @throws ValidationException
      */
     public function execute(
@@ -84,4 +79,3 @@ class SetSellingPrice
         return $newPriceRecord;
     }
 }
-

@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 test('create product with all fields and units', function () {
     $pmUser = pm();
     $cat = Category::create(['name' => 'Antibiotics']);
-    $action = new SaveProduct();
+    $action = new SaveProduct;
 
     $data = [
         'brand' => 'Amoxicillin 500mg',
@@ -47,7 +47,7 @@ test('create product with all fields and units', function () {
 });
 
 test('duplicate barcode shows existing product (A1)', function () {
-    $action = new SaveProduct();
+    $action = new SaveProduct;
     $p1 = $action->execute([
         'brand' => 'Paracetamol 500mg',
         'generic_name' => 'Paracetamol',
@@ -69,7 +69,7 @@ test('duplicate barcode shows existing product (A1)', function () {
 });
 
 test('duplicate brand strength form pack combination is blocked (A1)', function () {
-    $action = new SaveProduct();
+    $action = new SaveProduct;
     $p1 = $action->execute([
         'brand' => 'Ibuprofen 400mg',
         'generic_name' => 'Ibuprofen',
@@ -95,7 +95,7 @@ test('duplicate brand strength form pack combination is blocked (A1)', function 
 });
 
 test('missing mandatory fields are blocked (E1)', function () {
-    $action = new SaveProduct();
+    $action = new SaveProduct;
 
     expect(fn () => $action->execute(['brand' => 'Only Brand'], null, pm()))
         ->toThrow(ValidationException::class);
@@ -103,7 +103,7 @@ test('missing mandatory fields are blocked (E1)', function () {
 
 test('staff can create basic product but cannot specify or alter stock levels (E2)', function () {
     $staff = ps();
-    $action = new SaveProduct();
+    $action = new SaveProduct;
 
     // Staff trying to create with levels -> blocked
     expect(fn () => $action->execute([
@@ -139,7 +139,7 @@ test('staff cannot deactivate product (E2)', function () {
         'is_active' => true,
     ]);
 
-    $deactivate = new DeactivateProduct();
+    $deactivate = new DeactivateProduct;
     expect(fn () => $deactivate->execute($product, 'Staff attempting deactivation', ps()))
         ->toThrow(ValidationException::class);
 });
@@ -152,8 +152,8 @@ test('PM and Owner can deactivate and reactivate products keeping history (A2)',
         'is_active' => true,
     ]);
 
-    $deactivate = new DeactivateProduct();
-    $reactivate = new ReactivateProduct();
+    $deactivate = new DeactivateProduct;
+    $reactivate = new ReactivateProduct;
     $pmUser = pm();
 
     $deactivated = $deactivate->execute($product, 'Discontinued', $pmUser);
@@ -171,7 +171,7 @@ test('classification changes are audited', function () {
         'is_active' => true,
     ]);
 
-    $action = new SaveProduct();
+    $action = new SaveProduct;
     $action->execute([
         'brand' => 'Audit Med',
         'generic_name' => 'Audit Generic',

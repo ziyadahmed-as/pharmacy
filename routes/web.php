@@ -12,7 +12,13 @@ use App\Livewire\Auth\ForcePasswordChange;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Security;
 use App\Livewire\Auth\TwoFactorChallenge;
+use App\Livewire\Catalogue\Form;
+use App\Livewire\Catalogue\Import;
+use App\Livewire\Catalogue\Index;
+use App\Livewire\Catalogue\Show;
 use App\Livewire\Dashboard;
+use App\Livewire\Inventory\Receive;
+use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
 use App\Livewire\Settings as SettingsUi;
 use App\Livewire\Staff as StaffUi;
@@ -67,11 +73,15 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/audit/export/{format}', AuditExportController::class)->whereIn('format', ['csv', 'pdf'])->name('audit.export');
 
             // UC-01 / UC-03: Product Catalogue
-            Route::get('/catalogue', \App\Livewire\Catalogue\Index::class)->middleware('can:catalogue.view')->name('catalogue.index');
-            Route::get('/catalogue/import', \App\Livewire\Catalogue\Import::class)->middleware('can:catalogue.manage')->name('catalogue.import');
-            Route::get('/catalogue/create', \App\Livewire\Catalogue\Form::class)->middleware('can:catalogue.edit_basic')->name('catalogue.create');
-            Route::get('/catalogue/{product}', \App\Livewire\Catalogue\Show::class)->middleware('can:catalogue.view')->name('catalogue.show');
-            Route::get('/catalogue/{product}/edit', \App\Livewire\Catalogue\Form::class)->middleware('can:catalogue.edit_basic')->name('catalogue.edit');
+            Route::get('/catalogue', Index::class)->middleware('can:catalogue.view')->name('catalogue.index');
+            Route::get('/catalogue/import', Import::class)->middleware('can:catalogue.manage')->name('catalogue.import');
+            Route::get('/catalogue/create', Form::class)->middleware('can:catalogue.edit_basic')->name('catalogue.create');
+            Route::get('/catalogue/{product}', Show::class)->middleware('can:catalogue.view')->name('catalogue.show');
+            Route::get('/catalogue/{product}/edit', Form::class)->middleware('can:catalogue.edit_basic')->name('catalogue.edit');
+
+            // UC-04: Stock Receipts
+            Route::get('/inventory/receive', Receive::class)->middleware('can:stock.receive')->name('inventory.receive');
+            Route::get('/inventory/receipts/{receipt}', ShowReceipt::class)->middleware('can:stock.receive')->name('inventory.receipts.show');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

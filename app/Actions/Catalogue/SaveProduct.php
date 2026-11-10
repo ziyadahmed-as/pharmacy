@@ -18,10 +18,8 @@ use Illuminate\Validation\ValidationException;
 class SaveProduct
 {
     /**
-     * @param array<string, mixed> $data
-     * @param Product|null $product
-     * @param User|null $user
-     * @return Product
+     * @param  array<string, mixed>  $data
+     *
      * @throws ValidationException
      */
     public function execute(array $data, ?Product $product = null, ?User $user = null): Product
@@ -100,7 +98,7 @@ class SaveProduct
         $oldClassification = $product?->classification;
 
         return DB::transaction(function () use ($data, $product, $actor, $isNew, $oldClassification) {
-            $target = $product ?? new Product();
+            $target = $product ?? new Product;
 
             $target->brand = $data['brand'];
             $target->generic_name = $data['generic_name'];

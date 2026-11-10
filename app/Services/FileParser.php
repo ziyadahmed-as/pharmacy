@@ -17,8 +17,8 @@ class FileParser
     /**
      * Parse rows from a given file path.
      *
-     * @param string $path
      * @return \Generator<int, array<int, string>> yields [rowNumber => [cell values]]
+     *
      * @throws RuntimeException
      */
     public static function parse(string $path): \Generator
@@ -72,7 +72,7 @@ class FileParser
      */
     private static function parseXlsx(string $path): \Generator
     {
-        $zip = new ZipArchive();
+        $zip = new ZipArchive;
         if ($zip->open($path) !== true) {
             throw new RuntimeException(__('catalogue.file_unreadable_or_missing'));
         }
@@ -130,4 +130,3 @@ class FileParser
         }
     }
 }
-

@@ -48,7 +48,7 @@ class Import extends Component
 
         $originalName = $this->file->getClientOriginalName();
         $storedPath = $this->file->store('imports', 'local');
-        $fullPath = storage_path('app/' . $storedPath);
+        $fullPath = storage_path('app/'.$storedPath);
 
         try {
             $import = $action->execute($fullPath, $originalName, null, $user);
@@ -100,7 +100,7 @@ class Import extends Component
 
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="import_errors_' . $import->id . '.csv"',
+            'Content-Disposition' => 'attachment; filename="import_errors_'.$import->id.'.csv"',
         ];
 
         $callback = function () use ($errorRows) {
@@ -150,4 +150,3 @@ class Import extends Component
         ])->layout('layouts.app', ['title' => __('catalogue.import_title')]);
     }
 }
-

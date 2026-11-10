@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 function createTempCsv(array $lines): string
 {
-    $path = tempnam(sys_get_temp_dir(), 'pms_import_') . '.csv';
+    $path = tempnam(sys_get_temp_dir(), 'pms_import_').'.csv';
     $fp = fopen($path, 'w');
     foreach ($lines as $line) {
         fputcsv($fp, $line);
@@ -42,7 +42,7 @@ test('file with duplicates and missing fields shows a report and saves nothing u
         ['Invalid Price', 'Generic F', '10mg', 'Syrup', '100ml', 'bottle', '', '', 'BC_006', 'otc', '', '0', '0', '0', '0', '', '-10.00'], // Negative price
     ]);
 
-    $previewAction = new PreviewImport();
+    $previewAction = new PreviewImport;
     $import = $previewAction->execute($csv, 'test_batch.csv', null, $pmUser);
 
     expect($import)->toBeInstanceOf(ProductImport::class)
@@ -67,8 +67,8 @@ test('confirm import with A1 imports valid rows only and saves prices', function
         ['Imported Drug 2', 'Generic 2', '250mg', 'Capsule', '20s', 'capsule', 'Bayer', 'Antibiotics', 'NEW_BC_103', 'rx', '', '0', '5', '15', '60', 'EPSS', '45.50'],
     ]);
 
-    $previewAction = new PreviewImport();
-    $confirmAction = new ConfirmImport();
+    $previewAction = new PreviewImport;
+    $confirmAction = new ConfirmImport;
 
     $import = $previewAction->execute($csv, 'batch.csv', null, $pmUser);
     $result = $confirmAction->execute($import, false, $pmUser);
@@ -102,8 +102,8 @@ test('cancel import with A2 saves nothing', function () {
         ['Cancelled Med', 'Cancelled Generic', '', '', '', 'piece', '', '', 'CANCEL_BC_1', 'otc', '', '0', '0', '0', '0', '', '12.00'],
     ]);
 
-    $previewAction = new PreviewImport();
-    $confirmAction = new ConfirmImport();
+    $previewAction = new PreviewImport;
+    $confirmAction = new ConfirmImport;
 
     $import = $previewAction->execute($csv, 'cancelled.csv', null, $pmUser);
     $result = $confirmAction->execute($import, true, $pmUser);
@@ -118,9 +118,9 @@ test('cancel import with A2 saves nothing', function () {
 
 test('empty or unreadable file is refused (E1)', function () {
     $pmUser = pm();
-    $previewAction = new PreviewImport();
+    $previewAction = new PreviewImport;
 
-    $emptyPath = tempnam(sys_get_temp_dir(), 'empty_') . '.csv';
+    $emptyPath = tempnam(sys_get_temp_dir(), 'empty_').'.csv';
     file_put_contents($emptyPath, '');
 
     expect(fn () => $previewAction->execute($emptyPath, 'empty.csv', null, $pmUser))
@@ -134,7 +134,7 @@ test('empty or unreadable file is refused (E1)', function () {
 
 test('only PM and Owner may import products', function () {
     $staff = ps();
-    $previewAction = new PreviewImport();
+    $previewAction = new PreviewImport;
 
     $csv = createTempCsv([
         ['Brand', 'Generic Name', 'Strength', 'Dosage Form', 'Pack Size', 'Unit', 'Manufacturer', 'Category', 'Barcode', 'Classification', 'Storage Condition', 'Loose Allowed', 'Min Level', 'Reorder Level', 'Max Level', 'Preferred Supplier', 'Selling Price'],
@@ -150,7 +150,7 @@ test('only PM and Owner may import products', function () {
 test('20000 row file validates without timeout', function () {
     $pmUser = pm();
 
-    $path = tempnam(sys_get_temp_dir(), 'large_') . '.csv';
+    $path = tempnam(sys_get_temp_dir(), 'large_').'.csv';
     $fp = fopen($path, 'w');
     fputcsv($fp, ['Brand', 'Generic Name', 'Strength', 'Dosage Form', 'Pack Size', 'Unit', 'Manufacturer', 'Category', 'Barcode', 'Classification', 'Storage Condition', 'Loose Allowed', 'Min Level', 'Reorder Level', 'Max Level', 'Preferred Supplier', 'Selling Price']);
 
@@ -160,7 +160,7 @@ test('20000 row file validates without timeout', function () {
     fclose($fp);
 
     $start = microtime(true);
-    $previewAction = new PreviewImport();
+    $previewAction = new PreviewImport;
     $import = $previewAction->execute($path, 'large.csv', null, $pmUser);
     $elapsed = microtime(true) - $start;
 
@@ -170,4 +170,3 @@ test('20000 row file validates without timeout', function () {
 
     File::delete($path);
 });
-

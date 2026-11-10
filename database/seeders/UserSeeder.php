@@ -61,7 +61,7 @@ class UserSeeder extends Seeder
 
             if (isset($data['role'])) {
                 $role = Role::where('slug', $data['role'])->first();
-                if ($role && !$user->roles()->where('role_id', $role->id)->exists()) {
+                if ($role && ! $user->roles()->where('role_id', $role->id)->exists()) {
                     $user->roles()->attach($role->id);
                 }
             }

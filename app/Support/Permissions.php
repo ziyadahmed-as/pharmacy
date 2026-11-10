@@ -50,8 +50,11 @@ final class Permissions
             'catalogue.view' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM, $PS]],
             'price.set' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM]],
             'price.view' => ['module' => 'catalogue', 'active' => true, 'roles' => [$OW, $PM, $PS]],
-            'stock.receive' => ['module' => 'inventory', 'active' => false, 'roles' => [$PM, $PS]],
-            'stock.receipt.confirm' => ['module' => 'inventory', 'active' => false, 'roles' => [$PM]],
+            // --- Inventory & Receipts (Stage 2) ---
+            'stock.receive' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $PS, $OW]],
+            'stock.receipt.confirm' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $OW]],
+            'stock.view' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $PS, $OW]],
+            'cost.view' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $OW]],
             'stock.adjust.request' => ['module' => 'inventory', 'active' => false, 'roles' => [$PM, $PS]],
             'sales.sell' => ['module' => 'sales', 'active' => false, 'roles' => [$PM, $PS]],
             'sales.void.request' => ['module' => 'sales', 'active' => false, 'roles' => [$PM, $PS]],

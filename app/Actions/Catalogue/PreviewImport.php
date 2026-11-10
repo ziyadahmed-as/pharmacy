@@ -2,7 +2,6 @@
 
 namespace App\Actions\Catalogue;
 
-use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImport;
 use App\Models\ProductImportRow;
@@ -21,11 +20,8 @@ use Illuminate\Validation\ValidationException;
 class PreviewImport
 {
     /**
-     * @param string $filePath
-     * @param string $fileName
-     * @param array<string, int>|null $mapping Custom column mappings or defaults
-     * @param User|null $user
-     * @return ProductImport
+     * @param  array<string, int>|null  $mapping  Custom column mappings or defaults
+     *
      * @throws ValidationException
      */
     public function execute(string $filePath, string $fileName, ?array $mapping = null, ?User $user = null): ProductImport
@@ -102,6 +98,7 @@ class PreviewImport
                     $firstCell = strtolower($row[0] ?? '');
                     if ($firstCell === 'brand' || $firstCell === 'name' || $firstCell === 'product') {
                         $headerSkipped = true;
+
                         continue;
                     }
                     $headerSkipped = true;
