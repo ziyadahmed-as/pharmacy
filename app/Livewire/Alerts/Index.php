@@ -148,4 +148,3 @@ class Index extends Component
         ])->layout('layouts.app', ['title' => __('catalogue.alerts_title')]);
     }
 }
-

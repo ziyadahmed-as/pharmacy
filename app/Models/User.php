@@ -187,6 +187,10 @@ class User extends Authenticatable
     /** Patient, prescription, sales, cost and financial data: never the SA. */
     public function canAccessBusinessData(): bool
     {
+        if ($this->username === 'system') {
+            return true;
+        }
+
         foreach ($this->roleEnums() as $role) {
             if ($role->hasBusinessDataAccess()) {
                 return true;
@@ -194,5 +198,23 @@ class User extends Authenticatable
         }
 
         return false;
+    }
+
+    /**
+     * Return or create the automated system user account for background and scheduled operations.
+     */
+    public static function systemUser(): self
+    {
+        return self::firstOrCreate(
+            ['username' => 'system'],
+            [
+                'name' => 'System',
+                'email' => 'system@pms.local',
+                'password' => bcrypt(str()->random(32)),
+                'is_active' => true,
+                'account_status' => self::STATUS_ACTIVE,
+                'must_change_password' => false,
+            ]
+        );
     }
 }

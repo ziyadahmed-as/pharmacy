@@ -6,10 +6,13 @@ use App\Approvals\ApprovalHandlerRegistry;
 use App\Approvals\Handlers\ChangeRolesHandler;
 use App\Approvals\Handlers\CreateUserHandler;
 use App\Approvals\Handlers\DeactivateUserHandler;
+use App\Approvals\Handlers\QuarantineReleaseHandler;
 use App\Approvals\Handlers\ReactivateUserHandler;
 use App\Approvals\Handlers\SettingsUpdateHandler;
+use App\Contracts\ExpiredBatchQuarantiner;
 use App\Enums\Role;
 use App\Models\User;
+use App\Services\ExpiredBatchQuarantinerService;
 use App\Services\SettingsRepository;
 use App\Support\Permissions;
 use Illuminate\Support\Facades\Gate;
@@ -22,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
         require_once app_path('Support/helpers.php');
 
         $this->app->singleton(SettingsRepository::class);
+        $this->app->singleton(ExpiredBatchQuarantiner::class, ExpiredBatchQuarantinerService::class);
 
         // Approval handlers (UC-34): later use cases add their handler class here.
         $handlers = [
@@ -30,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
             DeactivateUserHandler::class,
             ReactivateUserHandler::class,
             SettingsUpdateHandler::class,
+            QuarantineReleaseHandler::class,
         ];
         $this->app->tag($handlers, 'approval.handlers');
         $this->app->singleton(ApprovalHandlerRegistry::class, fn ($app) => new ApprovalHandlerRegistry($app->tagged('approval.handlers')));

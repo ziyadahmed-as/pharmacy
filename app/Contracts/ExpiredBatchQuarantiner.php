@@ -18,4 +18,3 @@ interface ExpiredBatchQuarantiner
      */
     public function quarantine(Batch $batch, ?User $actor = null, ?string $reason = null): void;
 }
-
