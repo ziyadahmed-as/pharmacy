@@ -112,6 +112,33 @@ class SubmitStockReceipt
             $reference = DocumentSequence::next('stock_receipt', 'REC');
             $requiresConfirmation = (bool) setting('inventory.receipt_requires_confirmation', true);
 
+            // Check if any line exceeds maximum level (UC-05 Step 4)
+            $maxLevelWarnings = [];
+            foreach ($data['lines'] as $line) {
+                $prod = Product::find($line['product_id']);
+                if ($prod && $prod->max_level !== null && $prod->max_level > 0) {
+                    $currentSellable = (int) DB::table('batch_stocks')
+                        ->join('batches', 'batches.id', '=', 'batch_stocks.batch_id')
+                        ->where('batches.product_id', $prod->id)
+                        ->where('batch_stocks.status', 'sellable')
+                        ->sum('batch_stocks.quantity');
+
+                    $resulting = $currentSellable + (int) $line['quantity'];
+                    if ($resulting > $prod->max_level) {
+                        $maxLevelWarnings[] = __('catalogue.receipt_warning_exceeds_max', [
+                            'brand' => $prod->brand,
+                            'max' => $prod->max_level,
+                            'resulting' => $resulting,
+                        ]);
+                    }
+                }
+            }
+
+            $notes = $data['notes'] ?? '';
+            if (! empty($maxLevelWarnings)) {
+                $notes = trim($notes."\n".implode(' ', $maxLevelWarnings));
+            }
+
             $receipt = StockReceipt::create([
                 'reference' => $reference,
                 'supplier_name' => $data['supplier_name'],
@@ -119,7 +146,7 @@ class SubmitStockReceipt
                 'receipt_date' => $receiptDate,
                 'status' => $requiresConfirmation ? 'pending_confirmation' : 'posted',
                 'idempotency_key' => $data['idempotency_key'],
-                'notes' => $data['notes'] ?? null,
+                'notes' => $notes ?: null,
                 'created_by' => $actor->id,
             ]);
 
