@@ -67,12 +67,19 @@ class Prescription extends Model
         'replaced_by_id',
         'cancellation_reason',
         'created_by',
+        'verified_by',
+        'verified_at',
+        'rejected_by',
+        'rejected_at',
+        'rejection_reason',
     ];
 
     protected function casts(): array
     {
         return [
             'prescription_date' => 'date',
+            'verified_at' => 'datetime',
+            'rejected_at' => 'datetime',
         ];
     }
 
@@ -84,6 +91,16 @@ class Prescription extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function verifier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    public function rejecter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'rejected_by');
     }
 
     public function replacedBy(): BelongsTo
@@ -109,6 +126,16 @@ class Prescription extends Model
             self::STATUS_VERIFIED,
             self::STATUS_PARTIALLY_DISPENSED,
         ]);
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->status === self::STATUS_VERIFIED;
+    }
+
+    public function isPendingVerification(): bool
+    {
+        return $this->status === self::STATUS_PENDING_VERIFICATION;
     }
 
     public function isCancelled(): bool

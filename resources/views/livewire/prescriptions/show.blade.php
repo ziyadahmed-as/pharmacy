@@ -19,9 +19,73 @@
         </a>
     </div>
 
-    @if(session('success'))
+    @if($successMessage || session('success'))
         <div class="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-sm text-emerald-800 dark:text-emerald-200">
-            {{ session('success') }}
+            {{ $successMessage ?? session('success') }}
+        </div>
+    @endif
+
+    @if($errorMessage)
+        <div class="p-4 rounded-lg bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-sm text-rose-800 dark:text-rose-200">
+            {{ $errorMessage }}
+        </div>
+    @endif
+
+    {{-- Verification Panel (when pending verification) --}}
+    @if($canVerify)
+        <div class="bg-amber-50/50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-amber-200 dark:border-amber-800 pb-3">
+                <h2 class="text-base font-bold text-amber-900 dark:text-amber-200 flex items-center gap-2">
+                    <svg class="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ __('prescriptions.verification_checks') }}
+                </h2>
+                <span class="text-xs text-amber-700 dark:text-amber-300 font-medium">
+                    {{ __('prescriptions.all_checks_required') }}
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-amber-100/50 dark:hover:bg-amber-900/40">
+                    <input type="checkbox" wire:model.live="checkAuthenticity" class="rounded border-amber-300 text-teal-600 focus:ring-teal-500">
+                    <span class="text-slate-800 dark:text-slate-200">{{ __('prescriptions.check_authenticity') }}</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-amber-100/50 dark:hover:bg-amber-900/40">
+                    <input type="checkbox" wire:model.live="checkCompleteness" class="rounded border-amber-300 text-teal-600 focus:ring-teal-500">
+                    <span class="text-slate-800 dark:text-slate-200">{{ __('prescriptions.check_completeness') }}</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-amber-100/50 dark:hover:bg-amber-900/40">
+                    <input type="checkbox" wire:model.live="checkDrug" class="rounded border-amber-300 text-teal-600 focus:ring-teal-500">
+                    <span class="text-slate-800 dark:text-slate-200">{{ __('prescriptions.check_drug') }}</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-amber-100/50 dark:hover:bg-amber-900/40">
+                    <input type="checkbox" wire:model.live="checkDose" class="rounded border-amber-300 text-teal-600 focus:ring-teal-500">
+                    <span class="text-slate-800 dark:text-slate-200">{{ __('prescriptions.check_dose') }}</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-amber-100/50 dark:hover:bg-amber-900/40 md:col-span-2">
+                    <input type="checkbox" wire:model.live="checkQuantity" class="rounded border-amber-300 text-teal-600 focus:ring-teal-500">
+                    <span class="text-slate-800 dark:text-slate-200">{{ __('prescriptions.check_quantity') }}</span>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-amber-200 dark:border-amber-800">
+                <button
+                    type="button"
+                    wire:click="openRejectModal"
+                    class="px-4 py-2 border border-rose-300 dark:border-rose-700 text-rose-700 dark:text-rose-300 rounded-lg text-sm font-medium hover:bg-rose-50 dark:hover:bg-rose-950/50 transition"
+                >
+                    {{ __('prescriptions.reject') }}
+                </button>
+                <button
+                    type="button"
+                    wire:click="verify"
+                    @disabled(! $this->areAllChecksCompleted())
+                    class="px-4 py-2 bg-teal-600 hover:bg-teal-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-lg text-sm font-medium transition shadow-sm"
+                >
+                    {{ __('prescriptions.verify') }}
+                </button>
+            </div>
         </div>
     @endif
 
@@ -56,9 +120,49 @@
                     <span class="text-slate-500 dark:text-slate-400 font-mono text-xs ml-2">{{ $prescription->customer->phone }}</span>
                 </dd>
             </div>
+            <div>
+                <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('prescriptions.fields.scan') }}</dt>
+                <dd class="mt-1 text-sm">
+                    @if($prescription->scan_path)
+                        <a href="{{ route('prescriptions.scan', $prescription) }}" target="_blank" class="inline-flex items-center gap-1 text-teal-600 hover:text-teal-800 dark:text-teal-400 font-medium text-xs">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            View Scan
+                        </a>
+                    @else
+                        <span class="text-slate-400 text-xs">No scan uploaded</span>
+                    @endif
+                </dd>
+            </div>
+
+            @if($prescription->verified_by)
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">{{ __('prescriptions.fields.verified_by') }}</dt>
+                    <dd class="mt-1 text-sm text-slate-900 dark:text-white">
+                        {{ $prescription->verifier->name ?? 'Staff' }} &bull;
+                        <span class="text-xs text-slate-500">{{ $prescription->verified_at?->format('Y-m-d H:i') }}</span>
+                    </dd>
+                </div>
+            @endif
+
+            @if($prescription->rejected_by)
+                <div class="sm:col-span-2">
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">{{ __('prescriptions.fields.rejected_by') }}</dt>
+                    <dd class="mt-1 text-sm text-slate-900 dark:text-white">
+                        {{ $prescription->rejecter->name ?? 'Staff' }} &bull;
+                        <span class="text-xs text-slate-500">{{ $prescription->rejected_at?->format('Y-m-d H:i') }}</span>
+                    </dd>
+                    <dd class="mt-1 text-xs text-rose-600 dark:text-rose-400 font-mono">
+                        {{ __('prescriptions.fields.rejection_reason') }}: {{ $prescription->rejection_reason }}
+                    </dd>
+                </div>
+            @endif
+
             @if($prescription->cancellation_reason)
                 <div class="sm:col-span-2">
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-rose-500">Cancellation Reason</dt>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500">Cancellation Reason</dt>
                     <dd class="mt-1 text-sm text-slate-900 dark:text-white">{{ $prescription->cancellation_reason }}</dd>
                 </div>
             @endif
@@ -126,7 +230,7 @@
                         <p class="text-sm font-medium text-slate-900 dark:text-white">
                             @if($entry->from_status)
                                 <span class="text-slate-500">{{ $entry->from_status }}</span>
-                                <span class="text-slate-400 mx-1">→</span>
+                                <span class="text-slate-400 mx-1">&rarr;</span>
                             @endif
                             <span class="font-semibold">{{ $entry->to_status }}</span>
                         </p>
@@ -143,4 +247,47 @@
             @endforeach
         </ol>
     </div>
+
+    {{-- Rejection Modal --}}
+    @if($showRejectModal)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700">
+                <h3 class="text-lg font-bold text-rose-600 dark:text-rose-400">
+                    {{ __('prescriptions.reject_modal_title') }}
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                    This will mark the prescription as rejected and record a suspect prescription log entry.
+                </p>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        {{ __('prescriptions.reject_reason_label') }} *
+                    </label>
+                    <textarea
+                        wire:model="rejectionReason"
+                        rows="3"
+                        placeholder="State reason for suspecting or rejecting prescription..."
+                        class="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-rose-500"
+                    ></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button
+                        type="button"
+                        wire:click="closeRejectModal"
+                        class="px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm hover:bg-slate-50 transition"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="reject"
+                        class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-sm font-medium transition"
+                    >
+                        {{ __('prescriptions.reject') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

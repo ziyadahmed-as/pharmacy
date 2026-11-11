@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Role;
 use App\Http\Controllers\AuditExportController;
 use App\Http\Controllers\DailyClosingReportController;
 use App\Http\Controllers\KeepAliveController;
@@ -38,7 +39,9 @@ use App\Livewire\Staff as StaffUi;
 use App\Livewire\Stock as StockUi;
 use App\Livewire\Tills as TillsUi;
 use App\Livewire\Users as UsersUi;
+use App\Models\Prescription;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 /*
 | Pharmacy Management System - web routes.
@@ -138,10 +141,24 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/customers/{customer}', App\Livewire\Customers\Show::class)->middleware('can:customers.view')->name('customers.show');
             Route::get('/customers/{customer}/edit', App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.edit');
 
-            // UC-19: Prescriptions (Stage 4)
+            // UC-19, UC-20: Prescriptions (Stage 4)
             Route::get('/prescriptions', App\Livewire\Prescriptions\Index::class)->middleware('can:prescriptions.view')->name('prescriptions.index');
             Route::get('/prescriptions/create', Register::class)->middleware('can:prescriptions.register')->name('prescriptions.create');
             Route::get('/prescriptions/{prescription}', App\Livewire\Prescriptions\Show::class)->middleware('can:prescriptions.view')->name('prescriptions.show');
+            Route::get('/prescriptions/{prescription}/scan', function (Prescription $prescription) {
+                abort_unless(auth()->user()?->hasPermission('prescriptions.view'), 403);
+                abort_if(auth()->user()->hasRole(Role::SystemAdmin), 403);
+                abort_unless($prescription->scan_path && Storage::disk('private')->exists($prescription->scan_path), 404);
+            Route::get('/prescriptions/{prescription}/scan', function (\App\Models\Prescription $prescription) {
+                abort_unless(auth()->user()?->hasPermission('prescriptions.view'), 403);
+                abort_if(auth()->user()->hasRole(\App\Enums\Role::SystemAdmin), 403);
+                abort_unless($prescription->scan_path && \Illuminate\Support\Facades\Storage::disk('private')->exists($prescription->scan_path), 404);
+
+                return Storage::disk('private')->response($prescription->scan_path);
+            })->middleware('can:prescriptions.view')->name('prescriptions.scan');
+
+                return \Illuminate\Support\Facades\Storage::disk('private')->response($prescription->scan_path);
+            })->middleware('can:prescriptions.view')->name('prescriptions.scan');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

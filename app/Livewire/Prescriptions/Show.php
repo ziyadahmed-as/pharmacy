@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Prescriptions;
 
+use App\Actions\Prescriptions\RejectPrescription;
+use App\Actions\Prescriptions\VerifyPrescription;
 use App\Enums\Role;
 use App\Models\Prescription;
 use Illuminate\Contracts\View\View;
@@ -15,6 +17,26 @@ use Livewire\Component;
 class Show extends Component
 {
     public Prescription $prescription;
+
+    // Clinical Verification checklist
+    public bool $checkAuthenticity = false;
+
+    public bool $checkCompleteness = false;
+
+    public bool $checkDrug = false;
+
+    public bool $checkDose = false;
+
+    public bool $checkQuantity = false;
+
+    // Rejection state
+    public bool $showRejectModal = false;
+
+    public string $rejectionReason = '';
+
+    public ?string $errorMessage = null;
+
+    public ?string $successMessage = null;
 
     public function mount(Prescription $prescription): void
     {
@@ -42,26 +64,76 @@ class Show extends Component
 
     public function statusLabel(): string
     {
-        return match ($this->prescription->status) {
-            Prescription::STATUS_REGISTERED => __('prescriptions.status_registered'),
-            Prescription::STATUS_PENDING_VERIFICATION => __('prescriptions.status_pending_verification'),
-            Prescription::STATUS_VERIFIED => __('prescriptions.status_verified'),
-            Prescription::STATUS_PARTIALLY_DISPENSED => __('prescriptions.status_partially_dispensed'),
-            Prescription::STATUS_FULLY_DISPENSED => __('prescriptions.status_fully_dispensed'),
-            Prescription::STATUS_REJECTED => __('prescriptions.status_rejected'),
-            Prescription::STATUS_CANCELLED => __('prescriptions.status_cancelled'),
-            Prescription::STATUS_EXPIRED => __('prescriptions.status_expired'),
-            default => $this->prescription->status,
-        };
+        return $this->prescription->statusLabel();
+    }
+
+    public function areAllChecksCompleted(): bool
+    {
+        return $this->checkAuthenticity
+            && $this->checkCompleteness
+            && $this->checkDrug
+            && $this->checkDose
+            && $this->checkQuantity;
+    }
+
+    public function verify(VerifyPrescription $action): void
+    {
+        $this->errorMessage = null;
+
+        if (! $this->areAllChecksCompleted()) {
+            $this->errorMessage = __('prescriptions.all_checks_required');
+
+            return;
+        }
+
+        try {
+            $this->prescription = $action->execute(Auth::user(), $this->prescription);
+            $this->successMessage = __('prescriptions.prescription_verified_successfully');
+        } catch (\Throwable $e) {
+            $this->errorMessage = $e->getMessage();
+        }
+    }
+
+    public function openRejectModal(): void
+    {
+        $this->errorMessage = null;
+        $this->rejectionReason = '';
+        $this->showRejectModal = true;
+    }
+
+    public function closeRejectModal(): void
+    {
+        $this->showRejectModal = false;
+        $this->rejectionReason = '';
+    }
+
+    public function reject(RejectPrescription $action): void
+    {
+        $this->errorMessage = null;
+
+        if (trim($this->rejectionReason) === '') {
+            $this->errorMessage = __('prescriptions.rejection_reason_required');
+
+            return;
+        }
+
+        try {
+            $this->prescription = $action->execute(Auth::user(), $this->prescription, $this->rejectionReason);
+            $this->showRejectModal = false;
+            $this->successMessage = __('prescriptions.prescription_rejected_successfully');
+        } catch (\Throwable $e) {
+            $this->errorMessage = $e->getMessage();
+        }
     }
 
     public function render(): View
     {
-        $this->prescription->load(['lines.product', 'customer', 'statusHistory.user', 'replacedBy']);
+        $this->prescription->load(['lines.product', 'customer', 'statusHistory.user', 'replacedBy', 'verifier', 'rejecter']);
 
         return view('livewire.prescriptions.show', [
             'statusBadgeClass' => $this->statusBadgeClass(),
             'statusLabel' => $this->statusLabel(),
+            'canVerify' => Auth::user()?->hasPermission('prescriptions.verify') && $this->prescription->isPendingVerification(),
         ]);
     }
 }
