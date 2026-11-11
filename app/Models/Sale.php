@@ -31,6 +31,7 @@ class Sale extends Model
         'receipt_no',
         'shift_id',
         'user_id',
+        'customer_id',
         'status',
         'total',
         'idempotency_key',
@@ -55,6 +56,11 @@ class Sale extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function lines(): HasMany

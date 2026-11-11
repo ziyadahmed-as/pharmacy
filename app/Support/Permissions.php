@@ -62,6 +62,10 @@ final class Permissions
             'tills.manage' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $OW]],
             'sales.sell' => ['module' => 'sales', 'active' => false, 'roles' => [$PM, $PS]],
             'sales.void.request' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS]],
+            // --- Customers & Prescriptions (Stage 4) ---
+            'customers.manage' => ['module' => 'customers', 'active' => true, 'roles' => [$PS, $PM, $OW]],
+            'customers.view' => ['module' => 'customers', 'active' => true, 'roles' => [$PS, $PM, $OW]],
+            'customers.health.view' => ['module' => 'customers', 'active' => true, 'roles' => [$PS, $PM, $OW]],
             'backup.run' => ['module' => 'administration', 'active' => false, 'roles' => [$SA]],
             'reports.financial' => ['module' => 'reports', 'active' => false, 'roles' => [$OW, $PM]],
         ];

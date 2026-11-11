@@ -131,6 +131,18 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/closing/day', ClosingUi\Day::class)->middleware('can:shifts.view')->name('closing.day');
             Route::get('/closing/day/{dailyClosing}/report', [DailyClosingReportController::class, 'show'])->middleware('can:shifts.view')->name('closing.report');
 
+            // UC-25: Customer management (Stage 4)
+            Route::get('/customers', App\Livewire\Customers\Index::class)->middleware('can:customers.view')->name('customers.index');
+            Route::get('/customers/create', App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.create');
+            Route::get('/customers/{customer}', App\Livewire\Customers\Show::class)->middleware('can:customers.view')->name('customers.show');
+            Route::get('/customers/{customer}/edit', App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.edit');
+
+            // UC-25: Customer management (Stage 4)
+            Route::get('/customers', \App\Livewire\Customers\Index::class)->middleware('can:customers.view')->name('customers.index');
+            Route::get('/customers/create', \App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.create');
+            Route::get('/customers/{customer}', \App\Livewire\Customers\Show::class)->middleware('can:customers.view')->name('customers.show');
+            Route::get('/customers/{customer}/edit', \App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.edit');
+
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');
 
