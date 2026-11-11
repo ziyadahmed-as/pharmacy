@@ -337,23 +337,38 @@ it('renders livewire day closing component and reflects variance requirements', 
         ->assertSee(__('closing.reason_required_label'));
 });
 
-it('renders daily closing printable report successfully', function () {
+it('renders daily closing printable report successfully and totals equal shift totals', function () {
     $staff = ps();
     $shift = openClosingShift($staff, 50000);
-    app(CloseShift::class)->execute($staff, $shift, ['cash' => 50000], null);
+    $product = createClosingTestProduct();
+
+    // Add a cash sale of 2000 santim
+    app(CompleteSale::class)->execute(
+        $staff,
+        [['product_id' => $product->id, 'quantity' => 2]],
+        [['method' => 'cash', 'amount' => 2000]],
+        'idempotency-report-sale'
+    );
+
+    app(CloseShift::class)->execute($staff, $shift, ['cash' => 52000], null);
 
     $manager = pm();
     $dailyClosing = app(LockDay::class)->execute(
         $manager,
         now()->toDateString(),
-        ['cash' => 50000],
+        ['cash' => 52000],
         [],
         reauthConfirmed: true
     );
+
+    // Verify closing totals match shift totals
+    expect($dailyClosing->system_totals_by_method['cash'])->toBe(52000);
 
     test()->actingAs($manager)
         ->get(route('closing.report', $dailyClosing))
         ->assertStatus(200)
         ->assertSee(__('closing.report_title'))
-        ->assertSee($manager->name);
+        ->assertSee($manager->name)
+        ->assertSee('520.00')
+        ->assertSee('20.00 ETB');
 });

@@ -81,7 +81,7 @@
         <div class="card">
             {{-- Header --}}
             <div class="border-b text-center pb-4 mb-4">
-                <h1 style="font-size: 20px; margin: 0; text-transform: uppercase; font-weight: 900;">{{ setting('pharmacy.name', 'PMS Pharmacy') }}</h1>
+                <h1 style="font-size: 20px; margin: 0; text-transform: uppercase; font-weight: 900;">{{ setting('profile.name', 'PMS Pharmacy') }}</h1>
                 <p class="font-bold text-teal" style="font-size: 14px; margin: 4px 0 0 0;">{{ __('closing.report_title') }}</p>
                 <p class="font-mono text-slate-500" style="font-size: 12px; margin: 2px 0 0 0;">Date: {{ $closing->date }} · Status: {{ strtoupper($closing->status) }}</p>
             </div>
