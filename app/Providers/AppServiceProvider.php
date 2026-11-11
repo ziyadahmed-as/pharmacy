@@ -9,6 +9,7 @@ use App\Approvals\Handlers\DeactivateUserHandler;
 use App\Approvals\Handlers\QuarantineReleaseHandler;
 use App\Approvals\Handlers\ReactivateUserHandler;
 use App\Approvals\Handlers\SettingsUpdateHandler;
+use App\Approvals\Handlers\VoidSaleHandler;
 use App\Contracts\ExpiredBatchQuarantiner;
 use App\Enums\Role;
 use App\Models\User;
@@ -36,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
             ReactivateUserHandler::class,
             SettingsUpdateHandler::class,
             QuarantineReleaseHandler::class,
+            VoidSaleHandler::class,
         ];
         $this->app->tag($handlers, 'approval.handlers');
         $this->app->singleton(ApprovalHandlerRegistry::class, fn ($app) => new ApprovalHandlerRegistry($app->tagged('approval.handlers')));

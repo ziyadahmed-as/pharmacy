@@ -61,7 +61,7 @@ final class Permissions
             'shifts.view' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS, $OW]],
             'tills.manage' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $OW]],
             'sales.sell' => ['module' => 'sales', 'active' => false, 'roles' => [$PM, $PS]],
-            'sales.void.request' => ['module' => 'sales', 'active' => false, 'roles' => [$PM, $PS]],
+            'sales.void.request' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS]],
             'backup.run' => ['module' => 'administration', 'active' => false, 'roles' => [$SA]],
             'reports.financial' => ['module' => 'reports', 'active' => false, 'roles' => [$OW, $PM]],
         ];

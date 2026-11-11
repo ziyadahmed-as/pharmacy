@@ -25,6 +25,7 @@ use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
 use App\Livewire\Pos as PosUi;
 use App\Livewire\Quarantine as QuarantineUi;
+use App\Livewire\Sales as SalesUi;
 use App\Livewire\Settings as SettingsUi;
 use App\Livewire\Shifts as ShiftsUi;
 use App\Livewire\Staff as StaffUi;
@@ -111,6 +112,9 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-13: POS Sales & Receipts
             Route::get('/pos', PosUi\Sale::class)->middleware('can:shifts.open')->name('pos.sale');
             Route::get('/sales/{sale}/receipt', [ReceiptController::class, 'show'])->middleware('can:shifts.open')->name('sales.receipt');
+
+            // UC-15: Sale detail & Void request
+            Route::get('/sales/{sale}', SalesUi\Show::class)->middleware('can:shifts.open')->name('sales.show');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');
