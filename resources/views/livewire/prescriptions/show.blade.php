@@ -14,9 +14,16 @@
                 {{ __('prescriptions.fields.patient') }}: {{ $prescription->customer->name }}
             </p>
         </div>
-        <a href="{{ route('prescriptions.index') }}" class="px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
-            &larr; {{ __('prescriptions.title') }}
-        </a>
+        <div class="flex items-center gap-2">
+            @if($prescription->isDispensable() && !$prescription->isExpiredForDispensing() && auth()->user()?->hasPermission('prescriptions.dispense'))
+                <a href="{{ route('prescriptions.dispense', $prescription) }}" class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition">
+                    {{ __('prescriptions.dispense') }}
+                </a>
+            @endif
+            <a href="{{ route('prescriptions.index') }}" class="px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                &larr; {{ __('prescriptions.title') }}
+            </a>
+        </div>
     </div>
 
     @if($successMessage || session('success'))

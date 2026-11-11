@@ -15,6 +15,7 @@ use Illuminate\Support\Carbon;
  * @property string $receipt_no
  * @property int $shift_id
  * @property int $user_id
+ * @property int|null $prescription_id
  * @property string $status
  * @property int $total
  * @property string $idempotency_key
@@ -32,6 +33,7 @@ class Sale extends Model
         'shift_id',
         'user_id',
         'customer_id',
+        'prescription_id',
         'status',
         'total',
         'idempotency_key',
@@ -61,6 +63,11 @@ class Sale extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function prescription(): BelongsTo
+    {
+        return $this->belongsTo(Prescription::class);
     }
 
     public function lines(): HasMany

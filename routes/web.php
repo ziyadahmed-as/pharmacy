@@ -141,23 +141,17 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/customers/{customer}', App\Livewire\Customers\Show::class)->middleware('can:customers.view')->name('customers.show');
             Route::get('/customers/{customer}/edit', App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.edit');
 
-            // UC-19, UC-20: Prescriptions (Stage 4)
+            // UC-19, UC-20, UC-21: Prescriptions (Stage 4)
             Route::get('/prescriptions', App\Livewire\Prescriptions\Index::class)->middleware('can:prescriptions.view')->name('prescriptions.index');
             Route::get('/prescriptions/create', Register::class)->middleware('can:prescriptions.register')->name('prescriptions.create');
+            Route::get('/prescriptions/{prescription}/dispense', App\Livewire\Dispense\Show::class)->middleware('can:prescriptions.dispense')->name('prescriptions.dispense');
             Route::get('/prescriptions/{prescription}', App\Livewire\Prescriptions\Show::class)->middleware('can:prescriptions.view')->name('prescriptions.show');
             Route::get('/prescriptions/{prescription}/scan', function (Prescription $prescription) {
                 abort_unless(auth()->user()?->hasPermission('prescriptions.view'), 403);
                 abort_if(auth()->user()->hasRole(Role::SystemAdmin), 403);
                 abort_unless($prescription->scan_path && Storage::disk('private')->exists($prescription->scan_path), 404);
-            Route::get('/prescriptions/{prescription}/scan', function (\App\Models\Prescription $prescription) {
-                abort_unless(auth()->user()?->hasPermission('prescriptions.view'), 403);
-                abort_if(auth()->user()->hasRole(\App\Enums\Role::SystemAdmin), 403);
-                abort_unless($prescription->scan_path && \Illuminate\Support\Facades\Storage::disk('private')->exists($prescription->scan_path), 404);
 
                 return Storage::disk('private')->response($prescription->scan_path);
-            })->middleware('can:prescriptions.view')->name('prescriptions.scan');
-
-                return \Illuminate\Support\Facades\Storage::disk('private')->response($prescription->scan_path);
             })->middleware('can:prescriptions.view')->name('prescriptions.scan');
 
             // UC-38: settings

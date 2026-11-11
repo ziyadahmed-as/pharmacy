@@ -41,6 +41,7 @@ class CompleteSale
      * @param  User  $user  Cashier executing the sale
      * @param  array<int, array{product_id: int, quantity: int, unit_id?: int|null, batch_id?: int|null, override_reason?: string|null}>  $items
      * @param  array<int, array{method: string, amount: int, reference?: string|null}>  $payments
+     * @param  int|null  $prescriptionId  When set, Rx/controlled products are allowed (UC-21)
      *
      * @throws AuthorizationException
      * @throws NoOpenShiftException
@@ -52,7 +53,8 @@ class CompleteSale
         User $user,
         array $items,
         array $payments,
-        string $idempotencyKey
+        string $idempotencyKey,
+        ?int $prescriptionId = null
     ): Sale {
         // 1. Authorisation: SA cannot process sales
         if ($user->isSystemAdmin()) {
@@ -79,7 +81,7 @@ class CompleteSale
         }
 
         // 3. Atomically check idempotency and complete sale
-        return DB::transaction(function () use ($user, $shift, $items, $payments, $idempotencyKey) {
+        return DB::transaction(function () use ($user, $shift, $items, $payments, $idempotencyKey, $prescriptionId) {
             // E5: Check idempotency key under lock
             $existing = Sale::where('idempotency_key', $idempotencyKey)->first();
             if ($existing) {
@@ -94,7 +96,7 @@ class CompleteSale
                 $product = Product::findOrFail($item['product_id']);
 
                 // A3: Prescription / Controlled drug restriction
-                if (in_array($product->classification, ['rx', 'controlled'], true)) {
+                if (in_array($product->classification, ['rx', 'controlled'], true) && $prescriptionId === null) {
                     throw new InvalidArgumentException(__('sales.prescription_required_error', ['product' => $product->brand]));
                 }
 
@@ -170,6 +172,7 @@ class CompleteSale
                 'receipt_no' => $receiptNo,
                 'shift_id' => $shift->id,
                 'user_id' => $user->id,
+                'prescription_id' => $prescriptionId,
                 'status' => 'completed',
                 'total' => $saleTotalSantim,
                 'idempotency_key' => $idempotencyKey,

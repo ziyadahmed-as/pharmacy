@@ -148,6 +148,25 @@ class Prescription extends Model
         return $this->status === self::STATUS_FULLY_DISPENSED;
     }
 
+    public function isExpiredForDispensing(): bool
+    {
+        $validityDays = (int) setting('prescriptions.validity_days', 0);
+
+        if ($validityDays <= 0) {
+            return false;
+        }
+
+        return $this->prescription_date->addDays($validityDays)->isPast();
+    }
+
+    public function isDispensable(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_VERIFIED,
+            self::STATUS_PARTIALLY_DISPENSED,
+        ], true);
+    }
+
     public function isExpired(): bool
     {
         return $this->status === self::STATUS_EXPIRED;
