@@ -165,9 +165,13 @@ class Register extends Component
             ];
         }
 
-        // Handle scan upload
+        // Handle scan upload with validation (image or PDF, max 5MB)
         $scanPath = null;
         if ($this->scan) {
+            $this->validate([
+                'scan' => ['file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+            ]);
+
             $ext = $this->scan->getClientOriginalExtension();
             $uuid = Str::uuid()->toString();
             $scanPath = $this->scan->storeAs('prescriptions', "{$uuid}.{$ext}", 'private');

@@ -10,6 +10,8 @@ use App\Models\Prescription;
 use App\Models\Product;
 use App\Services\SettingsRepository;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 /**
@@ -301,4 +303,32 @@ it('Livewire Index and Show components render properly', function () {
         ->assertStatus(200)
         ->assertSee($prescription->prescription_number)
         ->assertSee('Bob Tester');
+});
+
+it('supports private scan upload during registration (Step 5)', function () {
+    Storage::fake('private');
+    $staff = ps();
+    $product = createPrescriptionEligibleProduct('rx');
+
+    $file = UploadedFile::fake()->create('prescription.pdf', 500, 'application/pdf');
+
+    Livewire::actingAs($staff)
+        ->test(PrescriptionRegister::class)
+        ->set('prescriberName', 'Dr. FileScan')
+        ->set('prescriberRegNo', 'REG-FILE-1')
+        ->set('prescriptionDate', now()->toDateString())
+        ->set('patientName', 'Scan Tester')
+        ->set('patientPhone', '+251933445566')
+        ->set('scan', $file)
+        ->call('addLine')
+        ->set('lines.0.product_id', $product->id)
+        ->set('lines.0.dose', '1 tablet daily')
+        ->set('lines.0.quantity', 10)
+        ->call('save')
+        ->assertHasNoErrors()
+        ->assertRedirect();
+
+    $rx = Prescription::where('prescriber_registration_no', 'REG-FILE-1')->firstOrFail();
+    expect($rx->scan_path)->not->toBeNull();
+    Storage::disk('private')->assertExists($rx->scan_path);
 });
