@@ -30,6 +30,12 @@ return [
     'status_cancelled' => 'Cancelled',
     'status_expired' => 'Expired',
 
+    'search_placeholder' => 'Search by prescription number, prescriber, or patient name...',
+    'all_statuses' => 'All Statuses',
+    'no_prescriptions_found' => 'No prescriptions found.',
+    'view_details' => 'View Details',
+    'back_to_list' => 'Back to Prescriptions',
+
     'fields' => [
         'prescription_number' => 'Prescription No.',
         'prescriber_name' => 'Prescriber Name',

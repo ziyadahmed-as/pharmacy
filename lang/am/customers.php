@@ -57,4 +57,3 @@ return [
     'ip_address' => 'የአይፒ አድራሻ',
     'no_health_data_recorded' => 'ምንም የተመዘገበ አለርጂ ወይም ስር የሰደደ በሽታ የለም።',
 ];
-

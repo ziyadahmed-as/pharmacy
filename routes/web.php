@@ -28,6 +28,7 @@ use App\Livewire\Inventory\Receive;
 use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
 use App\Livewire\Pos as PosUi;
+use App\Livewire\Prescriptions\Register;
 use App\Livewire\Quarantine as QuarantineUi;
 use App\Livewire\Returns as ReturnsUi;
 use App\Livewire\Sales as SalesUi;
@@ -137,11 +138,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/customers/{customer}', App\Livewire\Customers\Show::class)->middleware('can:customers.view')->name('customers.show');
             Route::get('/customers/{customer}/edit', App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.edit');
 
-            // UC-25: Customer management (Stage 4)
-            Route::get('/customers', \App\Livewire\Customers\Index::class)->middleware('can:customers.view')->name('customers.index');
-            Route::get('/customers/create', \App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.create');
-            Route::get('/customers/{customer}', \App\Livewire\Customers\Show::class)->middleware('can:customers.view')->name('customers.show');
-            Route::get('/customers/{customer}/edit', \App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.edit');
+            // UC-19: Prescriptions (Stage 4)
+            Route::get('/prescriptions', App\Livewire\Prescriptions\Index::class)->middleware('can:prescriptions.view')->name('prescriptions.index');
+            Route::get('/prescriptions/create', Register::class)->middleware('can:prescriptions.register')->name('prescriptions.create');
+            Route::get('/prescriptions/{prescription}', App\Livewire\Prescriptions\Show::class)->middleware('can:prescriptions.view')->name('prescriptions.show');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

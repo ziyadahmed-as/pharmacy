@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Product $product
  *
  * @uc UC-19
+ *
  * @fr FR-4.2
  */
 class PrescriptionLine extends Model
@@ -61,4 +62,3 @@ class PrescriptionLine extends Model
         return $this->quantity_dispensed >= $this->quantity_prescribed;
     }
 }
-

@@ -119,4 +119,3 @@ class Form extends Component
         return view('livewire.customers.form');
     }
 }
-

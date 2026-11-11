@@ -30,6 +30,12 @@ return [
     'status_cancelled' => 'ተሰርዟል',
     'status_expired' => 'ጊዜው አልፏል',
 
+    'search_placeholder' => 'በቀመር ቁጥር፣ በሀኪም ስም ወይም በታካሚ ስም ይፈልጉ...',
+    'all_statuses' => 'ሁሉም ሁኔታዎች',
+    'no_prescriptions_found' => 'ምንም ቀመር አልተገኘም።',
+    'view_details' => 'ዝርዝሩን ይመልከቱ',
+    'back_to_list' => 'ወደ ቀመሮች ዝርዝር ተመለስ',
+
     'fields' => [
         'prescription_number' => 'የቀመር ቁጥር',
         'prescriber_name' => 'የሀኪሙ ስም',

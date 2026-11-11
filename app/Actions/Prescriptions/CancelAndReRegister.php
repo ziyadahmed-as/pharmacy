@@ -13,6 +13,7 @@ use InvalidArgumentException;
  * Cancel an existing prescription and register a corrected replacement.
  *
  * @uc UC-19
+ *
  * @fr FR-4.11
  */
 class CancelAndReRegister

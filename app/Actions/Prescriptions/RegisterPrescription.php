@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Prescription;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\ActingRole;
 use App\Services\AuditLogger;
 use App\Services\DocumentSequence;
 use App\Services\SettingsRepository;
@@ -20,6 +21,7 @@ use RuntimeException;
  * Register a new prescription with product lines from a licensed prescriber.
  *
  * @uc UC-19
+ *
  * @fr FR-4.2, FR-4.8, FR-4.11
  */
 class RegisterPrescription
@@ -163,7 +165,7 @@ class RegisterPrescription
                 'from_status' => null,
                 'to_status' => Prescription::STATUS_REGISTERED,
                 'user_id' => $user->id,
-                'role_used' => \App\Services\ActingRole::for($user)?->value,
+                'role_used' => ActingRole::for($user)?->value,
                 'notes' => 'Prescription registered',
             ]);
 
@@ -219,4 +221,3 @@ class RegisterPrescription
         throw new InvalidArgumentException(__('prescriptions.patient_required'));
     }
 }
-

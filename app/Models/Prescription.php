@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ActingRole;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read Collection<int, PrescriptionStatusHistory> $statusHistory
  *
  * @uc UC-19
+ *
  * @fr FR-4.2, FR-4.8, FR-4.11
  */
 class Prescription extends Model
@@ -129,6 +131,21 @@ class Prescription extends Model
         return $this->status === self::STATUS_REJECTED;
     }
 
+    public function statusLabel(): string
+    {
+        return match ($this->status) {
+            self::STATUS_REGISTERED => __('prescriptions.status_registered'),
+            self::STATUS_PENDING_VERIFICATION => __('prescriptions.status_pending_verification'),
+            self::STATUS_VERIFIED => __('prescriptions.status_verified'),
+            self::STATUS_PARTIALLY_DISPENSED => __('prescriptions.status_partially_dispensed'),
+            self::STATUS_FULLY_DISPENSED => __('prescriptions.status_fully_dispensed'),
+            self::STATUS_REJECTED => __('prescriptions.status_rejected'),
+            self::STATUS_CANCELLED => __('prescriptions.status_cancelled'),
+            self::STATUS_EXPIRED => __('prescriptions.status_expired'),
+            default => $this->status,
+        };
+    }
+
     public function transitionStatus(string $to, User $actor, ?string $notes = null): void
     {
         $from = $this->status;
@@ -140,9 +157,8 @@ class Prescription extends Model
             'from_status' => $from,
             'to_status' => $to,
             'user_id' => $actor->id,
-            'role_used' => \App\Services\ActingRole::for($actor)?->value,
+            'role_used' => ActingRole::for($actor)?->value,
             'notes' => $notes,
         ]);
     }
 }
-

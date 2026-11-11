@@ -57,4 +57,3 @@ return [
     'ip_address' => 'IP Address',
     'no_health_data_recorded' => 'No allergies or chronic conditions recorded.',
 ];
-

@@ -59,15 +59,15 @@ class Index extends Component
         return view('livewire.prescriptions.index', [
             'prescriptions' => $prescriptions,
             'canRegister' => Auth::user()?->hasPermission('prescriptions.register') ?? false,
-            'statuses' => [
-                Prescription::STATUS_REGISTERED,
-                Prescription::STATUS_PENDING_VERIFICATION,
-                Prescription::STATUS_VERIFIED,
-                Prescription::STATUS_PARTIALLY_DISPENSED,
-                Prescription::STATUS_FULLY_DISPENSED,
-                Prescription::STATUS_REJECTED,
-                Prescription::STATUS_CANCELLED,
-                Prescription::STATUS_EXPIRED,
+            'statusOptions' => [
+                Prescription::STATUS_REGISTERED => __('prescriptions.status_registered'),
+                Prescription::STATUS_PENDING_VERIFICATION => __('prescriptions.status_pending_verification'),
+                Prescription::STATUS_VERIFIED => __('prescriptions.status_verified'),
+                Prescription::STATUS_PARTIALLY_DISPENSED => __('prescriptions.status_partially_dispensed'),
+                Prescription::STATUS_FULLY_DISPENSED => __('prescriptions.status_fully_dispensed'),
+                Prescription::STATUS_REJECTED => __('prescriptions.status_rejected'),
+                Prescription::STATUS_CANCELLED => __('prescriptions.status_cancelled'),
+                Prescription::STATUS_EXPIRED => __('prescriptions.status_expired'),
             ],
         ]);
     }

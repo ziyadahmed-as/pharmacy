@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read User $user
  *
  * @uc UC-19
+ *
  * @fr FR-4.8
  */
 class PrescriptionStatusHistory extends Model
@@ -54,4 +55,3 @@ class PrescriptionStatusHistory extends Model
         return $this->belongsTo(User::class);
     }
 }
-
