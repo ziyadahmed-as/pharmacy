@@ -66,6 +66,8 @@ final class Permissions
             'customers.manage' => ['module' => 'customers', 'active' => true, 'roles' => [$PS, $PM, $OW]],
             'customers.view' => ['module' => 'customers', 'active' => true, 'roles' => [$PS, $PM, $OW]],
             'customers.health.view' => ['module' => 'customers', 'active' => true, 'roles' => [$PS, $PM, $OW]],
+            'prescriptions.register' => ['module' => 'prescriptions', 'active' => true, 'roles' => [$PS, $PM, $OW]],
+            'prescriptions.view' => ['module' => 'prescriptions', 'active' => true, 'roles' => [$PS, $PM, $OW]],
             'backup.run' => ['module' => 'administration', 'active' => false, 'roles' => [$SA]],
             'reports.financial' => ['module' => 'reports', 'active' => false, 'roles' => [$OW, $PM]],
         ];
