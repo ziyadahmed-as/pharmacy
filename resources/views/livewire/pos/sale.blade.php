@@ -13,6 +13,16 @@
                     <span class="text-teal-600 font-mono">({{ $currentShift->openingFloatEtb() }} ETB)</span>
                 </div>
             @endif
+            <button
+                type="button"
+                wire:click="openHeldSalesModal"
+                class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm">
+                <svg class="h-3.5 w-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>{{ __('sales.held_sales_button') }}</span>
+                @if ($heldSalesCount > 0)
+                    <span class="rounded-full bg-amber-100 text-amber-800 px-1.5 py-0.2 text-[10px] font-bold">{{ $heldSalesCount }}</span>
+                @endif
+            </button>
             <a href="{{ route('shifts.open') }}" class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm">
                 {{ __('shifts.active_shift_title') }}
             </a>
@@ -46,6 +56,22 @@
                 </div>
             </div>
             <button wire:click="$set('warningMessage', null)" class="text-amber-500 hover:text-amber-700">✕</button>
+        </div>
+    @endif
+
+    {{-- Resumed cart warnings (A1) --}}
+    @if (!empty($resumeWarnings))
+        <div class="rounded-xl border border-amber-300 bg-amber-50 p-4 shadow-sm space-y-2">
+            <div class="flex items-center gap-2 text-sm font-bold text-amber-900">
+                <svg class="h-5 w-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span>{{ __('sales.resumed_items_require_attention') }}</span>
+                <button type="button" wire:click="$set('resumeWarnings', [])" class="ml-auto text-amber-500 hover:text-amber-700">✕</button>
+            </div>
+            <ul class="list-disc list-inside text-xs text-amber-800 space-y-1">
+                @foreach ($resumeWarnings as $warn)
+                    <li>{{ $warn }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -144,7 +170,7 @@
                             {{-- A4 Hold button --}}
                             <button
                                 type="button"
-                                wire:click="holdSale"
+                                wire:click="openHoldModal"
                                 class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition">
                                 <svg class="h-3.5 w-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 {{ __('sales.hold_cart') }}
@@ -188,8 +214,21 @@
                                     <tr wire:key="cart-line-{{ $line['temp_id'] }}" class="hover:bg-slate-50/50">
                                         {{-- Product --}}
                                         <td class="px-4 py-3">
-                                            <div class="font-bold text-slate-900">{{ $line['brand'] }}</div>
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <span class="font-bold text-slate-900">{{ $line['brand'] }}</span>
+                                                @if (!empty($line['sold_out']))
+                                                    <span class="bg-rose-100 text-rose-800 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ __('sales.sold_out_badge') }}</span>
+                                                @elseif (!empty($line['insufficient_stock']))
+                                                    <span class="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ __('sales.insufficient_badge') }}</span>
+                                                @endif
+                                                @if (!empty($line['price_changed']))
+                                                    <span class="bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ __('sales.price_changed_badge') }}</span>
+                                                @endif
+                                            </div>
                                             <div class="text-xs text-slate-500">{{ $line['generic_name'] }}</div>
+                                            @if (!empty($line['stock_warning']))
+                                                <div class="text-[11px] text-rose-600 font-medium">{{ $line['stock_warning'] }}</div>
+                                            @endif
                                         </td>
 
                                         {{-- Batch & FEFO --}}
@@ -253,7 +292,10 @@
 
                                         {{-- Unit Price --}}
                                         <td class="px-3 py-3 text-right whitespace-nowrap text-xs font-mono text-slate-700">
-                                            {{ number_format($line['unit_price'] / 100, 2) }}
+                                            <div>{{ number_format($line['unit_price'] / 100, 2) }}</div>
+                                            @if (!empty($line['price_changed']))
+                                                <div class="text-[10px] text-slate-400 line-through">{{ number_format($line['old_price'] / 100, 2) }}</div>
+                                            @endif
                                         </td>
 
                                         {{-- Subtotal --}}
@@ -479,6 +521,113 @@
                         wire:click="saveBatchOverride"
                         class="rounded-xl bg-teal-600 px-4 py-2 text-xs font-bold text-white hover:bg-teal-700 shadow-sm">
                         {{ __('sales.apply_override') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Hold Sale Modal (UC-14) --}}
+    @if ($holdModalOpen)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+            <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">{{ __('sales.hold_sale_title') }}</h3>
+                        <p class="text-xs text-slate-500">{{ __('sales.hold_sale_subtitle') }}</p>
+                    </div>
+                    <button wire:click="$set('holdModalOpen', false)" class="text-slate-400 hover:text-slate-600">✕</button>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">
+                            {{ __('sales.hold_reference_label') }}
+                        </label>
+                        <input
+                            type="text"
+                            wire:model="holdReferenceInput"
+                            placeholder="{{ __('sales.hold_reference_placeholder') }}"
+                            class="w-full rounded-xl border-slate-300 text-xs py-2 focus:border-teal-500 focus:ring-teal-200"
+                        />
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button
+                        type="button"
+                        wire:click="$set('holdModalOpen', false)"
+                        class="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                        {{ __('common.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="confirmHold"
+                        class="rounded-xl bg-amber-600 px-4 py-2 text-xs font-bold text-white hover:bg-amber-700 shadow-sm">
+                        {{ __('sales.confirm_hold_button') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Held Sales List Modal (UC-14) --}}
+    @if ($heldSalesModalOpen)
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+            <div class="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-xl space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">{{ __('sales.held_sales_modal_title') }}</h3>
+                        <p class="text-xs text-slate-500">{{ __('sales.user_single_shift_notice') }}</p>
+                    </div>
+                    <button wire:click="$set('heldSalesModalOpen', false)" class="text-slate-400 hover:text-slate-600">✕</button>
+                </div>
+
+                @if ($heldSales->isEmpty())
+                    <div class="py-12 text-center text-sm text-slate-500">
+                        {{ __('sales.no_held_sales_found') }}
+                    </div>
+                @else
+                    <div class="overflow-y-auto max-h-80 divide-y divide-slate-100">
+                        @foreach ($heldSales as $held)
+                            <div class="py-3 flex items-center justify-between gap-4">
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-sm text-slate-900">{{ $held->reference ?: '#' . $held->id }}</span>
+                                        <span class="text-xs font-mono font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+                                            {{ $held->totalEtb() }} ETB
+                                        </span>
+                                    </div>
+                                    <div class="text-xs text-slate-500 mt-0.5">
+                                        {{ $held->itemsCount() }} {{ __('sales.cart_items') }} • {{ __('sales.held_at') }}: {{ $held->held_at->diffForHumans() }}
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button
+                                        type="button"
+                                        wire:click="resumeSale({{ $held->id }})"
+                                        class="rounded-xl bg-teal-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-teal-700 transition shadow-sm">
+                                        {{ __('sales.resume_sale_button') }}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        wire:click="discardSale({{ $held->id }})"
+                                        wire:confirm="{{ __('sales.discard_confirm') }}"
+                                        class="rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition">
+                                        {{ __('sales.discard_sale_button') }}
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="flex items-center justify-end pt-3 border-t border-slate-100">
+                    <button
+                        type="button"
+                        wire:click="$set('heldSalesModalOpen', false)"
+                        class="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                        {{ __('common.close') }}
                     </button>
                 </div>
             </div>

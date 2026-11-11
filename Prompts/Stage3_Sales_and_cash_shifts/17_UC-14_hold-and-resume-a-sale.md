@@ -25,6 +25,7 @@ STEP 3 A1: any invalid line (sold out, expired, price changed) is flagged and st
 STEP 4 Livewire: Hold button, held list on the POS, Resume and Discard actions; payment continues in the UC-13 flow.
 STEP 5 Held sales older than the end of the day are listed to the PM at daily closing (UC-18) and cannot be completed on another shift without resume.
 
+
 TESTS: hold stores without reserving stock; resume re-validates; changed price and sold-out line flagged (A1); another sale can take the stock first (E1); cart survives a page refresh; staff only see their own held sales (AC-23).
 
 DONE WHEN: all green.

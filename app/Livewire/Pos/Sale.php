@@ -3,11 +3,15 @@
 namespace App\Livewire\Pos;
 
 use App\Actions\Sales\CompleteSale;
+use App\Actions\Sales\DiscardHeldSale;
+use App\Actions\Sales\HoldSale;
+use App\Actions\Sales\ResumeSale;
 use App\Exceptions\FefoOverrideException;
 use App\Exceptions\InsufficientStockException;
 use App\Exceptions\PaymentMismatchException;
 use App\Exceptions\SellabilityException;
 use App\Models\Batch;
+use App\Models\HeldSale;
 use App\Models\Product;
 use App\Models\ProductUnit;
 use App\Services\CurrentShift;
@@ -93,6 +97,18 @@ class Sale extends Component
     public ?int $overrideSelectedBatchId = null;
 
     public string $overrideReason = '';
+
+    /**
+     * Held sales state.
+     */
+    public bool $holdModalOpen = false;
+
+    public string $holdReferenceInput = '';
+
+    public bool $heldSalesModalOpen = false;
+
+    /** @var array<int, string> */
+    public array $resumeWarnings = [];
 
     /**
      * Error / Warning messages.
@@ -530,9 +546,9 @@ class Sale extends Component
     }
 
     /**
-     * Action A4: Hold Sale (Stub for UC-14).
+     * Action: Hold Sale (UC-14).
      */
-    public function holdSale(): void
+    public function openHoldModal(): void
     {
         if (empty($this->cart)) {
             $this->errorMessage = __('sales.empty_cart_error');
@@ -540,12 +556,88 @@ class Sale extends Component
             return;
         }
 
-        // Stub until UC-14 is built
-        $this->cart = [];
-        $this->payments = [];
-        $this->warningMessage = null;
+        $this->holdReferenceInput = '';
+        $this->holdModalOpen = true;
+    }
+
+    public function confirmHold(HoldSale $action): void
+    {
         $this->errorMessage = null;
-        session()->flash('status', __('sales.cart_held_success'));
+
+        if (empty($this->cart)) {
+            $this->errorMessage = __('sales.empty_cart_error');
+            $this->holdModalOpen = false;
+
+            return;
+        }
+
+        try {
+            $heldSale = $action->execute(
+                user: Auth::user(),
+                shift: CurrentShift::requireForUser(Auth::user()),
+                cart: $this->cart,
+                reference: $this->holdReferenceInput
+            );
+
+            $this->cart = [];
+            $this->payments = [];
+            $this->warningMessage = null;
+            $this->resumeWarnings = [];
+            $this->holdModalOpen = false;
+            $this->holdReferenceInput = '';
+
+            session()->flash('status', __('sales.cart_held_success', ['ref' => $heldSale->reference ?: "#{$heldSale->id}"]));
+        } catch (\Exception $e) {
+            $this->errorMessage = $e->getMessage();
+        }
+    }
+
+    public function openHeldSalesModal(): void
+    {
+        $this->heldSalesModalOpen = true;
+    }
+
+    public function resumeSale(int $heldSaleId, ResumeSale $action): void
+    {
+        $this->errorMessage = null;
+        $this->resumeWarnings = [];
+
+        try {
+            $heldSale = HeldSale::findOrFail($heldSaleId);
+            $result = $action->execute(
+                user: Auth::user(),
+                heldSale: $heldSale,
+                shift: CurrentShift::requireForUser(Auth::user())
+            );
+
+            $this->cart = $result['cart'];
+            $this->resumeWarnings = $result['warnings'];
+            $this->payments = [];
+            $this->recalculatePayments();
+            $this->heldSalesModalOpen = false;
+
+            if ($result['has_issues']) {
+                $this->errorMessage = __('sales.resumed_with_issues_warning');
+            } else {
+                session()->flash('status', __('sales.sale_resumed_successfully'));
+            }
+        } catch (\Exception $e) {
+            $this->errorMessage = $e->getMessage();
+        }
+    }
+
+    public function discardSale(int $heldSaleId, DiscardHeldSale $action, ?string $reason = null): void
+    {
+        $this->errorMessage = null;
+
+        try {
+            $heldSale = HeldSale::findOrFail($heldSaleId);
+            $action->execute(Auth::user(), $heldSale, $reason);
+
+            session()->flash('status', __('sales.held_sale_discarded_success'));
+        } catch (\Exception $e) {
+            $this->errorMessage = $e->getMessage();
+        }
     }
 
     /**
@@ -557,6 +649,14 @@ class Sale extends Component
 
         if (empty($this->cart)) {
             $this->errorMessage = __('sales.empty_cart_error');
+
+            return;
+        }
+
+        // Check if any item in cart is invalid or sold out (A1)
+        $invalidItem = collect($this->cart)->firstWhere('invalid', true);
+        if ($invalidItem) {
+            $this->errorMessage = __('sales.cannot_complete_sale_with_invalid_items');
 
             return;
         }
@@ -611,6 +711,7 @@ class Sale extends Component
             $this->cart = [];
             $this->payments = [];
             $this->warningMessage = null;
+            $this->resumeWarnings = [];
             $this->idempotencyKey = (string) Str::uuid();
 
             session()->flash('status', __('sales.sale_completed_successfully', ['receipt' => $sale->receipt_no]));
@@ -624,6 +725,7 @@ class Sale extends Component
     public function render(): View
     {
         $currentShift = CurrentShift::forUser(Auth::user());
+        $heldSales = Auth::user() ? HeldSale::held()->forUser(Auth::user())->latest('id')->get() : collect();
 
         return view('livewire.pos.sale', [
             'currentShift' => $currentShift,
@@ -631,6 +733,8 @@ class Sale extends Component
             'cartTotalSantim' => $this->getCartTotalSantim(),
             'totalPaidSantim' => $this->getTotalPaidSantim(),
             'balanceSantim' => $this->getBalanceSantim(),
+            'heldSales' => $heldSales,
+            'heldSalesCount' => $heldSales->count(),
         ]);
     }
 }
