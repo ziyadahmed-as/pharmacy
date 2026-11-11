@@ -6,6 +6,8 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use RuntimeException;
 
 /**
  * @property int $id
@@ -51,6 +53,19 @@ class Shift extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::updating(function (Shift $shift) {
+            if ($shift->getOriginal('status') === 'closed') {
+                throw new RuntimeException(__('shifts.closed_shift_immutable'));
+            }
+        });
+
+        static::deleting(function () {
+            throw new RuntimeException(__('shifts.shifts_cannot_be_deleted'));
+        });
+    }
+
     public function till(): BelongsTo
     {
         return $this->belongsTo(Till::class);
@@ -59,6 +74,21 @@ class Shift extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    public function cashMovements(): HasMany
+    {
+        return $this->hasMany(ShiftCashMovement::class);
+    }
+
+    public function heldSales(): HasMany
+    {
+        return $this->hasMany(HeldSale::class);
     }
 
     public function isOpen(): bool
@@ -74,5 +104,14 @@ class Shift extends Model
     public function openingFloatEtb(): float
     {
         return $this->opening_float / 100;
+    }
+
+    public function varianceEtb(): ?string
+    {
+        if ($this->variance === null) {
+            return null;
+        }
+
+        return number_format($this->variance / 100, 2);
     }
 }

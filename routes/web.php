@@ -5,6 +5,7 @@ use App\Http\Controllers\KeepAliveController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\ShiftSummaryController;
 use App\Http\Controllers\StaffPhotoController;
 use App\Http\Controllers\StockExportController;
 use App\Livewire\Alerts as AlertsUi;
@@ -107,6 +108,8 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             // UC-12: Cash Shifts & Tills
             Route::get('/shifts/open', ShiftsUi\Open::class)->middleware('can:shifts.open')->name('shifts.open');
+            Route::get('/shifts/close', ShiftsUi\Close::class)->middleware('can:shifts.open')->name('shifts.close');
+            Route::get('/shifts/{shift}/summary', [ShiftSummaryController::class, 'show'])->middleware('can:shifts.view')->name('shifts.summary');
             Route::get('/tills', TillsUi\Index::class)->middleware('can:tills.manage')->name('tills.index');
 
             // UC-13: POS Sales & Receipts

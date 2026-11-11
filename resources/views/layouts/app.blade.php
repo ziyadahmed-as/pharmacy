@@ -137,11 +137,14 @@
             @if ($authUser)
             <div class="flex items-center gap-2">
                 @if ($currentShift)
-                    <div class="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-800 shadow-sm" title="{{ __('shifts.shift_open') }}: {{ $currentShift->till->name }}">
+                    <a href="{{ route('shifts.close') }}"
+                       class="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-medium text-emerald-800 hover:bg-emerald-100 transition shadow-sm"
+                       title="{{ __('shifts.shift_open') }}: {{ $currentShift->till->name }} - {{ __('shifts.close_shift_button') }}">
                         <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span class="font-semibold">{{ $currentShift->till->name }}</span>
                         <span class="text-emerald-600 font-mono">({{ number_format($currentShift->opening_float / 100, 2) }} ETB)</span>
-                    </div>
+                        <span class="underline text-emerald-900 font-semibold ml-0.5">{{ __('shifts.close_shift_button') }}</span>
+                    </a>
                 @elseif ($authUser->hasPermission('shifts.open'))
                     <a href="{{ route('shifts.open') }}"
                        class="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-medium text-amber-800 hover:bg-amber-100 transition shadow-sm"
