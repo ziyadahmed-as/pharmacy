@@ -82,4 +82,3 @@ class RecordCashMovement
         return $movement;
     }
 }
-

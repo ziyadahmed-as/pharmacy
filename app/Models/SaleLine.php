@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -67,6 +68,23 @@ class SaleLine extends Model
     public function batch(): BelongsTo
     {
         return $this->belongsTo(Batch::class);
+    }
+
+    public function returnLines(): HasMany
+    {
+        return $this->hasMany(SaleReturnLine::class);
+    }
+
+    public function returnedQuantity(): int
+    {
+        return (int) $this->returnLines()
+            ->whereHas('saleReturn', fn ($q) => $q->whereIn('status', [SaleReturn::STATUS_COMPLETED, SaleReturn::STATUS_PENDING_APPROVAL]))
+            ->sum('quantity');
+    }
+
+    public function remainingReturnableQuantity(): int
+    {
+        return max(0, $this->quantity - $this->returnedQuantity());
     }
 
     public function unitPriceEtb(): string

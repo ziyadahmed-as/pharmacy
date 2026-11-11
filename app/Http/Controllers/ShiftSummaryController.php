@@ -27,4 +27,3 @@ class ShiftSummaryController extends Controller
         ]);
     }
 }
-

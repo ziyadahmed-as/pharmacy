@@ -5,6 +5,7 @@ use App\Http\Controllers\KeepAliveController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\RefundReceiptController;
 use App\Http\Controllers\ShiftSummaryController;
 use App\Http\Controllers\StaffPhotoController;
 use App\Http\Controllers\StockExportController;
@@ -26,6 +27,7 @@ use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
 use App\Livewire\Pos as PosUi;
 use App\Livewire\Quarantine as QuarantineUi;
+use App\Livewire\Returns as ReturnsUi;
 use App\Livewire\Sales as SalesUi;
 use App\Livewire\Settings as SettingsUi;
 use App\Livewire\Shifts as ShiftsUi;
@@ -118,6 +120,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             // UC-15: Sale detail & Void request
             Route::get('/sales/{sale}', SalesUi\Show::class)->middleware('can:shifts.open')->name('sales.show');
+
+            // UC-16: Customer returns & refunds
+            Route::get('/returns', ReturnsUi\Process::class)->middleware('can:shifts.open')->name('returns.process');
+            Route::get('/returns/{saleReturn}/receipt', [RefundReceiptController::class, 'show'])->middleware('can:shifts.open')->name('returns.receipt');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');
