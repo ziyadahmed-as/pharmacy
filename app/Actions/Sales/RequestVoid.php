@@ -3,6 +3,7 @@
 namespace App\Actions\Sales;
 
 use App\Models\ApprovalRequest;
+use App\Models\DailyClosing;
 use App\Models\Sale;
 use App\Models\User;
 use App\Services\ApprovalService;
@@ -86,12 +87,10 @@ class RequestVoid
      */
     private function guardDayNotLocked(Sale $sale): void
     {
-        // When UC-18 ships, replace with:
-        // if (DayClosing::isLockedForDate($sale->completed_at->toDateString())) {
-        //     throw new RuntimeException(__('sales.void_error_locked_day'));
-        // }
-        //
-        // For now, check a flag injected via the sale itself in tests.
+        if ($sale->completed_at && DailyClosing::isLockedForDate($sale->completed_at)) {
+            throw new RuntimeException(__('sales.void_error_locked_day'));
+        }
+
         if (property_exists($sale, '_dayLocked') && $sale->_dayLocked === true) {
             throw new RuntimeException(__('sales.void_error_locked_day'));
         }

@@ -21,4 +21,3 @@ class RefundReceiptController extends Controller
         ]);
     }
 }
-

@@ -167,4 +167,5 @@ return [
     'refund_number' => 'Refund Number',
     'original_receipt' => 'Original Receipt',
     'refund_footer_note' => 'Operational Customer Return Receipt · :app',
+    'refund_error_locked_day' => 'The accounting day is locked. Use an approved adjustment instead.',
 ];

@@ -167,4 +167,5 @@ return [
     'refund_number' => 'የተመላሽ ቁጥር',
     'original_receipt' => 'የመጀመሪያ ደረሰኝ',
     'refund_footer_note' => 'የደንበኛ ዕቃ መመለሻ ደረሰኝ · :app',
+    'refund_error_locked_day' => 'የሒሳብ ቀኑ ተዘግቷል። ፈቃድ ያለው ማስተካከያ ይጠቀሙ።',
 ];

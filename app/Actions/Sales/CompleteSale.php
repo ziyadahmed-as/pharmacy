@@ -5,6 +5,7 @@ namespace App\Actions\Sales;
 use App\Exceptions\NoOpenShiftException;
 use App\Exceptions\PaymentMismatchException;
 use App\Exceptions\SellabilityException;
+use App\Models\DailyClosing;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\ProductUnit;
@@ -56,6 +57,11 @@ class CompleteSale
         // 1. Authorisation: SA cannot process sales
         if ($user->isSystemAdmin()) {
             throw new AuthorizationException(__('sales.unauthorized_to_sell'));
+        }
+
+        // 1.5. Day lock check (FR-3.10, AC-24)
+        if (DailyClosing::isLockedForDate(now())) {
+            throw new \RuntimeException(__('closing.day_is_locked_error'));
         }
 
         // 2. Open Shift Check

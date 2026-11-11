@@ -51,4 +51,5 @@ return [
     'choose_role_title' => 'Choose your role for this session',
     'choose_role_help' => 'You hold several roles. Everything you do is recorded under the role you pick.',
     'switch_role' => 'Switch role',
+    'reauth_required' => 'Password re-authentication is required to perform this action.',
 ];

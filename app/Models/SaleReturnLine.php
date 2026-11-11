@@ -81,4 +81,3 @@ class SaleReturnLine extends Model
         return number_format($this->subtotal / 100, 2);
     }
 }
-

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuditExportController;
+use App\Http\Controllers\DailyClosingReportController;
 use App\Http\Controllers\KeepAliveController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LogoutController;
@@ -21,6 +22,7 @@ use App\Livewire\Catalogue\Form;
 use App\Livewire\Catalogue\Import;
 use App\Livewire\Catalogue\Index;
 use App\Livewire\Catalogue\Show;
+use App\Livewire\Closing as ClosingUi;
 use App\Livewire\Dashboard;
 use App\Livewire\Inventory\Receive;
 use App\Livewire\Inventory\ShowReceipt;
@@ -124,6 +126,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-16: Customer returns & refunds
             Route::get('/returns', ReturnsUi\Process::class)->middleware('can:shifts.open')->name('returns.process');
             Route::get('/returns/{saleReturn}/receipt', [RefundReceiptController::class, 'show'])->middleware('can:shifts.open')->name('returns.receipt');
+
+            // UC-18: Daily closing & day lock
+            Route::get('/closing/day', ClosingUi\Day::class)->middleware('can:shifts.view')->name('closing.day');
+            Route::get('/closing/day/{dailyClosing}/report', [DailyClosingReportController::class, 'show'])->middleware('can:shifts.view')->name('closing.report');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

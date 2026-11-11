@@ -3,6 +3,7 @@
 namespace App\Actions\Sales;
 
 use App\Models\ApprovalRequest;
+use App\Models\DailyClosing;
 use App\Models\QuarantineRecord;
 use App\Models\Sale;
 use App\Models\SaleReturn;
@@ -69,6 +70,11 @@ class ProcessReturn
 
         if (! $sale->isCompleted()) {
             throw new RuntimeException(__('sales.cannot_refund_uncompleted_sale'));
+        }
+
+        // Check if the sale date is locked (E2)
+        if ($sale->completed_at && DailyClosing::isLockedForDate($sale->completed_at)) {
+            throw new RuntimeException(__('sales.refund_error_locked_day'));
         }
 
         // 3. Check Return Window (A1)

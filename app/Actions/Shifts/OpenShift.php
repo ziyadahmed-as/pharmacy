@@ -5,6 +5,7 @@ namespace App\Actions\Shifts;
 use App\Exceptions\ShiftAlreadyOpenException;
 use App\Exceptions\TillInactiveException;
 use App\Exceptions\UserAlreadyHasOpenShiftException;
+use App\Models\DailyClosing;
 use App\Models\Shift;
 use App\Models\Till;
 use App\Models\User;
@@ -40,6 +41,11 @@ class OpenShift
         // Authorisation check (pharmacy_staff, PM, Owner)
         if (! $user->hasPermission('shifts.open')) {
             throw new AuthorizationException(__('shifts.unauthorized_to_open_shift'));
+        }
+
+        // Refuse if day is locked (FR-3.10, AC-24)
+        if (DailyClosing::isLockedForDate(now())) {
+            throw new \RuntimeException(__('closing.cannot_open_shift_on_locked_day'));
         }
 
         $tillModel = $till instanceof Till ? $till : Till::findOrFail($till);
