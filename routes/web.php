@@ -4,6 +4,7 @@ use App\Http\Controllers\AuditExportController;
 use App\Http\Controllers\KeepAliveController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LogoutController;
+use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\StaffPhotoController;
 use App\Http\Controllers\StockExportController;
 use App\Livewire\Alerts as AlertsUi;
@@ -22,6 +23,7 @@ use App\Livewire\Dashboard;
 use App\Livewire\Inventory\Receive;
 use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
+use App\Livewire\Pos as PosUi;
 use App\Livewire\Quarantine as QuarantineUi;
 use App\Livewire\Settings as SettingsUi;
 use App\Livewire\Shifts as ShiftsUi;
@@ -105,6 +107,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-12: Cash Shifts & Tills
             Route::get('/shifts/open', ShiftsUi\Open::class)->middleware('can:shifts.open')->name('shifts.open');
             Route::get('/tills', TillsUi\Index::class)->middleware('can:tills.manage')->name('tills.index');
+
+            // UC-13: POS Sales & Receipts
+            Route::get('/pos', PosUi\Sale::class)->middleware('can:shifts.open')->name('pos.sale');
+            Route::get('/sales/{sale}/receipt', [ReceiptController::class, 'show'])->middleware('can:shifts.open')->name('sales.receipt');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

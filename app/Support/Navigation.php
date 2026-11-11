@@ -56,6 +56,7 @@ final class Navigation
                 ['label' => 'nav.receive_stock', 'route' => 'inventory.receive', 'any' => ['stock.receive']],
             ]],
             ['key' => 'sales', 'items' => [
+                ['label' => 'nav.pos', 'route' => 'pos.sale', 'any' => ['shifts.open']],
                 ['label' => 'nav.open_shift', 'route' => 'shifts.open', 'any' => ['shifts.open']],
                 ['label' => 'nav.tills', 'route' => 'tills.index', 'any' => ['tills.manage']],
             ]],

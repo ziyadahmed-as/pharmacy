@@ -8,6 +8,7 @@ use App\Models\StockMovement;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Support\RoleCombinationRule;
+use App\Support\SettingsCatalogue;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
@@ -123,4 +124,21 @@ it('only allows StockMovementService to write BatchStock across the application'
     }
 
     expect($violators)->toBe([]);
+});
+
+it('has no discount, price-override or tax field in sales schema, API or settings (AC-36, BR-20)', function () {
+    // 1. Database schema: sales, sale_lines, payments have no discount, tax or price override columns
+    foreach (['sales', 'sale_lines', 'payments'] as $table) {
+        $columns = Schema::getColumnListing($table);
+        foreach (['discount', 'tax', 'vat', 'price_override', 'override_price', 'custom_price'] as $forbidden) {
+            expect($columns)->not->toContain($forbidden, "Forbidden column {$forbidden} found on {$table}");
+        }
+    }
+
+    // 2. Settings: no settings key mentioning discount or tax
+    $allSettings = array_keys(SettingsCatalogue::all());
+    foreach ($allSettings as $key) {
+        expect(str_contains(strtolower($key), 'discount'))->toBeFalse("Forbidden setting {$key}");
+        expect(str_contains(strtolower($key), 'tax'))->toBeFalse("Forbidden setting {$key}");
+    }
 });

@@ -39,6 +39,11 @@ class Batch extends Model
         return $this->hasMany(BatchStock::class);
     }
 
+    public function batchStocks(): HasMany
+    {
+        return $this->hasMany(BatchStock::class);
+    }
+
     public function movements(): HasMany
     {
         return $this->hasMany(StockMovement::class);

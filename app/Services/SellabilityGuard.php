@@ -167,6 +167,25 @@ class SellabilityGuard
             "Sellability check blocked: {$reason} for {$action}"
         );
 
+        if ($action === 'sell') {
+            AuditLogger::record(
+                'sale.blocked',
+                $batch,
+                [],
+                [],
+                [
+                    'product_id' => $product->id,
+                    'batch_id' => $batch->id,
+                    'batch_no' => $batch->batch_no,
+                    'quantity' => $quantity,
+                    'reason' => $reason,
+                    'action' => $action,
+                ],
+                $user,
+                "Sale blocked: {$reason} for product {$product->brand}"
+            );
+        }
+
         throw new SellabilityException($message, $reason);
     }
 }

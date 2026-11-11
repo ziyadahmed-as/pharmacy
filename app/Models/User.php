@@ -145,6 +145,11 @@ class User extends Authenticatable
         return $this->roles->contains('slug', $slug);
     }
 
+    public function isSystemAdmin(): bool
+    {
+        return $this->hasRole(RoleEnum::SystemAdmin);
+    }
+
     /** @param  array<RoleEnum|string>  $roles */
     public function hasAnyRole(array $roles): bool
     {
