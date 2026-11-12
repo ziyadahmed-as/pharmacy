@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Prescriptions;
 
+use App\Actions\Customers\ViewHealthFields;
 use App\Actions\Prescriptions\RejectPrescription;
 use App\Actions\Prescriptions\VerifyPrescription;
 use App\Enums\Role;
 use App\Models\Prescription;
+use App\Services\AuditLogger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
@@ -17,6 +19,11 @@ use Livewire\Component;
 class Show extends Component
 {
     public Prescription $prescription;
+
+    // Patient health fields state
+    public bool $viewingHealth = false;
+
+    public ?array $healthFields = null;
 
     // Clinical Verification checklist
     public bool $checkAuthenticity = false;
@@ -45,6 +52,30 @@ class Show extends Component
         abort_unless($user->hasPermission('prescriptions.view'), 403);
 
         $this->prescription = $prescription;
+
+        // Audit view of prescription (UC-23 STEP 3)
+        AuditLogger::record(
+            action: 'prescription.viewed',
+            subject: $prescription,
+            old: [],
+            new: [
+                'prescription_number' => $prescription->prescription_number,
+                'status' => $prescription->status,
+            ],
+            metadata: ['customer_id' => $prescription->customer_id],
+            user: $user,
+            description: "Prescription {$prescription->prescription_number} viewed"
+        );
+    }
+
+    public function viewHealthFields(): void
+    {
+        $user = Auth::user();
+        abort_if(! $user || $user->hasRole(Role::SystemAdmin), 403);
+        abort_unless($user->hasPermission('customers.health.view'), 403);
+
+        $this->healthFields = app(ViewHealthFields::class)->execute($user, $this->prescription->customer);
+        $this->viewingHealth = true;
     }
 
     public function statusBadgeClass(): string
@@ -128,12 +159,25 @@ class Show extends Component
 
     public function render(): View
     {
-        $this->prescription->load(['lines.product', 'customer', 'statusHistory.user', 'replacedBy', 'verifier', 'rejecter']);
+        $this->prescription->load([
+            'lines.product',
+            'lines.dispensingEvents.batch',
+            'lines.dispensingEvents.user',
+            'lines.dispensingEvents.sale',
+            'customer',
+            'statusHistory.user',
+            'replacedBy',
+            'verifier',
+            'rejecter',
+        ]);
+
+        $user = Auth::user();
 
         return view('livewire.prescriptions.show', [
             'statusBadgeClass' => $this->statusBadgeClass(),
             'statusLabel' => $this->statusLabel(),
-            'canVerify' => Auth::user()?->hasPermission('prescriptions.verify') && $this->prescription->isPendingVerification(),
+            'canVerify' => $user?->hasPermission('prescriptions.verify') && $this->prescription->isPendingVerification(),
+            'canViewHealth' => $user?->hasPermission('customers.health.view') && $this->prescription->customer->consent_given,
         ]);
     }
 }

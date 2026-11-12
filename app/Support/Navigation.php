@@ -65,6 +65,7 @@ final class Navigation
             ]],
             ['key' => 'prescriptions', 'items' => [
                 ['label' => 'nav.prescriptions', 'route' => 'prescriptions.index', 'any' => ['prescriptions.view']],
+                ['label' => 'nav.prescriptions_search', 'route' => 'prescriptions.search', 'any' => ['prescriptions.view']],
                 ['label' => 'nav.controlled_drug_register', 'route' => 'controlled-drugs.register', 'any' => ['controlled_drugs.view']],
             ]],
             ['key' => 'customers', 'items' => []],

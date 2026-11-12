@@ -22,6 +22,7 @@ return [
     'shifts' => 'የገንዘብ ፈረቃዎች',
     'tills' => 'ካሳዎች',
     'prescriptions' => 'ማዘዣዎች (ቀመሮች)',
+    'prescriptions_search' => 'የቀመር ፍለጋ',
     'controlled_drug_register' => 'የቁጥጥር ስር መድሃኒቶች መዝገብ',
     'group' => [
         'catalogue' => 'ካታሎግ',

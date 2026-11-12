@@ -38,6 +38,26 @@
         </div>
     @endif
 
+    {{-- Suspect / Rejected Alert Banner (FR-4.12) --}}
+    @if($prescription->isRejected())
+        <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 space-y-1">
+            <div class="flex items-center gap-2 font-bold text-sm">
+                <svg class="h-5 w-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                {{ __('prescriptions.suspect_prescription_title') }}
+            </div>
+            <p class="text-xs">
+                {{ __('prescriptions.fields.rejection_reason') }}: <span class="font-medium font-mono">{{ $prescription->rejection_reason }}</span>
+            </p>
+            @if($prescription->rejected_at)
+                <p class="text-xs text-rose-600 dark:text-rose-400">
+                    Rejected on {{ $prescription->rejected_at->format('Y-m-d H:i') }} by {{ $prescription->rejecter->name ?? 'Staff' }}
+                </p>
+            @endif
+        </div>
+    @endif
+
     {{-- Verification Panel (when pending verification) --}}
     @if($canVerify)
         <div class="bg-amber-50/50 dark:bg-amber-950/30 rounded-xl border border-amber-200 dark:border-amber-800 p-6 space-y-4">
@@ -186,6 +206,63 @@
         </dl>
     </div>
 
+    {{-- Patient Health Information (A1, E1, E2, AC-26) --}}
+    @if(auth()->user()?->hasPermission('customers.health.view'))
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+                <div>
+                    <h2 class="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>{{ __('prescriptions.health_fields_title') }}</span>
+                    </h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">
+                        {{ __('prescriptions.health_fields_subtitle') }}
+                    </p>
+                </div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                    🔒 Access Audited
+                </span>
+            </div>
+
+            @if(!$prescription->customer->consent_given)
+                <div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300">
+                    {{ __('prescriptions.patient_consent_not_given') }}
+                </div>
+            @elseif(!$viewingHealth)
+                <div class="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                    <p class="text-xs text-slate-600 dark:text-slate-400">
+                        {{ __('prescriptions.click_to_view_health_warning') }}
+                    </p>
+                    <button
+                        type="button"
+                        wire:click="viewHealthFields"
+                        class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-medium transition shadow-sm"
+                    >
+                        {{ __('prescriptions.view_health_data') }}
+                    </button>
+                </div>
+            @else
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                            {{ __('prescriptions.allergies') }}
+                        </h3>
+                        <p class="text-sm font-medium text-slate-900 dark:text-white whitespace-pre-line">
+                            {{ $healthFields['allergies'] ?? __('prescriptions.no_allergies_recorded') }}
+                        </p>
+                    </div>
+                    <div class="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                        <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">
+                            {{ __('prescriptions.chronic_conditions') }}
+                        </h3>
+                        <p class="text-sm font-medium text-slate-900 dark:text-white whitespace-pre-line">
+                            {{ $healthFields['chronic_conditions'] ?? __('prescriptions.no_conditions_recorded') }}
+                        </p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
+
     {{-- Product Lines --}}
     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
@@ -219,6 +296,64 @@
             </table>
         </div>
     </div>
+
+    {{-- Dispensing Events / History --}}
+    @php
+        $hasDispensingEvents = $prescription->lines->some(fn($l) => $l->dispensingEvents->isNotEmpty());
+    @endphp
+    @if($hasDispensingEvents)
+        <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">{{ __('prescriptions.dispensing_history') }}</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-left text-sm">
+                    <thead class="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 font-medium text-xs uppercase tracking-wider">
+                        <tr>
+                            <th class="px-6 py-3">{{ __('prescriptions.fields.dispensed_at') }}</th>
+                            <th class="px-6 py-3">{{ __('prescriptions.fields.product') }}</th>
+                            <th class="px-6 py-3">{{ __('prescriptions.fields.batch') }}</th>
+                            <th class="px-6 py-3 text-right">{{ __('prescriptions.fields.quantity') }}</th>
+                            <th class="px-6 py-3">{{ __('prescriptions.fields.dispensed_by') }}</th>
+                            <th class="px-6 py-3">{{ __('prescriptions.fields.receipt') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                        @foreach($prescription->lines as $line)
+                            @foreach($line->dispensingEvents as $event)
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+                                    <td class="px-6 py-3.5 text-xs text-slate-700 dark:text-slate-300">
+                                        {{ $event->dispensed_at?->format('Y-m-d H:i') }}
+                                    </td>
+                                    <td class="px-6 py-3.5 font-medium text-slate-900 dark:text-white text-xs">
+                                        {{ $line->product->brand }}
+                                    </td>
+                                    <td class="px-6 py-3.5 font-mono text-xs text-slate-600 dark:text-slate-400">
+                                        {{ $event->batch?->batch_no ?? '—' }}
+                                    </td>
+                                    <td class="px-6 py-3.5 text-right font-mono font-semibold text-xs text-teal-600 dark:text-teal-400">
+                                        {{ $event->quantity }}
+                                    </td>
+                                    <td class="px-6 py-3.5 text-xs text-slate-700 dark:text-slate-300">
+                                        {{ $event->user?->name ?? 'Staff' }}
+                                    </td>
+                                    <td class="px-6 py-3.5 text-xs font-mono">
+                                        @if($event->sale)
+                                            <a href="{{ route('sales.show', $event->sale) }}" class="text-teal-600 hover:text-teal-800 dark:text-teal-400">
+                                                {{ $event->sale->receipt_number }}
+                                            </a>
+                                        @else
+                                            <span class="text-slate-400">—</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 
     {{-- Status History --}}
     <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">

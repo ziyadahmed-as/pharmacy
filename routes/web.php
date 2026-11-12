@@ -7,6 +7,7 @@ use App\Http\Controllers\DailyClosingReportController;
 use App\Http\Controllers\KeepAliveController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LogoutController;
+use App\Http\Controllers\PrescriptionExportController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RefundReceiptController;
 use App\Http\Controllers\ShiftSummaryController;
@@ -31,6 +32,7 @@ use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
 use App\Livewire\Pos as PosUi;
 use App\Livewire\Prescriptions\Register;
+use App\Livewire\Prescriptions\Search;
 use App\Livewire\Quarantine as QuarantineUi;
 use App\Livewire\Returns as ReturnsUi;
 use App\Livewire\Sales as SalesUi;
@@ -142,8 +144,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/customers/{customer}', App\Livewire\Customers\Show::class)->middleware('can:customers.view')->name('customers.show');
             Route::get('/customers/{customer}/edit', App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.edit');
 
-            // UC-19, UC-20, UC-21, UC-22: Prescriptions and Controlled Drugs (Stage 4)
+            // UC-19, UC-20, UC-21, UC-22, UC-23: Prescriptions and Controlled Drugs (Stage 4)
             Route::get('/prescriptions', App\Livewire\Prescriptions\Index::class)->middleware('can:prescriptions.view')->name('prescriptions.index');
+            Route::get('/prescriptions/search', Search::class)->middleware('can:prescriptions.view')->name('prescriptions.search');
+            Route::get('/prescriptions/export/{format}', PrescriptionExportController::class)->whereIn('format', ['csv', 'pdf'])->middleware('can:prescriptions.view')->name('prescriptions.export');
             Route::get('/prescriptions/create', Register::class)->middleware('can:prescriptions.register')->name('prescriptions.create');
             Route::get('/prescriptions/{prescription}/dispense', App\Livewire\Dispense\Show::class)->middleware('can:prescriptions.dispense')->name('prescriptions.dispense');
             Route::get('/prescriptions/{prescription}', App\Livewire\Prescriptions\Show::class)->middleware('can:prescriptions.view')->name('prescriptions.show');
