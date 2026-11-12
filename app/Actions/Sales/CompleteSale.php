@@ -54,7 +54,9 @@ class CompleteSale
         array $items,
         array $payments,
         string $idempotencyKey,
-        ?int $prescriptionId = null
+        ?int $prescriptionId = null,
+        ?string $patientName = null,
+        ?string $prescriberName = null
     ): Sale {
         // 1. Authorisation: SA cannot process sales
         if ($user->isSystemAdmin()) {
@@ -81,7 +83,7 @@ class CompleteSale
         }
 
         // 3. Atomically check idempotency and complete sale
-        return DB::transaction(function () use ($user, $shift, $items, $payments, $idempotencyKey, $prescriptionId) {
+        return DB::transaction(function () use ($user, $shift, $items, $payments, $idempotencyKey, $prescriptionId, $patientName, $prescriberName) {
             // E5: Check idempotency key under lock
             $existing = Sale::where('idempotency_key', $idempotencyKey)->first();
             if ($existing) {
@@ -202,7 +204,11 @@ class CompleteSale
                     source: $sale,
                     user: $user,
                     status: 'sellable',
-                    description: "Sale {$receiptNo}"
+                    location: null,
+                    description: "Sale {$receiptNo}",
+                    secondPerson: null,
+                    patientName: $patientName,
+                    prescriberName: $prescriberName
                 );
             }
 

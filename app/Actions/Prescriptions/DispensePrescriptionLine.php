@@ -110,9 +110,19 @@ class DispensePrescriptionLine
             );
         }
 
-        // 7. A3: controlled drug stub → hand over to UC-22
+        // 7. Controlled drug handover to UC-22
         if ($line->product->classification === 'controlled') {
-            throw new InvalidArgumentException(__('prescriptions.controlled_drug_use_uc22'));
+            return app(DispenseControlledDrug::class)->execute(
+                user: $user,
+                prescription: $prescription,
+                lineId: $lineId,
+                quantity: $quantity,
+                payments: $payments,
+                idempotencyKey: $idempotencyKey,
+                batchId: $batchId,
+                overrideReason: $overrideReason,
+                repeatWarningAcknowledged: $repeatWarningAcknowledged,
+            );
         }
 
         $remaining = $line->remainingQuantity();

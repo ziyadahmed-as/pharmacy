@@ -21,6 +21,8 @@ return [
     'open_shift' => 'ፈረቃ ክፈት',
     'shifts' => 'የገንዘብ ፈረቃዎች',
     'tills' => 'ካሳዎች',
+    'prescriptions' => 'ማዘዣዎች (ቀመሮች)',
+    'controlled_drug_register' => 'የቁጥጥር ስር መድሃኒቶች መዝገብ',
     'group' => [
         'catalogue' => 'ካታሎግ',
         'inventory' => 'ክምችት',

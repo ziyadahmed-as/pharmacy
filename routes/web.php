@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\AuditExportController;
+use App\Http\Controllers\ControlledDrugExportController;
 use App\Http\Controllers\DailyClosingReportController;
 use App\Http\Controllers\KeepAliveController;
 use App\Http\Controllers\LocaleController;
@@ -141,7 +142,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/customers/{customer}', App\Livewire\Customers\Show::class)->middleware('can:customers.view')->name('customers.show');
             Route::get('/customers/{customer}/edit', App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.edit');
 
-            // UC-19, UC-20, UC-21: Prescriptions (Stage 4)
+            // UC-19, UC-20, UC-21, UC-22: Prescriptions and Controlled Drugs (Stage 4)
             Route::get('/prescriptions', App\Livewire\Prescriptions\Index::class)->middleware('can:prescriptions.view')->name('prescriptions.index');
             Route::get('/prescriptions/create', Register::class)->middleware('can:prescriptions.register')->name('prescriptions.create');
             Route::get('/prescriptions/{prescription}/dispense', App\Livewire\Dispense\Show::class)->middleware('can:prescriptions.dispense')->name('prescriptions.dispense');
@@ -153,6 +154,9 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
                 return Storage::disk('private')->response($prescription->scan_path);
             })->middleware('can:prescriptions.view')->name('prescriptions.scan');
+
+            Route::get('/controlled-drugs/register', App\Livewire\ControlledDrugs\Register::class)->middleware('can:controlled_drugs.view')->name('controlled-drugs.register');
+            Route::get('/controlled-drugs/export/{format}', ControlledDrugExportController::class)->middleware('can:controlled_drugs.export')->name('controlled-drugs.export');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

@@ -22,6 +22,9 @@ final class Navigation
                 if (! Route::has($item['route'])) {
                     continue;
                 }
+                if ($item['route'] === 'controlled-drugs.register' && ! (bool) setting('pharmacy.handles_controlled_drugs', true)) {
+                    continue;
+                }
                 $allowed = false;
                 foreach ($item['any'] as $permission) {
                     if ($user->hasPermission($permission)) {
@@ -60,7 +63,10 @@ final class Navigation
                 ['label' => 'nav.open_shift', 'route' => 'shifts.open', 'any' => ['shifts.open']],
                 ['label' => 'nav.tills', 'route' => 'tills.index', 'any' => ['tills.manage']],
             ]],
-            ['key' => 'prescriptions', 'items' => []],
+            ['key' => 'prescriptions', 'items' => [
+                ['label' => 'nav.prescriptions', 'route' => 'prescriptions.index', 'any' => ['prescriptions.view']],
+                ['label' => 'nav.controlled_drug_register', 'route' => 'controlled-drugs.register', 'any' => ['controlled_drugs.view']],
+            ]],
             ['key' => 'customers', 'items' => []],
             ['key' => 'finance', 'items' => []],
             ['key' => 'reports', 'items' => []],

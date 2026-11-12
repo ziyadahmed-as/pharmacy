@@ -21,6 +21,7 @@ return [
         'inventory.receipt_requires_confirmation' => true,
         'sales.active_payment_methods' => ['cash', 'mobile_money', 'card', 'bank_transfer'],
         'prescriptions.licence_categories_allowed' => [],
+        'pharmacy.handles_controlled_drugs' => true,
         'general.default_language' => 'en',
         'profile.currency' => 'ETB',
     ],

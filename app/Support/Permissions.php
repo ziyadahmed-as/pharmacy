@@ -70,6 +70,8 @@ final class Permissions
             'prescriptions.verify' => ['module' => 'prescriptions', 'active' => true, 'roles' => [$PS, $PM, $OW]],
             'prescriptions.dispense' => ['module' => 'prescriptions', 'active' => true, 'roles' => [$PS, $PM, $OW]],
             'prescriptions.view' => ['module' => 'prescriptions', 'active' => true, 'roles' => [$PS, $PM, $OW]],
+            'controlled_drugs.view' => ['module' => 'prescriptions', 'active' => true, 'roles' => [$OW, $PM]],
+            'controlled_drugs.export' => ['module' => 'prescriptions', 'active' => true, 'roles' => [$OW, $PM]],
             'backup.run' => ['module' => 'administration', 'active' => false, 'roles' => [$SA]],
             'reports.financial' => ['module' => 'reports', 'active' => false, 'roles' => [$OW, $PM]],
         ];

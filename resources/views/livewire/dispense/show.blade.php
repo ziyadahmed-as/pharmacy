@@ -130,6 +130,31 @@
                 </div>
             </div>
 
+            {{-- Controlled Drug Confirmation Panel --}}
+            @if($isControlled)
+                <div class="rounded-md bg-purple-50 border border-purple-200 p-4 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold bg-purple-200 text-purple-900 uppercase tracking-wide">
+                            {{ __('controlled_drugs.badge') }}
+                        </span>
+                        <h3 class="text-sm font-semibold text-purple-900">{{ __('controlled_drugs.confirmation_title') }}</h3>
+                    </div>
+                    <p class="text-xs text-purple-700">{{ __('controlled_drugs.confirmation_notice') }}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                        <div>
+                            <label class="block text-xs font-medium text-purple-900 mb-1">{{ __('controlled_drugs.confirmed_patient') }}</label>
+                            <input type="text" wire:model="confirmedPatientName"
+                                   class="block w-full border-purple-300 rounded-md shadow-sm sm:text-sm focus:ring-purple-500 focus:border-purple-500" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-purple-900 mb-1">{{ __('controlled_drugs.confirmed_prescriber') }}</label>
+                            <input type="text" wire:model="confirmedPrescriberName"
+                                   class="block w-full border-purple-300 rounded-md shadow-sm sm:text-sm focus:ring-purple-500 focus:border-purple-500" />
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             {{-- Repeat warning acknowledgement --}}
             @if($showRepeatWarning)
                 <div class="rounded-md bg-amber-50 border border-amber-200 p-4 space-y-3">

@@ -21,6 +21,8 @@ return [
     'open_shift' => 'Open shift',
     'shifts' => 'Cash shifts',
     'tills' => 'Tills',
+    'prescriptions' => 'Prescriptions',
+    'controlled_drug_register' => 'Controlled Drug Register',
     'group' => [
         'catalogue' => 'Catalogue',
         'inventory' => 'Inventory',

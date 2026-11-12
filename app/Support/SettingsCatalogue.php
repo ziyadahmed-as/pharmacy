@@ -49,6 +49,7 @@ final class SettingsCatalogue
             'prescriptions.validity_days' => self::def('prescriptions', 'pos_int', null, false, 'Days a prescription stays valid (OQ-02)'),
             'prescriptions.repeat_purchase_warning_days' => self::def('prescriptions', 'pos_int', null, false, 'Repeat purchase warning window (OQ-02)'),
             'prescriptions.licence_categories_allowed' => self::def('prescriptions', 'string_list', [], false, 'Licence categories allowed to dispense; empty means any valid licence (OQ-09)'),
+            'pharmacy.handles_controlled_drugs' => self::def('pharmacy', 'bool', true, true, 'Whether the pharmacy handles and records controlled drugs in a register (OQ-01)'),
             // finance
             'finance.expense_approval_limit' => self::def('finance', 'money', null, false, 'Expense amount above which approval is needed (OQ-06)'),
             // receipt and language

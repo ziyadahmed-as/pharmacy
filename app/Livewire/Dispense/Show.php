@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dispense;
 
+use App\Actions\Prescriptions\DispenseControlledDrug;
 use App\Actions\Prescriptions\DispensePrescriptionLine;
 use App\Exceptions\NoOpenShiftException;
 use App\Exceptions\PrescriptionNotDispensableException;
@@ -42,6 +43,13 @@ class Show extends Component
 
     public string $paymentReference = '';
 
+    // Controlled drug confirmation
+    public bool $isControlled = false;
+
+    public string $confirmedPatientName = '';
+
+    public string $confirmedPrescriberName = '';
+
     // State flags
     public bool $showOverrideModal = false;
 
@@ -69,6 +77,7 @@ class Show extends Component
         $first = $this->prescription->lines->first(fn ($l) => ! $l->isFullyDispensed());
         if ($first) {
             $this->selectedLineId = $first->id;
+            $this->syncControlledState();
             $this->refreshBatchProposal();
         }
     }
@@ -77,7 +86,16 @@ class Show extends Component
     {
         $this->quantity = 1;
         $this->batchId = null;
+        $this->syncControlledState();
         $this->refreshBatchProposal();
+    }
+
+    private function syncControlledState(): void
+    {
+        $line = $this->selectedLine();
+        $this->isControlled = $line?->product->classification === 'controlled';
+        $this->confirmedPatientName = $this->prescription->customer->name;
+        $this->confirmedPrescriberName = $this->prescription->prescriber_name;
     }
 
     private function refreshBatchProposal(): void
@@ -129,17 +147,33 @@ class Show extends Component
         ];
 
         try {
-            $sale = $action->execute(
-                user: $user,
-                prescription: $this->prescription,
-                lineId: $this->selectedLineId,
-                quantity: $this->quantity,
-                payments: $payments,
-                idempotencyKey: Str::uuid()->toString(),
-                batchId: $this->batchId ?: null,
-                overrideReason: $this->overrideReason ?: null,
-                repeatWarningAcknowledged: $this->repeatWarningAcknowledged,
-            );
+            if ($this->isControlled) {
+                $sale = app(DispenseControlledDrug::class)->execute(
+                    user: $user,
+                    prescription: $this->prescription,
+                    lineId: $this->selectedLineId,
+                    quantity: $this->quantity,
+                    payments: $payments,
+                    idempotencyKey: Str::uuid()->toString(),
+                    batchId: $this->batchId ?: null,
+                    overrideReason: $this->overrideReason ?: null,
+                    repeatWarningAcknowledged: $this->repeatWarningAcknowledged,
+                    confirmedPatientName: $this->confirmedPatientName ?: null,
+                    confirmedPrescriberName: $this->confirmedPrescriberName ?: null,
+                );
+            } else {
+                $sale = $action->execute(
+                    user: $user,
+                    prescription: $this->prescription,
+                    lineId: $this->selectedLineId,
+                    quantity: $this->quantity,
+                    payments: $payments,
+                    idempotencyKey: Str::uuid()->toString(),
+                    batchId: $this->batchId ?: null,
+                    overrideReason: $this->overrideReason ?: null,
+                    repeatWarningAcknowledged: $this->repeatWarningAcknowledged,
+                );
+            }
 
             $this->successMessage = __('prescriptions.dispensing_success', [
                 'receipt_no' => $sale->receipt_no,
