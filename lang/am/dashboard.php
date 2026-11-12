@@ -13,15 +13,15 @@ return [
     'card' => [
         'operations' => [
             'title' => 'የፋርማሲ ሥራዎች',
-            'body' => 'ሽያጭ፣ መድኃኒት ማደል እና የክምችት ሥራ። በኋላ ደረጃዎች ይከፈታል።',
+            'body' => 'የሽያጭ ቦታ (POS)፣ ቀመሮች፣ መድኃኒት ማደል፣ ክምችት እና ቁጥጥር ስር ያሉ መድሃኒቶች።',
         ],
         'management' => [
             'title' => 'አስተዳደር',
-            'body' => 'ማጽደቂያዎች፣ የሠራተኛ መዛግብት እና የኦዲት መዝገብ።',
+            'body' => 'ማጽደቂያዎች፣ የቀን መዝጊያዎች፣ የተገዢነት ሪፖርቶች እና የሠራተኛ መዛግብት።',
         ],
         'system' => [
             'title' => 'የሥርዓት አስተዳደር',
-            'body' => 'የተጠቃሚ መለያዎች፣ ማገገሚያ እና ቅንብሮች። የንግድ መረጃ የለም።',
+            'body' => 'የተጠቃሚ መለያዎች፣ የሚና ምደባዎች፣ የደህንነት ቅንብሮች እና የኦዲት መዝገብ።',
         ],
     ],
     'notification_generic' => 'አዲስ ማሳወቂያ አለዎት።',
@@ -48,4 +48,50 @@ return [
     'action_settings' => 'የሥርዓት ቅንብሮች',
     'action_recovery' => 'የመለያ ማገገሚያ',
     'no_alerts_good' => 'ምንም አሳሳቢ የክምችት ችግር የለም',
+
+    // --- Shift & POS indicators ---
+    'shift_active_title' => 'ንቁ የገንዘብ ፈረቃ፦ :till',
+    'shift_active_subtitle' => 'የተከፈተበት ሰዓት :time · መነሻ ገንዘብ፦ :float ብር',
+    'shift_none_title' => 'ምንም ንቁ ፈረቃ አልተከፈተም',
+    'shift_none_subtitle' => 'ሽያጭ፣ ቀመሮችን እና የገንዘብ ክፍያዎችን ለመፈጸም በካሳ ላይ ፈረቃ ይክፈቱ።',
+    'btn_pos' => 'የሽያጭ ቦታ ክፈት (POS)',
+    'btn_open_shift' => 'ፈረቃ ክፈት',
+    'btn_close_shift' => 'ፈረቃ ዝጋ',
+    'stat_shift_sales_count' => 'በፈረቃው የተደረገ ሽያጭ',
+    'stat_shift_sales_total' => 'የፈረቃው ጠቅላላ ገቢ',
+
+    // --- Activity & Clinical Stats ---
+    'stat_today_revenue' => 'የዛሬ ሽያጭ ገቢ',
+    'stat_today_sales_count' => 'የዛሬ ሽያጮች',
+    'stat_open_shifts_count' => 'ንቁ ፈረቃዎች',
+    'stat_pending_verification' => 'ማረጋገጫ የሚጠብቁ',
+    'stat_ready_dispense' => 'ለመሰጠት ዝግጁ',
+    'stat_today_dispensed' => 'ዛሬ የተሰጡ ቀመሮች',
+
+    // --- Extended Quick Actions ---
+    'action_pos' => 'የሽያጭ ቦታ (POS)',
+    'action_open_shift' => 'ፈረቃ ክፈት',
+    'action_tills' => 'ካሳዎች',
+    'action_returns' => 'የተመለሱ ሽያጮች',
+    'action_daily_closing' => 'የዕለቱ የቀን መዝጊያ',
+    'action_prescriptions' => 'ቀመሮች (ማዘዣዎች)',
+    'action_register_rx' => 'ቀመር መዝግብ',
+    'action_search_rx' => 'የቀመር ፍለጋ',
+    'action_controlled_drugs' => 'ቁጥጥር ስር ያሉ መድሃኒቶች',
+    'action_customers' => 'የደንበኞች መዝገብ',
+
+    // --- Recent Activity Stream ---
+    'recent_sales_title' => 'የቅርብ ጊዜ ሽያጮች እና የቀመር አሰጣጦች',
+    'recent_audits_title' => 'የቅርብ ጊዜ የአስተዳደር ኦዲት ክስተቶች',
+    'no_recent_sales' => 'ዛሬ እስካሁን የተመዘገበ ሽያጭ የለም።',
+    'no_recent_audits' => 'ዛሬ የተመዘገበ የአስተዳደር ኦዲት ክስተት የለም።',
+    'col_receipt' => 'ደረሰኝ ቁጥር',
+    'col_customer' => 'ደንበኛ / ታካሚ',
+    'col_staff' => 'ባለሙያ',
+    'col_total' => 'ጠቅላላ (ብር)',
+    'col_time' => 'ሰዓት',
+    'col_status' => 'ሁኔታ',
+    'col_action' => 'ድርጊት',
+    'col_actor' => 'ፈጻሚ',
+    'col_details' => 'ዝርዝር',
 ];

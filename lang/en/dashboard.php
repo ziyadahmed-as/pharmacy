@@ -13,15 +13,15 @@ return [
     'card' => [
         'operations' => [
             'title' => 'Pharmacy operations',
-            'body' => 'Sales, dispensing and stock work. Opens in later stages.',
+            'body' => 'POS sales, prescriptions, dispensing, inventory and controlled drugs.',
         ],
         'management' => [
             'title' => 'Management',
-            'body' => 'Approvals, staff records and the audit log.',
+            'body' => 'Approvals, daily day locks, compliance reports and staff records.',
         ],
         'system' => [
             'title' => 'System administration',
-            'body' => 'User accounts, recovery and settings. No business data.',
+            'body' => 'User accounts, role assignments, security settings and audit log.',
         ],
     ],
     'notification_generic' => 'You have a new notification.',
@@ -48,4 +48,50 @@ return [
     'action_settings' => 'System Settings',
     'action_recovery' => 'Account Recovery',
     'no_alerts_good' => 'No critical stock issues detected',
+
+    // --- Shift & POS indicators ---
+    'shift_active_title' => 'Active Cash Shift: :till',
+    'shift_active_subtitle' => 'Opened at :time · Float: :float ETB',
+    'shift_none_title' => 'No Active Cash Shift',
+    'shift_none_subtitle' => 'Open a shift on a till to begin processing sales, prescriptions, and cash receipts.',
+    'btn_pos' => 'Open Point of Sale',
+    'btn_open_shift' => 'Open Shift',
+    'btn_close_shift' => 'Close Shift',
+    'stat_shift_sales_count' => 'Sales on Shift',
+    'stat_shift_sales_total' => 'Total on Shift',
+
+    // --- Activity & Clinical Stats ---
+    'stat_today_revenue' => 'Today\'s Sales Revenue',
+    'stat_today_sales_count' => 'Today\'s Sales',
+    'stat_open_shifts_count' => 'Active Shifts',
+    'stat_pending_verification' => 'Pending Verification',
+    'stat_ready_dispense' => 'Ready to Dispense',
+    'stat_today_dispensed' => 'Dispensed Today',
+
+    // --- Extended Quick Actions ---
+    'action_pos' => 'Point of Sale (POS)',
+    'action_open_shift' => 'Open Shift',
+    'action_tills' => 'Tills',
+    'action_returns' => 'Sales Returns',
+    'action_daily_closing' => 'Daily Day Closing',
+    'action_prescriptions' => 'Prescriptions',
+    'action_register_rx' => 'Register Prescription',
+    'action_search_rx' => 'Prescription Search',
+    'action_controlled_drugs' => 'Controlled Drugs',
+    'action_customers' => 'Customer Records',
+
+    // --- Recent Activity Stream ---
+    'recent_sales_title' => 'Recent Sales & Dispensing',
+    'recent_audits_title' => 'Recent Administrative Audit Events',
+    'no_recent_sales' => 'No transactions recorded yet today.',
+    'no_recent_audits' => 'No recent administrative events recorded today.',
+    'col_receipt' => 'Receipt #',
+    'col_customer' => 'Customer / Patient',
+    'col_staff' => 'Staff',
+    'col_total' => 'Total (ETB)',
+    'col_time' => 'Time',
+    'col_status' => 'Status',
+    'col_action' => 'Action',
+    'col_actor' => 'Actor',
+    'col_details' => 'Details',
 ];
