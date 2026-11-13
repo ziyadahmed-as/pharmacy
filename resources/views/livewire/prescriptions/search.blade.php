@@ -181,3 +181,4 @@
         {{ $prescriptions->links() }}
     </div>
 </div>
+
