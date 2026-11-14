@@ -30,6 +30,7 @@ return [
     'backups' => 'የመረጃ ምትኬ እና ማግኛ',
     'restore_checklist' => 'የመልሶ ማግኛ ማረጋገጫ',
     'expenses' => 'የስራ ማስኬጃ ወጪዎች',
+    'cash_revenue' => 'የጥሬ ገንዘብ እና የገቢ ማጠቃለያዎች',
     'group' => [
         'catalogue' => 'ካታሎግ',
         'inventory' => 'ክምችት',

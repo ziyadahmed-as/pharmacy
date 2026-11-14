@@ -571,3 +571,6 @@
 [stacktrace]
 #0 {main}
 "} 
+[2026-11-14 11:16:31] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
+[2026-11-14 11:16:45] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 11:16:45] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 

@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\AuditExportController;
+use App\Http\Controllers\CashRevenueExportController;
 use App\Http\Controllers\ControlledDrugExportController;
 use App\Http\Controllers\DailyClosingReportController;
 use App\Http\Controllers\KeepAliveController;
@@ -28,6 +29,7 @@ use App\Livewire\Catalogue\Index;
 use App\Livewire\Catalogue\Show;
 use App\Livewire\Closing as ClosingUi;
 use App\Livewire\Dashboard;
+use App\Livewire\Finance\CashRevenue;
 use App\Livewire\Finance\Expenses as ExpensesUi;
 use App\Livewire\Inventory\Adjustments as AdjustmentsUi;
 use App\Livewire\Inventory\Disposals as DisposalsUi;
@@ -194,6 +196,11 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
                 return Storage::disk('private')->response($expense->proof_path);
             })->middleware('can:finance.expense.view')->name('finance.expenses.proof');
+
+            // UC-29: Cash and revenue summaries (Stage 6)
+            Route::get('/finance/cash-revenue', CashRevenue::class)->middleware('can:finance.expense.view')->name('finance.cash-revenue');
+            Route::get('/finance/cash-revenue/export/{format}', [CashRevenueExportController::class, 'export'])->whereIn('format', ['csv', 'excel', 'pdf'])->middleware('can:finance.expense.view')->name('finance.cash-revenue.export');
+            Route::get('/finance/cash-revenue/print', [CashRevenueExportController::class, 'print'])->middleware('can:finance.expense.view')->name('finance.cash-revenue.print');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

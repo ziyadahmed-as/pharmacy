@@ -30,6 +30,7 @@ return [
     'backups' => 'Backups & Recovery',
     'restore_checklist' => 'Restore Checklist',
     'expenses' => 'Operating expenses',
+    'cash_revenue' => 'Cash & revenue summaries',
     'group' => [
         'catalogue' => 'Catalogue',
         'inventory' => 'Inventory',

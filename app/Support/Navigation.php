@@ -73,6 +73,7 @@ final class Navigation
             ]],
             ['key' => 'customers', 'items' => []],
             ['key' => 'finance', 'items' => [
+                ['label' => 'nav.cash_revenue', 'route' => 'finance.cash-revenue', 'any' => ['finance.expense.view']],
                 ['label' => 'nav.expenses', 'route' => 'finance.expenses.index', 'any' => ['finance.expense.view']],
             ]],
             ['key' => 'reports', 'items' => []],
