@@ -27,7 +27,8 @@ class QuarantineStock
         int $quantity,
         string $reason,
         ?string $note = null,
-        ?User $actor = null
+        ?User $actor = null,
+        ?User $secondPerson = null
     ): QuarantineRecord {
         $user = $actor ?? Auth::user();
 
@@ -62,7 +63,7 @@ class QuarantineStock
             ]);
         }
 
-        return DB::transaction(function () use ($batch, $quantity, $reason, $note, $user) {
+        return DB::transaction(function () use ($batch, $quantity, $reason, $note, $user, $secondPerson) {
             $record = QuarantineRecord::create([
                 'batch_id' => $batch->id,
                 'quantity' => $quantity,
@@ -80,7 +81,8 @@ class QuarantineStock
                 source: $record,
                 user: $user,
                 status: 'sellable',
-                description: "Quarantined: {$reason}"
+                description: "Quarantined: {$reason}",
+                secondPerson: $secondPerson
             );
 
             // 2) Add to quarantine
@@ -91,7 +93,8 @@ class QuarantineStock
                 source: $record,
                 user: $user,
                 status: 'quarantine',
-                description: "Quarantined: {$reason}"
+                description: "Quarantined: {$reason}",
+                secondPerson: $secondPerson
             );
 
             AuditLogger::record(

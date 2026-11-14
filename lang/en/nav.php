@@ -18,6 +18,7 @@ return [
     'quarantine' => 'Quarantine stock',
     'stock_adjustments' => 'Stock adjustments',
     'stocktakes' => 'Stocktakes',
+    'disposals' => 'Stock disposals',
     'receive_stock' => 'Receive stock',
     'pos' => 'Point of Sale (POS)',
     'open_shift' => 'Open shift',

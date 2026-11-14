@@ -41,6 +41,8 @@ final class SettingsCatalogue
             'inventory.adjustment_value_threshold' => self::def('inventory', 'money', null, false, 'Adjustment value that needs extra approval'),
             'inventory.recount_threshold' => self::def('inventory', 'pos_int', null, false, 'Stocktake variance that triggers a recount'),
             'inventory.receipt_requires_confirmation' => self::def('inventory', 'bool', true, true, 'PM must confirm a receipt before stock is sellable (BR-19)'),
+            'inventory.disposal_methods' => self::def('inventory', 'string_list', ['return_to_supplier', 'incineration', 'authorised_collector', 'other'], false, 'Allowed disposal methods (OQ-04)'),
+            'inventory.authorised_collectors' => self::def('inventory', 'string_list', [], false, 'Authorised waste disposal collectors (OQ-04)'),
             // sales
             'sales.refund_limit' => self::def('sales', 'money', null, false, 'Refund value above which approval is needed (OQ-06)'),
             'sales.return_window_days' => self::def('sales', 'pos_int', null, false, 'Days within which a return is accepted (OQ-06)'),

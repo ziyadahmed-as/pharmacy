@@ -18,6 +18,7 @@ return [
     'quarantine' => 'የተለየ ክምችት',
     'stock_adjustments' => 'የክምችት ማስተካከያዎች',
     'stocktakes' => 'ስቶክ ቆጠራ',
+    'disposals' => 'የተወገደ ክምችት',
     'receive_stock' => 'ክምችት ተረከብ',
     'pos' => 'የሽያጭ ቦታ (POS)',
     'open_shift' => 'ፈረቃ ክፈት',

@@ -11,6 +11,7 @@ use App\Approvals\Handlers\ReactivateUserHandler;
 use App\Approvals\Handlers\RefundApprovalHandler;
 use App\Approvals\Handlers\SettingsUpdateHandler;
 use App\Approvals\Handlers\StockAdjustmentHandler;
+use App\Approvals\Handlers\StockDisposalHandler;
 use App\Approvals\Handlers\VoidSaleHandler;
 use App\Contracts\ExpiredBatchQuarantiner;
 use App\Enums\Role;
@@ -42,7 +43,7 @@ class AppServiceProvider extends ServiceProvider
             VoidSaleHandler::class,
             RefundApprovalHandler::class,
             StockAdjustmentHandler::class,
-            StockAdjustmentHandler::class,
+            StockDisposalHandler::class,
         ];
         $this->app->tag($handlers, 'approval.handlers');
         $this->app->singleton(ApprovalHandlerRegistry::class, fn ($app) => new ApprovalHandlerRegistry($app->tagged('approval.handlers')));

@@ -28,6 +28,7 @@ use App\Livewire\Catalogue\Show;
 use App\Livewire\Closing as ClosingUi;
 use App\Livewire\Dashboard;
 use App\Livewire\Inventory\Adjustments as AdjustmentsUi;
+use App\Livewire\Inventory\Disposals as DisposalsUi;
 use App\Livewire\Inventory\Receive;
 use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Inventory\Stocktakes as StocktakesUi;
@@ -113,6 +114,11 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-07: Stocktakes
             Route::get('/inventory/stocktakes', StocktakesUi\Index::class)->middleware('can:stock.stocktake')->name('inventory.stocktakes.index');
             Route::get('/inventory/stocktakes/{stocktake}', StocktakesUi\Show::class)->middleware('can:stock.stocktake')->name('inventory.stocktakes.show');
+
+            // UC-09: Stock Disposals & Supplier Returns
+            Route::get('/inventory/disposals', DisposalsUi\Index::class)->middleware('can:stock.dispose')->name('inventory.disposals.index');
+            Route::get('/inventory/disposals/{disposal}', DisposalsUi\Show::class)->middleware('can:stock.dispose')->name('inventory.disposals.show');
+            Route::get('/inventory/disposals/{disposal}/certificate', DisposalsUi\Certificate::class)->middleware('can:stock.dispose')->name('inventory.disposals.certificate');
 
             // UC-11: Stock on Hand & Ledger
             Route::get('/inventory/stock', StockUi\Index::class)->middleware('can:stock.view')->name('inventory.stock');

@@ -156,6 +156,7 @@ class ApprovalService
         $result = $this->denyAudited($request, $approver, fn () => DB::transaction(function () use ($request, $approver, $comment) {
             $locked = ApprovalRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
             $this->guardDecision($locked, $approver);
+            $locked->decision_comment = $comment;
 
             $this->registry->for($locked->type)->onRejected($locked, $approver);
 

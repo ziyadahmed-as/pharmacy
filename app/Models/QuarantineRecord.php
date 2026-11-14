@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class QuarantineRecord extends Model
 {
@@ -78,6 +79,20 @@ class QuarantineRecord extends Model
     public function isOpen(): bool
     {
         return $this->status === self::STATUS_OPEN;
+    }
+
+    public function disposals(): HasMany
+    {
+        return $this->hasMany(Disposal::class);
+    }
+
+    public function disposableQuantity(): int
+    {
+        $activeDisposals = (int) $this->disposals()
+            ->whereIn('status', [Disposal::STATUS_PENDING, Disposal::STATUS_APPROVED])
+            ->sum('quantity');
+
+        return max(0, $this->quantity - $activeDisposals);
     }
 
     public function isRecalled(): bool

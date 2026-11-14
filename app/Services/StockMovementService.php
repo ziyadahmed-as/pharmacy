@@ -102,11 +102,11 @@ class StockMovementService
             ]);
 
             // Controlled drug register integration (BR-11, FR-4.4)
-            if ($isControlled && $handlesControlled && ($status === 'sellable' || $type === 'disposal')) {
+            if ($isControlled && $handlesControlled && ($status === 'sellable' || in_array($type, ['disposal', 'supplier_return'], true))) {
                 $entryType = match ($type) {
                     'sale' => 'dispense',
                     'receipt' => 'receipt',
-                    'disposal' => 'disposal',
+                    'disposal', 'supplier_return' => 'disposal',
                     default => 'adjustment',
                 };
 
