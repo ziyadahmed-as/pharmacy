@@ -22,6 +22,15 @@
                 {{ __('customers.back_to_list') }}
             </a>
             @if($canManage)
+                @if($customer->creditAccount)
+                    <a href="{{ route('credits.show', $customer->creditAccount) }}" class="px-3 py-1.5 border border-teal-300 dark:border-teal-700 text-teal-700 dark:text-teal-300 rounded-lg text-xs font-medium hover:bg-teal-50 dark:hover:bg-teal-900/30 transition shadow-sm">
+                        {{ __('credits.credit_account') }} ({{ $customer->creditAccount->limitEtb() }} ETB)
+                    </a>
+                @else
+                    <a href="{{ route('credits.set-limit', $customer) }}" class="px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                        {{ __('credits.set_limit') }}
+                    </a>
+                @endif
                 <a href="{{ route('customers.edit', $customer) }}" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium transition shadow-sm">
                     {{ __('customers.edit_profile') }}
                 </a>

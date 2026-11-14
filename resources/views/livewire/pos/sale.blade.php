@@ -324,6 +324,76 @@
 
         {{-- RIGHT COLUMN: Payment Panel & Checkout (4 cols) --}}
         <div class="lg:col-span-4 space-y-4">
+            {{-- Customer & Credit Panel (UC-26) --}}
+            <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+                <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-500">
+                    <span>{{ __('credits.customer') }}</span>
+                    @if ($selectedCustomer)
+                        <button type="button" wire:click="clearCustomer" class="text-rose-500 hover:text-rose-700 font-semibold lowercase text-[11px]">✕ remove</button>
+                    @endif
+                </div>
+
+                @if (! $selectedCustomer)
+                    <div class="relative">
+                        <input
+                            type="text"
+                            wire:model.live.debounce.300ms="customerSearch"
+                            placeholder="{{ __('credits.select_customer') }}..."
+                            class="w-full rounded-xl border-slate-300 text-xs py-2 px-3 focus:border-teal-500 focus:ring-teal-200"
+                        />
+                        @if (!empty($customerSearchResults))
+                            <div class="absolute z-20 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto divide-y divide-slate-100 text-xs">
+                                @foreach ($customerSearchResults as $res)
+                                    <button
+                                        type="button"
+                                        wire:click="selectCustomer({{ $res['id'] }})"
+                                        class="w-full text-left p-2.5 hover:bg-teal-50 transition flex items-center justify-between">
+                                        <div>
+                                            <div class="font-bold text-slate-900">{{ $res['name'] }}</div>
+                                            <div class="text-[10px] text-slate-500">{{ $res['phone'] }}</div>
+                                        </div>
+                                        @if ($res['has_credit'])
+                                            <span class="rounded-full bg-teal-100 text-teal-800 px-2 py-0.5 text-[10px] font-bold">
+                                                Credit: {{ number_format($res['available_credit'] / 100, 2) }} ETB
+                                            </span>
+                                        @endif
+                                    </button>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @else
+                    <div class="rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-slate-900">{{ $selectedCustomer->name }}</span>
+                            <span class="text-slate-500 font-mono text-[11px]">{{ $selectedCustomer->phone }}</span>
+                        </div>
+
+                        @if ($selectedCustomer->creditAccount)
+                            <div class="pt-2 border-t border-slate-200/80 space-y-1">
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-teal-700">{{ __('credits.credit_details') }}</div>
+                                <div class="grid grid-cols-3 gap-1 text-[11px]">
+                                    <div class="bg-white rounded p-1.5 border border-slate-200 text-center">
+                                        <div class="text-slate-400 text-[9px]">{{ __('credits.credit_limit') }}</div>
+                                        <div class="font-bold font-mono">{{ $selectedCustomer->creditAccount->limitEtb() }}</div>
+                                    </div>
+                                    <div class="bg-white rounded p-1.5 border border-slate-200 text-center">
+                                        <div class="text-slate-400 text-[9px]">{{ __('credits.balance_outstanding') }}</div>
+                                        <div class="font-bold font-mono text-rose-600">{{ $selectedCustomer->creditAccount->balanceEtb() }}</div>
+                                    </div>
+                                    <div class="bg-white rounded p-1.5 border border-slate-200 text-center">
+                                        <div class="text-slate-400 text-[9px]">{{ __('credits.available_credit') }}</div>
+                                        <div class="font-bold font-mono text-emerald-600">{{ $selectedCustomer->creditAccount->availableCreditEtb() }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        @else
+                            <div class="text-[11px] text-slate-500 italic">{{ __('credits.no_credit_account') }}</div>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
             <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-5">
                 <h2 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center justify-between">
                     <span>{{ __('sales.payment_summary') }}</span>

@@ -55,6 +55,7 @@ class Payment extends Model
             'cbe_birr' => __('sales.payment_method_cbe_birr'),
             'card' => __('sales.payment_method_card'),
             'bank_transfer' => __('sales.payment_method_bank_transfer'),
+            'credit' => __('credits.credit_payment_method'),
             default => ucfirst(str_replace('_', ' ', $this->method)),
         };
     }

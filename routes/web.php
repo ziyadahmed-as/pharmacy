@@ -29,6 +29,8 @@ use App\Livewire\Catalogue\Import;
 use App\Livewire\Catalogue\Index;
 use App\Livewire\Catalogue\Show;
 use App\Livewire\Closing as ClosingUi;
+use App\Livewire\Credits\Ageing;
+use App\Livewire\Credits\SetLimit;
 use App\Livewire\Dashboard;
 use App\Livewire\Finance\CashRevenue;
 use App\Livewire\Finance\Expenses as ExpensesUi;
@@ -175,6 +177,12 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/customers/create', App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.create');
             Route::get('/customers/{customer}', App\Livewire\Customers\Show::class)->middleware('can:customers.view')->name('customers.show');
             Route::get('/customers/{customer}/edit', App\Livewire\Customers\Form::class)->middleware('can:customers.manage')->name('customers.edit');
+
+            // UC-26: Credit accounts & receivables (Stage 7)
+            Route::get('/credits', App\Livewire\Credits\Index::class)->middleware('can:customers.manage')->name('credits.index');
+            Route::get('/credits/ageing', Ageing::class)->middleware('can:customers.manage')->name('credits.ageing');
+            Route::get('/credits/{account}', App\Livewire\Credits\Show::class)->middleware('can:customers.manage')->name('credits.show');
+            Route::get('/customers/{customer}/credit-limit', SetLimit::class)->middleware('can:customers.manage')->name('credits.set-limit');
 
             // UC-19, UC-20, UC-21, UC-22, UC-23: Prescriptions and Controlled Drugs (Stage 4)
             Route::get('/prescriptions', App\Livewire\Prescriptions\Index::class)->middleware('can:prescriptions.view')->name('prescriptions.index');

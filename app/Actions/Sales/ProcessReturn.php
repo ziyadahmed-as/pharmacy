@@ -3,6 +3,8 @@
 namespace App\Actions\Sales;
 
 use App\Models\ApprovalRequest;
+use App\Models\CreditAccount;
+use App\Models\CreditPayment;
 use App\Models\DailyClosing;
 use App\Models\QuarantineRecord;
 use App\Models\Sale;
@@ -235,6 +237,28 @@ class ProcessReturn
                             status: 'quarantine',
                             description: "Customer return (quarantine): {$refundNo}"
                         );
+                    }
+                }
+
+                // If sale was on credit or customer has credit account, reduce credit balance (UC-26)
+                if ($sale->customer_id) {
+                    $creditAccount = CreditAccount::where('customer_id', $sale->customer_id)->first();
+                    if ($creditAccount && ($primaryPaymentMethod === 'credit' || $sale->payments()->where('method', 'credit')->exists())) {
+                        $refundCreditAmount = min($totalRefund, $creditAccount->balance);
+                        if ($refundCreditAmount > 0) {
+                            $creditAccount->decrement('balance', $refundCreditAmount);
+                            CreditPayment::create([
+                                'credit_account_id' => $creditAccount->id,
+                                'sale_id' => $sale->id,
+                                'amount' => $refundCreditAmount,
+                                'direction' => 'payment',
+                                'method' => 'credit',
+                                'receipt_no' => $refundNo,
+                                'reference' => $refundNo,
+                                'user_id' => $user->id,
+                                'notes' => "Refund {$refundNo} for sale {$sale->receipt_no}",
+                            ]);
+                        }
                     }
                 }
 

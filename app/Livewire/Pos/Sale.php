@@ -11,6 +11,7 @@ use App\Exceptions\InsufficientStockException;
 use App\Exceptions\PaymentMismatchException;
 use App\Exceptions\SellabilityException;
 use App\Models\Batch;
+use App\Models\Customer;
 use App\Models\HeldSale;
 use App\Models\Product;
 use App\Models\ProductUnit;
@@ -107,6 +108,16 @@ class Sale extends Component
 
     public bool $heldSalesModalOpen = false;
 
+    /**
+     * Customer selection & Credit panel state (UC-26).
+     */
+    public ?int $selectedCustomerId = null;
+
+    public string $customerSearch = '';
+
+    /** @var array<int, array<string, mixed>> */
+    public array $customerSearchResults = [];
+
     /** @var array<int, string> */
     public array $resumeWarnings = [];
 
@@ -140,12 +151,19 @@ class Sale extends Component
 
     /**
      * List active payment methods from settings.
+     * Credit is added only for credit customers (UC-26 FR-3.4).
      *
      * @return list<string>
      */
     public function getActivePaymentMethods(): array
     {
-        return (array) setting('sales.active_payment_methods', ['cash', 'mobile_money', 'card', 'bank_transfer']);
+        $methods = (array) setting('sales.active_payment_methods', ['cash', 'mobile_money', 'card', 'bank_transfer']);
+
+        if ($this->selectedCustomer?->creditAccount) {
+            $methods[] = 'credit';
+        }
+
+        return array_values(array_unique($methods));
     }
 
     public function paymentMethodLabel(string $method): string
@@ -157,8 +175,57 @@ class Sale extends Component
             'cbe_birr' => __('sales.payment_method_cbe_birr'),
             'card' => __('sales.payment_method_card'),
             'bank_transfer' => __('sales.payment_method_bank_transfer'),
+            'credit' => __('credits.credit_payment_method'),
             default => ucfirst(str_replace('_', ' ', $method)),
         };
+    }
+
+    public function updatedCustomerSearch(): void
+    {
+        $q = trim($this->customerSearch);
+        if (strlen($q) < 2) {
+            $this->customerSearchResults = [];
+
+            return;
+        }
+
+        $this->customerSearchResults = Customer::search($q)
+            ->with('creditAccount')
+            ->limit(5)
+            ->get()
+            ->map(fn (Customer $c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'phone' => $c->phone,
+                'has_credit' => (bool) $c->creditAccount,
+                'credit_limit' => $c->creditAccount?->credit_limit ?? 0,
+                'balance' => $c->creditAccount?->balance ?? 0,
+                'available_credit' => $c->creditAccount?->availableCredit() ?? 0,
+            ])
+            ->toArray();
+    }
+
+    public function selectCustomer(int $id): void
+    {
+        $this->selectedCustomerId = $id;
+        $this->customerSearch = '';
+        $this->customerSearchResults = [];
+    }
+
+    public function clearCustomer(): void
+    {
+        $this->selectedCustomerId = null;
+        $this->customerSearch = '';
+        $this->customerSearchResults = [];
+
+        if ($this->selectedPaymentMethod === 'credit') {
+            $this->selectedPaymentMethod = 'cash';
+        }
+    }
+
+    public function getSelectedCustomerProperty(): ?Customer
+    {
+        return $this->selectedCustomerId ? Customer::with('creditAccount')->find($this->selectedCustomerId) : null;
     }
 
     /**
@@ -701,7 +768,11 @@ class Sale extends Component
                 user: Auth::user(),
                 items: $items,
                 payments: $payments,
-                idempotencyKey: $this->idempotencyKey
+                idempotencyKey: $this->idempotencyKey,
+                prescriptionId: null,
+                patientName: null,
+                prescriberName: null,
+                customerId: $this->selectedCustomerId
             );
 
             $this->lastCompletedSaleId = $sale->id;
@@ -712,12 +783,13 @@ class Sale extends Component
             $this->payments = [];
             $this->warningMessage = null;
             $this->resumeWarnings = [];
+            $this->selectedCustomerId = null;
             $this->idempotencyKey = (string) Str::uuid();
 
             session()->flash('status', __('sales.sale_completed_successfully', ['receipt' => $sale->receipt_no]));
 
             $this->redirect(route('sales.receipt', ['sale' => $sale->id]), navigate: true);
-        } catch (PaymentMismatchException|InsufficientStockException|FefoOverrideException|SellabilityException|\InvalidArgumentException $e) {
+        } catch (PaymentMismatchException|InsufficientStockException|FefoOverrideException|SellabilityException|\InvalidArgumentException|\RuntimeException $e) {
             $this->errorMessage = $e->getMessage();
         }
     }
@@ -735,6 +807,7 @@ class Sale extends Component
             'balanceSantim' => $this->getBalanceSantim(),
             'heldSales' => $heldSales,
             'heldSalesCount' => $heldSales->count(),
+            'selectedCustomer' => $this->selectedCustomer,
         ]);
     }
 }

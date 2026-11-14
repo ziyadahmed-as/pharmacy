@@ -5,6 +5,8 @@ namespace App\Approvals\Handlers;
 use App\Approvals\ApprovalHandler;
 use App\Enums\Role;
 use App\Models\ApprovalRequest;
+use App\Models\CreditAccount;
+use App\Models\CreditPayment;
 use App\Models\QuarantineRecord;
 use App\Models\SaleReturn;
 use App\Models\User;
@@ -80,6 +82,29 @@ class RefundApprovalHandler implements ApprovalHandler
                 'status' => SaleReturn::STATUS_COMPLETED,
                 'completed_at' => now(),
             ])->save();
+
+            // If sale was on credit, reduce credit balance (UC-26)
+            $sale = $saleReturn->sale;
+            if ($sale && $sale->customer_id) {
+                $creditAccount = CreditAccount::where('customer_id', $sale->customer_id)->first();
+                if ($creditAccount && ($saleReturn->payment_method === 'credit' || $sale->payments()->where('method', 'credit')->exists())) {
+                    $refundCreditAmount = min($saleReturn->total_refund, $creditAccount->balance);
+                    if ($refundCreditAmount > 0) {
+                        $creditAccount->decrement('balance', $refundCreditAmount);
+                        CreditPayment::create([
+                            'credit_account_id' => $creditAccount->id,
+                            'sale_id' => $sale->id,
+                            'amount' => $refundCreditAmount,
+                            'direction' => 'payment',
+                            'method' => 'credit',
+                            'receipt_no' => $saleReturn->refund_no,
+                            'reference' => $saleReturn->refund_no,
+                            'user_id' => $approver->id,
+                            'notes' => "Refund {$saleReturn->refund_no} for sale {$sale->receipt_no}",
+                        ]);
+                    }
+                }
+            }
 
             AuditLogger::record(
                 action: 'sale.refund.approved',

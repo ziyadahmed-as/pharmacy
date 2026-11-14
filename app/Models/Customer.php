@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Customer profile with encrypted health records and audit trail.
@@ -66,6 +67,11 @@ class Customer extends Model
     public function sales(): HasMany
     {
         return $this->hasMany(Sale::class);
+    }
+
+    public function creditAccount(): HasOne
+    {
+        return $this->hasOne(CreditAccount::class);
     }
 
     public function scopeSearch(Builder $query, ?string $term): Builder

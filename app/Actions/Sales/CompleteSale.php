@@ -2,9 +2,11 @@
 
 namespace App\Actions\Sales;
 
+use App\Actions\Credits\CompleteCreditSale;
 use App\Exceptions\NoOpenShiftException;
 use App\Exceptions\PaymentMismatchException;
 use App\Exceptions\SellabilityException;
+use App\Models\CreditAccount;
 use App\Models\DailyClosing;
 use App\Models\Payment;
 use App\Models\Product;
@@ -56,7 +58,8 @@ class CompleteSale
         string $idempotencyKey,
         ?int $prescriptionId = null,
         ?string $patientName = null,
-        ?string $prescriberName = null
+        ?string $prescriberName = null,
+        ?int $customerId = null
     ): Sale {
         // 1. Authorisation: SA cannot process sales
         if ($user->isSystemAdmin()) {
@@ -83,7 +86,7 @@ class CompleteSale
         }
 
         // 3. Atomically check idempotency and complete sale
-        return DB::transaction(function () use ($user, $shift, $items, $payments, $idempotencyKey, $prescriptionId, $patientName, $prescriberName) {
+        return DB::transaction(function () use ($user, $shift, $items, $payments, $idempotencyKey, $prescriptionId, $patientName, $prescriberName, $customerId) {
             // E5: Check idempotency key under lock
             $existing = Sale::where('idempotency_key', $idempotencyKey)->first();
             if ($existing) {
@@ -166,6 +169,33 @@ class CompleteSale
                 ]));
             }
 
+            // 5b. Credit payment validation (UC-26 FR-5.3)
+            $creditAmount = 0;
+            $creditAccount = null;
+            foreach ($payments as $payment) {
+                if (($payment['method'] ?? '') === 'credit') {
+                    $creditAmount += (int) $payment['amount'];
+                }
+            }
+
+            if ($creditAmount > 0) {
+                if (! $customerId) {
+                    throw new InvalidArgumentException(__('credits.no_credit_account'));
+                }
+
+                $creditAccount = CreditAccount::where('customer_id', $customerId)->first();
+                if (! $creditAccount) {
+                    throw new InvalidArgumentException(__('credits.no_credit_account'));
+                }
+
+                if (! $creditAccount->hasRoom($creditAmount)) {
+                    throw new \RuntimeException(__('credits.credit_limit_exceeded', [
+                        'available' => number_format($creditAccount->availableCredit() / 100, 2),
+                        'requested' => number_format($creditAmount / 100, 2),
+                    ]));
+                }
+            }
+
             // 6. Generate sequential gapless receipt number
             $receiptNo = DocumentSequence::next('sale', 'REC');
 
@@ -174,6 +204,7 @@ class CompleteSale
                 'receipt_no' => $receiptNo,
                 'shift_id' => $shift->id,
                 'user_id' => $user->id,
+                'customer_id' => $customerId,
                 'prescription_id' => $prescriptionId,
                 'status' => 'completed',
                 'total' => $saleTotalSantim,
@@ -220,6 +251,11 @@ class CompleteSale
                     'amount' => (int) $paymentData['amount'],
                     'reference' => ! empty($paymentData['reference']) ? trim($paymentData['reference']) : null,
                 ]);
+            }
+
+            // 9b. Charge credit account if applicable (UC-26)
+            if ($creditAmount > 0 && $creditAccount) {
+                (new CompleteCreditSale)->execute($user, $sale, $creditAccount);
             }
 
             // 10. Audit log (BR-15)
