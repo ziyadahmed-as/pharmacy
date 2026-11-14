@@ -82,6 +82,8 @@ final class Navigation
                 ['label' => 'nav.users', 'route' => 'users.index', 'any' => ['users.view']],
                 ['label' => 'nav.audit', 'route' => 'audit.index', 'any' => ['audit.view', 'audit.view.technical']],
                 ['label' => 'nav.settings', 'route' => 'settings.index', 'any' => ['settings.view']],
+                ['label' => 'nav.backups', 'route' => 'admin.backups', 'any' => ['backup.run']],
+                ['label' => 'nav.restore_checklist', 'route' => 'backup.checklist', 'any' => ['audit.view']],
             ]],
         ];
     }

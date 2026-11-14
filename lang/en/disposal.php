@@ -95,4 +95,3 @@ return [
     'invalid_performer' => 'Invalid performing person selected.',
     'invalid_witness' => 'Invalid witness selected.',
 ];
-

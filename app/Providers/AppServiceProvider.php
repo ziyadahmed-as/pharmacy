@@ -9,6 +9,7 @@ use App\Approvals\Handlers\DeactivateUserHandler;
 use App\Approvals\Handlers\QuarantineReleaseHandler;
 use App\Approvals\Handlers\ReactivateUserHandler;
 use App\Approvals\Handlers\RefundApprovalHandler;
+use App\Approvals\Handlers\RestoreApprovalHandler;
 use App\Approvals\Handlers\SettingsUpdateHandler;
 use App\Approvals\Handlers\StockAdjustmentHandler;
 use App\Approvals\Handlers\StockDisposalHandler;
@@ -44,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
             RefundApprovalHandler::class,
             StockAdjustmentHandler::class,
             StockDisposalHandler::class,
+            RestoreApprovalHandler::class,
         ];
         $this->app->tag($handlers, 'approval.handlers');
         $this->app->singleton(ApprovalHandlerRegistry::class, fn ($app) => new ApprovalHandlerRegistry($app->tagged('approval.handlers')));

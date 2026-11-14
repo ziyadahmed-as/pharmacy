@@ -30,6 +30,13 @@ return [
 
     'disks' => [
 
+        'backup' => [
+            'driver' => 'local',
+            'root' => env('BACKUP_DISK_PATH', storage_path('app/backups')),
+            'throw' => false,
+            'report' => false,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

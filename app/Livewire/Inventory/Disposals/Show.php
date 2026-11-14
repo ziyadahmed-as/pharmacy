@@ -46,4 +46,3 @@ class Show extends Component
         ]);
     }
 }
-

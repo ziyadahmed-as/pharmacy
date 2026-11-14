@@ -95,4 +95,3 @@ return [
     'invalid_performer' => 'ትክክለኛ ያልሆነ ፈጻሚ ተመርጧል።',
     'invalid_witness' => 'ትክክለኛ ያልሆነ ምስክር ተመርጧል።',
 ];
-

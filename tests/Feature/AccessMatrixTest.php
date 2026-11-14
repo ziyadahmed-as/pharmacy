@@ -25,7 +25,7 @@ it('gives the SA no permission that touches business data', function () {
 });
 
 it('keeps every later-stage permission inactive in Stage 1 except Stage 2 active permissions', function () {
-    foreach (['sales.sell', 'backup.run', 'reports.financial'] as $p) {
+    foreach (['sales.sell', 'reports.financial'] as $p) {
         expect(Permissions::matrix()[$p]['active'])->toBeFalse($p);
         expect(Gate::has($p))->toBeFalse($p);
     }

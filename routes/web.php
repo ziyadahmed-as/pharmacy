@@ -21,6 +21,7 @@ use App\Livewire\Auth\ForcePasswordChange;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Security;
 use App\Livewire\Auth\TwoFactorChallenge;
+use App\Livewire\Backup\RestoreChecklist;
 use App\Livewire\Catalogue\Form;
 use App\Livewire\Catalogue\Import;
 use App\Livewire\Catalogue\Index;
@@ -95,6 +96,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-31: audit log
             Route::get('/audit', AuditUi\Index::class)->name('audit.index');
             Route::get('/audit/export/{format}', AuditExportController::class)->whereIn('format', ['csv', 'pdf'])->name('audit.export');
+
+            // UC-37: Backup & Restore
+            Route::get('/admin/backups', App\Livewire\Backup\Dashboard::class)->middleware('can:backup.run')->name('admin.backups');
+            Route::get('/backup/checklist', RestoreChecklist::class)->name('backup.checklist');
 
             // UC-01 / UC-03: Product Catalogue
             Route::get('/catalogue', Index::class)->middleware('can:catalogue.view')->name('catalogue.index');

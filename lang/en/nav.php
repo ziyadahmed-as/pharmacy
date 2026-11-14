@@ -27,6 +27,8 @@ return [
     'prescriptions' => 'Prescriptions',
     'prescriptions_search' => 'Prescription search',
     'controlled_drug_register' => 'Controlled Drug Register',
+    'backups' => 'Backups & Recovery',
+    'restore_checklist' => 'Restore Checklist',
     'group' => [
         'catalogue' => 'Catalogue',
         'inventory' => 'Inventory',

@@ -27,6 +27,8 @@ return [
     'prescriptions' => 'ማዘዣዎች (ቀመሮች)',
     'prescriptions_search' => 'የቀመር ፍለጋ',
     'controlled_drug_register' => 'የቁጥጥር ስር መድሃኒቶች መዝገብ',
+    'backups' => 'የመረጃ ምትኬ እና ማግኛ',
+    'restore_checklist' => 'የመልሶ ማግኛ ማረጋገጫ',
     'group' => [
         'catalogue' => 'ካታሎግ',
         'inventory' => 'ክምችት',
