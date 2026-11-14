@@ -2,8 +2,7 @@
 
 namespace App\Livewire\Dispense;
 
-use App\Actions\Prescriptions\DispenseControlledDrug;
-use App\Actions\Prescriptions\DispensePrescriptionLine;
+use App\Actions\Prescriptions\DispensePartially;
 use App\Exceptions\NoOpenShiftException;
 use App\Exceptions\PrescriptionNotDispensableException;
 use App\Exceptions\QuantityExceedsPrescriptionException;
@@ -17,14 +16,14 @@ use Illuminate\View\View;
 use Livewire\Component;
 
 /**
- * Dispense a verified prescription line.
+ * Dispense a verified prescription line in full, in parts, or as a refill.
  *
- * Shows all lines with remaining quantities; proposes FEFO batch;
- * handles quantity override and repeat-warning acknowledge dialogs.
+ * Shows all lines with remaining quantities and refill counts; proposes FEFO batch;
+ * handles partial quantities, next refill dates, overrides, and repeat-warning dialogs.
  *
- * @uc UC-21
+ * @uc UC-21 @uc UC-24
  *
- * @fr FR-4.1, FR-4.8, FR-4.9, FR-4.10
+ * @fr FR-4.1, FR-4.5, FR-4.8, FR-4.9, FR-4.10; D-08
  */
 class Show extends Component
 {
@@ -42,6 +41,11 @@ class Show extends Component
     public string $paymentMethod = 'cash';
 
     public string $paymentReference = '';
+
+    // Partial and Refill State (UC-24)
+    public bool $isRefill = false;
+
+    public ?string $nextRefillDate = null;
 
     // Controlled drug confirmation
     public bool $isControlled = false;
@@ -76,18 +80,47 @@ class Show extends Component
         // Pre-select first dispensable line
         $first = $this->prescription->lines->first(fn ($l) => ! $l->isFullyDispensed());
         if ($first) {
-            $this->selectedLineId = $first->id;
-            $this->syncControlledState();
-            $this->refreshBatchProposal();
+            $this->selectLine($first->id);
         }
+    }
+
+    public function selectLine(int $lineId, bool $refill = false): void
+    {
+        $this->selectedLineId = $lineId;
+        $this->isRefill = $refill;
+        $line = $this->selectedLine();
+
+        if ($refill) {
+            $this->quantity = $line ? $line->quantity_prescribed : 1;
+        } else {
+            $this->quantity = $line && $line->remainingQuantity() > 0 ? $line->remainingQuantity() : 1;
+        }
+
+        $this->batchId = null;
+        $this->nextRefillDate = null;
+        $this->syncControlledState();
+        $this->refreshBatchProposal();
+    }
+
+    public function toggleRefill(): void
+    {
+        $line = $this->selectedLine();
+        if (! $line) {
+            return;
+        }
+
+        $this->isRefill = ! $this->isRefill;
+        if ($this->isRefill) {
+            $this->quantity = $line->quantity_prescribed;
+        } else {
+            $this->quantity = $line->remainingQuantity() > 0 ? $line->remainingQuantity() : 1;
+        }
+        $this->refreshBatchProposal();
     }
 
     public function updatedSelectedLineId(): void
     {
-        $this->quantity = 1;
-        $this->batchId = null;
-        $this->syncControlledState();
-        $this->refreshBatchProposal();
+        $this->selectLine($this->selectedLineId);
     }
 
     private function syncControlledState(): void
@@ -108,7 +141,7 @@ class Show extends Component
         try {
             $allocations = FefoBatchResolver::resolve(
                 product: $line->product,
-                requestedQuantity: 1,
+                requestedQuantity: max(1, $this->quantity),
             );
             $this->batchId = $allocations[0]['batch']->id ?? null;
         } catch (\Throwable) {
@@ -116,12 +149,12 @@ class Show extends Component
         }
     }
 
-    private function selectedLine(): ?PrescriptionLine
+    public function selectedLine(): ?PrescriptionLine
     {
         return $this->prescription->lines->firstWhere('id', $this->selectedLineId);
     }
 
-    public function dispense(DispensePrescriptionLine $action): void
+    public function dispense(DispensePartially $partiallyAction): void
     {
         $this->validate();
         $this->errorMessage = '';
@@ -147,37 +180,23 @@ class Show extends Component
         ];
 
         try {
-            if ($this->isControlled) {
-                $sale = app(DispenseControlledDrug::class)->execute(
-                    user: $user,
-                    prescription: $this->prescription,
-                    lineId: $this->selectedLineId,
-                    quantity: $this->quantity,
-                    payments: $payments,
-                    idempotencyKey: Str::uuid()->toString(),
-                    batchId: $this->batchId ?: null,
-                    overrideReason: $this->overrideReason ?: null,
-                    repeatWarningAcknowledged: $this->repeatWarningAcknowledged,
-                    confirmedPatientName: $this->confirmedPatientName ?: null,
-                    confirmedPrescriberName: $this->confirmedPrescriberName ?: null,
-                );
-            } else {
-                $sale = $action->execute(
-                    user: $user,
-                    prescription: $this->prescription,
-                    lineId: $this->selectedLineId,
-                    quantity: $this->quantity,
-                    payments: $payments,
-                    idempotencyKey: Str::uuid()->toString(),
-                    batchId: $this->batchId ?: null,
-                    overrideReason: $this->overrideReason ?: null,
-                    repeatWarningAcknowledged: $this->repeatWarningAcknowledged,
-                );
-            }
+            $sale = $partiallyAction->execute(
+                user: $user,
+                prescription: $this->prescription,
+                lineId: $this->selectedLineId,
+                quantity: $this->quantity,
+                payments: $payments,
+                idempotencyKey: Str::uuid()->toString(),
+                batchId: $this->batchId ?: null,
+                overrideReason: $this->overrideReason ?: null,
+                repeatWarningAcknowledged: $this->repeatWarningAcknowledged,
+                nextRefillDate: $this->nextRefillDate ?: null,
+                isRefill: $this->isRefill,
+            );
 
-            $this->successMessage = __('prescriptions.dispensing_success', [
-                'receipt_no' => $sale->receipt_no,
-            ]);
+            $this->successMessage = $this->isRefill
+                ? __('prescriptions.refill_success', ['receipt_no' => $sale->receipt_no])
+                : __('prescriptions.dispensing_success', ['receipt_no' => $sale->receipt_no]);
 
             // Refresh prescription to reflect new status
             $this->prescription->refresh()->load(['lines.product', 'customer']);
@@ -185,13 +204,14 @@ class Show extends Component
             $this->showRepeatWarning = false;
             $this->overrideReason = '';
             $this->repeatWarningAcknowledged = false;
+            $this->isRefill = false;
+            $this->nextRefillDate = null;
 
         } catch (QuantityExceedsPrescriptionException $e) {
             $this->showOverrideModal = true;
             $this->errorMessage = $e->getMessage();
         } catch (\InvalidArgumentException $e) {
             $msg = $e->getMessage();
-            // Detect repeat warning (a bit fragile but sufficient for Livewire flow)
             if (str_contains($msg, __('prescriptions.repeat_purchase_warning', [
                 'days' => setting('prescriptions.repeat_purchase_warning_days', 0),
                 'product' => $this->selectedLine()?->product->brand ?? '',

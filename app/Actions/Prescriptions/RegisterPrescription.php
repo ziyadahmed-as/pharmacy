@@ -128,7 +128,9 @@ class RegisterPrescription
                 throw new InvalidArgumentException(__('prescriptions.quantity_must_be_positive'));
             }
 
-            $validatedLines[] = compact('product', 'dose', 'qty');
+            $refillsAllowed = max(0, (int) ($line['refills_allowed'] ?? $line['refills'] ?? 0));
+
+            $validatedLines[] = compact('product', 'dose', 'qty', 'refillsAllowed');
         }
 
         return DB::transaction(function () use ($user, $prescriberName, $prescriberRegNo, $parsedDate, $patientData, $validatedLines, $scanPath) {
@@ -157,6 +159,10 @@ class RegisterPrescription
                     'dose' => $line['dose'],
                     'quantity_prescribed' => $line['qty'],
                     'quantity_dispensed' => 0,
+                    'remaining_quantity' => $line['qty'],
+                    'refills_allowed' => $line['refillsAllowed'],
+                    'refills_used' => 0,
+                    'next_refill_date' => null,
                 ]);
             }
 

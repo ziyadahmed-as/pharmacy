@@ -35,6 +35,10 @@ class PrescriptionLine extends Model
         'dose',
         'quantity_prescribed',
         'quantity_dispensed',
+        'remaining_quantity',
+        'refills_allowed',
+        'refills_used',
+        'next_refill_date',
     ];
 
     protected function casts(): array
@@ -42,6 +46,10 @@ class PrescriptionLine extends Model
         return [
             'quantity_prescribed' => 'integer',
             'quantity_dispensed' => 'integer',
+            'remaining_quantity' => 'integer',
+            'refills_allowed' => 'integer',
+            'refills_used' => 'integer',
+            'next_refill_date' => 'date',
         ];
     }
 
@@ -62,11 +70,32 @@ class PrescriptionLine extends Model
 
     public function remainingQuantity(): int
     {
+        if ($this->remaining_quantity !== null) {
+            return max(0, (int) $this->remaining_quantity);
+        }
+
         return max(0, $this->quantity_prescribed - $this->quantity_dispensed);
     }
 
     public function isFullyDispensed(): bool
     {
+        if ($this->remaining_quantity !== null) {
+            $hasRemaining = $this->remaining_quantity > 0;
+            $hasRefills = $this->refills_allowed > 0 && $this->refills_used < $this->refills_allowed;
+
+            return ! $hasRemaining && ! $hasRefills;
+        }
+
         return $this->quantity_dispensed >= $this->quantity_prescribed;
+    }
+
+    public function canRefill(): bool
+    {
+        return $this->refills_allowed > 0 && $this->refills_used < $this->refills_allowed;
+    }
+
+    public function remainingRefills(): int
+    {
+        return max(0, $this->refills_allowed - $this->refills_used);
     }
 }

@@ -49,7 +49,9 @@
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('prescriptions.fields.quantity_prescribed') }}</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('prescriptions.fields.quantity_dispensed') }}</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('prescriptions.remaining_qty') }}</th>
-                    <th class="px-4 py-3"></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('prescriptions.refills_allowed') }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('prescriptions.next_refill_date') }}</th>
+                    <th class="px-4 py-3 text-right"></th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -62,14 +64,37 @@
                         <td class="px-4 py-3 text-sm font-semibold {{ $line->remainingQuantity() > 0 ? 'text-green-700' : 'text-gray-400' }}">
                             {{ $line->remainingQuantity() }}
                         </td>
-                        <td class="px-4 py-3">
-                            @if(!$line->isFullyDispensed())
-                                <button wire:click="$set('selectedLineId', {{ $line->id }})"
-                                        class="text-xs px-2 py-1 rounded {{ $selectedLineId === $line->id ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-indigo-50' }}">
+                        <td class="px-4 py-3 text-xs text-gray-600">
+                            @if($line->refills_allowed > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $line->canRefill() ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600' }}">
+                                    {{ $line->refills_used }} / {{ $line->refills_allowed }}
+                                </span>
+                            @else
+                                <span class="text-gray-400">&mdash;</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-xs text-gray-600">
+                            @if($line->next_refill_date)
+                                <span class="font-medium text-indigo-700">{{ $line->next_refill_date->format('Y-m-d') }}</span>
+                            @else
+                                <span class="text-gray-400">&mdash;</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-right space-x-1">
+                            @if($line->remainingQuantity() > 0)
+                                <button wire:click="selectLine({{ $line->id }}, false)"
+                                        class="text-xs px-2.5 py-1 rounded font-medium {{ $selectedLineId === $line->id && !$isRefill ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-indigo-50' }}">
                                     {{ __('prescriptions.dispense_line') }}
                                 </button>
-                            @else
-                                <span class="text-xs text-gray-400">{{ __('prescriptions.status_fully_dispensed') }}</span>
+                            @endif
+                            @if($line->canRefill())
+                                <button wire:click="selectLine({{ $line->id }}, true)"
+                                        class="text-xs px-2.5 py-1 rounded font-medium {{ $selectedLineId === $line->id && $isRefill ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' }}">
+                                    {{ __('prescriptions.refill') }}
+                                </button>
+                            @endif
+                            @if($line->isFullyDispensed())
+                                <span class="text-xs text-gray-400 font-medium">{{ __('prescriptions.status_fully_dispensed') }}</span>
                             @endif
                         </td>
                     </tr>
@@ -80,7 +105,47 @@
 
     {{-- Dispensing form --}}
     @if($prescription->isDispensable() && !$prescription->isExpiredForDispensing())
-        <div class="bg-white shadow rounded-lg p-6 space-y-4">
+        @php $activeLine = $this->selectedLine(); @endphp
+        <div class="bg-white shadow rounded-lg p-6 space-y-5">
+            {{-- STEP 4: Remaining-quantity panel --}}
+            @if($activeLine)
+                <div class="rounded-lg border {{ $isRefill ? 'border-emerald-200 bg-emerald-50/60' : 'border-indigo-100 bg-indigo-50/50' }} p-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                            <span class="text-xs font-semibold uppercase tracking-wider {{ $isRefill ? 'text-emerald-800' : 'text-indigo-800' }}">
+                                {{ $isRefill ? __('prescriptions.mode_refill') : __('prescriptions.remaining_quantity_panel') }}
+                            </span>
+                            <h3 class="text-base font-bold text-gray-900 mt-0.5">
+                                {{ $activeLine->product->brand }}
+                            </h3>
+                            <p class="text-xs text-gray-600">
+                                {{ __('prescriptions.fields.dose') }}: {{ $activeLine->dose }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-center sm:text-right">
+                                <span class="text-xs text-gray-500 block">{{ __('prescriptions.remaining_qty') }}</span>
+                                <span class="text-xl font-extrabold text-indigo-700">{{ $activeLine->remainingQuantity() }}</span>
+                            </div>
+                            @if($activeLine->refills_allowed > 0)
+                                <div class="text-center sm:text-right border-l border-gray-200 pl-4">
+                                    <span class="text-xs text-gray-500 block">{{ __('prescriptions.refills_allowed') }}</span>
+                                    <span class="text-sm font-bold text-gray-800">{{ $activeLine->refills_used }} / {{ $activeLine->refills_allowed }}</span>
+                                </div>
+                            @endif
+                            @if($activeLine->canRefill())
+                                <div class="border-l border-gray-200 pl-4">
+                                    <button wire:click="toggleRefill" type="button"
+                                            class="px-3 py-1.5 rounded text-xs font-semibold {{ $isRefill ? 'bg-indigo-600 text-white' : 'bg-emerald-600 text-white hover:bg-emerald-700' }}">
+                                        {{ $isRefill ? __('prescriptions.mode_partial') : __('prescriptions.refill') }}
+                                    </button>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <h2 class="text-lg font-semibold text-gray-800">{{ __('prescriptions.dispense_summary') }}</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -88,7 +153,6 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
                         {{ __('prescriptions.remaining_qty') }}
-                        @php $activeLine = $prescription->lines->firstWhere('id', $selectedLineId); @endphp
                         @if($activeLine)
                             <span class="text-indigo-600">({{ $activeLine->remainingQuantity() }} {{ __('prescriptions.remaining_qty') }})</span>
                         @endif
@@ -96,6 +160,16 @@
                     <input type="number" wire:model.live="quantity" min="1"
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                     @error('quantity') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                </div>
+
+                {{-- Next Refill Date --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ __('prescriptions.next_refill_date') }}
+                        <span class="text-xs text-gray-400">({{ __('prescriptions.optional') }})</span>
+                    </label>
+                    <input type="date" wire:model="nextRefillDate"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
                 </div>
 
                 {{-- Proposed batch --}}
@@ -194,8 +268,8 @@
             @if(!$showOverrideModal && !$showRepeatWarning)
                 <div class="flex justify-end">
                     <button wire:click="dispense" wire:loading.attr="disabled"
-                            class="inline-flex items-center px-6 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md shadow hover:bg-indigo-700 disabled:opacity-50">
-                        <span wire:loading.remove>{{ __('prescriptions.dispense') }}</span>
+                            class="inline-flex items-center px-6 py-2 {{ $isRefill ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-indigo-600 hover:bg-indigo-700' }} text-white text-sm font-semibold rounded-md shadow disabled:opacity-50">
+                        <span wire:loading.remove>{{ $isRefill ? __('prescriptions.refill') : __('prescriptions.dispense') }}</span>
                         <span wire:loading>{{ __('common.please_wait') }}</span>
                     </button>
                 </div>
@@ -203,4 +277,3 @@
         </div>
     @endif
 </div>
-

@@ -217,6 +217,11 @@ class DispensePrescriptionLine
 
             // Update prescription line quantity
             $line->increment('quantity_dispensed', $quantity);
+            if ($line->remaining_quantity !== null) {
+                $line->update([
+                    'remaining_quantity' => max(0, $line->remaining_quantity - $quantity),
+                ]);
+            }
             $line->refresh();
 
             // Recompute prescription status
