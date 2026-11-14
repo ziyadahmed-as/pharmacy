@@ -103,3 +103,4 @@ class AuditVoidsReport extends BaseReportDefinition
         ];
     }
 }
+

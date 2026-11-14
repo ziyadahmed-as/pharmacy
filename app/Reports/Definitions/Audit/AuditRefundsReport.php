@@ -107,3 +107,4 @@ class AuditRefundsReport extends BaseReportDefinition
         ];
     }
 }
+

@@ -176,3 +176,4 @@ class SalesByProductReport extends BaseReportDefinition
         ];
     }
 }
+

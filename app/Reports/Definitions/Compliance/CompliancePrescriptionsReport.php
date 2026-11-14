@@ -131,3 +131,4 @@ class CompliancePrescriptionsReport extends BaseReportDefinition
         ];
     }
 }
+

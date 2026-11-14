@@ -210,6 +210,12 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/reports/{type}/export/{format}', [ReportExportController::class, 'export'])->whereIn('format', ['csv', 'excel', 'pdf'])->middleware('can:access-business-data')->name('reports.export');
             Route::get('/reports/{type}/print', [ReportExportController::class, 'print'])->middleware('can:access-business-data')->name('reports.print');
 
+            // UC-30: Generate and export reports (Stage 6)
+            Route::get('/reports', App\Livewire\Reports\Index::class)->middleware('can:access-business-data')->name('reports.index');
+            Route::get('/reports/{type}', App\Livewire\Reports\Run::class)->middleware('can:access-business-data')->name('reports.run');
+            Route::get('/reports/{type}/export/{format}', [App\Http\Controllers\ReportExportController::class, 'export'])->whereIn('format', ['csv', 'excel', 'pdf'])->middleware('can:access-business-data')->name('reports.export');
+            Route::get('/reports/{type}/print', [App\Http\Controllers\ReportExportController::class, 'print'])->middleware('can:access-business-data')->name('reports.print');
+
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');
 

@@ -189,3 +189,4 @@ return [
     'col_effective_from' => 'የሚጀምርበት ቀን',
     'col_changed_by' => 'የለወጠው ባለሙያ',
 ];
+

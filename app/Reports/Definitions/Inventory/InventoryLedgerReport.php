@@ -121,3 +121,4 @@ class InventoryLedgerReport extends BaseReportDefinition
         ];
     }
 }
+

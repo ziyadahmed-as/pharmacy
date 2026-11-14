@@ -110,3 +110,4 @@ class SalesReturnsRefundsReport extends BaseReportDefinition
         ];
     }
 }
+

@@ -104,3 +104,4 @@ class InventoryLowStockReport extends BaseReportDefinition
         ];
     }
 }
+

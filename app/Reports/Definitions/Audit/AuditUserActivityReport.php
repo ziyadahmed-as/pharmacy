@@ -118,3 +118,4 @@ class AuditUserActivityReport extends BaseReportDefinition
         ];
     }
 }
+
