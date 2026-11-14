@@ -74,6 +74,11 @@ class Customer extends Model
         return $this->hasOne(CreditAccount::class);
     }
 
+    public function reminders(): HasMany
+    {
+        return $this->hasMany(Reminder::class);
+    }
+
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
         $term = trim((string) $term);

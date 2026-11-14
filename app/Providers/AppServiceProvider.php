@@ -20,6 +20,8 @@ use App\Enums\Role;
 use App\Models\User;
 use App\Reports\ReportRegistry;
 use App\Services\ExpiredBatchQuarantinerService;
+use App\Services\Messaging\LogMessageGateway;
+use App\Services\Messaging\MessageGateway;
 use App\Services\SettingsRepository;
 use App\Support\Permissions;
 use Illuminate\Support\Facades\Gate;
@@ -35,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(SettingsRepository::class);
         $this->app->singleton(ExpiredBatchQuarantiner::class, ExpiredBatchQuarantinerService::class);
         $this->app->singleton(ReportRegistry::class);
-        $this->app->singleton(ReportRegistry::class);
+        $this->app->singleton(MessageGateway::class, LogMessageGateway::class);
 
         // Approval handlers (UC-34): later use cases add their handler class here.
         $handlers = [

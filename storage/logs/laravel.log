@@ -583,3 +583,26 @@
 [2026-11-14 13:41:08] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
 [2026-11-14 13:41:22] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
 [2026-11-14 13:41:22] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 14:00:46] testing.INFO: Refill reminder SMS sent to +251911888888 (ID: MSG-A0K9ME5JCI): Dear Derartu, your refill is due.  
+[2026-11-14 14:00:46] testing.WARNING: Refill reminder delivery failed to +251999999999: Carrier network timeout  
+[2026-11-14 14:00:47] testing.INFO: Refill reminder SMS sent to +251911000001 (ID: MSG-AZXP3VYXV1): Reminder 1  
+[2026-11-14 14:00:47] testing.INFO: Refill reminder SMS sent to +251911000002 (ID: MSG-SNMRDXGMNM): Reminder 2  
+[2026-11-14 14:01:44] testing.INFO: Refill reminder SMS sent to +251911888888 (ID: MSG-DUOR5D5IW0): Dear Derartu, your refill is due.  
+[2026-11-14 14:01:44] testing.WARNING: Refill reminder delivery failed to +251999999999: Carrier network timeout  
+[2026-11-14 14:01:44] testing.INFO: Refill reminder SMS sent to +251911000001 (ID: MSG-UP9BN8JNIZ): Reminder 1  
+[2026-11-14 14:01:44] testing.INFO: Refill reminder SMS sent to +251911000002 (ID: MSG-QJMX4FPPW6): Reminder 2  
+[2026-11-14 14:02:47] testing.INFO: Refill reminder SMS sent to +251911888888 (ID: MSG-ACBAHDXLTL): Dear Derartu, your refill is due.  
+[2026-11-14 14:02:47] testing.WARNING: Refill reminder delivery failed to +251999999999: Carrier network timeout  
+[2026-11-14 14:02:47] testing.INFO: Refill reminder SMS sent to +251911000001 (ID: MSG-CB3XTGT8LH): Reminder 1  
+[2026-11-14 14:02:47] testing.INFO: Refill reminder SMS sent to +251911000002 (ID: MSG-LMYRYYEGRH): Reminder 2  
+[2026-11-14 14:04:14] testing.INFO: Refill reminder SMS sent to +251911888888 (ID: MSG-CUM7YROKXM): Dear Derartu, your refill is due.  
+[2026-11-14 14:04:14] testing.WARNING: Refill reminder delivery failed to +251999999999: Carrier network timeout  
+[2026-11-14 14:04:14] testing.INFO: Refill reminder SMS sent to +251911000001 (ID: MSG-Z3GE5G5OU6): Reminder 1  
+[2026-11-14 14:04:14] testing.INFO: Refill reminder SMS sent to +251911000002 (ID: MSG-TITDOOGLOQ): Reminder 2  
+[2026-11-14 14:05:06] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
+[2026-11-14 14:05:20] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 14:05:20] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 14:05:31] testing.INFO: Refill reminder SMS sent to +251911888888 (ID: MSG-BL7XCXNJJ7): Dear Derartu, your refill is due.  
+[2026-11-14 14:05:31] testing.WARNING: Refill reminder delivery failed to +251999999999: Carrier network timeout  
+[2026-11-14 14:05:31] testing.INFO: Refill reminder SMS sent to +251911000001 (ID: MSG-DV9ZL3SYQU): Reminder 1  
+[2026-11-14 14:05:31] testing.INFO: Refill reminder SMS sent to +251911000002 (ID: MSG-QJ33VHNALQ): Reminder 2  

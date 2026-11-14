@@ -68,6 +68,11 @@ class PrescriptionLine extends Model
         return $this->hasMany(DispensingEvent::class);
     }
 
+    public function reminders(): HasMany
+    {
+        return $this->hasMany(Reminder::class);
+    }
+
     public function remainingQuantity(): int
     {
         if ($this->remaining_quantity !== null) {

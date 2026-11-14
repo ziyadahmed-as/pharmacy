@@ -184,6 +184,9 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/credits/{account}', App\Livewire\Credits\Show::class)->middleware('can:customers.manage')->name('credits.show');
             Route::get('/customers/{customer}/credit-limit', SetLimit::class)->middleware('can:customers.manage')->name('credits.set-limit');
 
+            // UC-27: Refill Reminders (Stage 7)
+            Route::get('/reminders', App\Livewire\Reminders\Index::class)->middleware('can:prescriptions.dispense')->name('reminders.index');
+
             // UC-19, UC-20, UC-21, UC-22, UC-23: Prescriptions and Controlled Drugs (Stage 4)
             Route::get('/prescriptions', App\Livewire\Prescriptions\Index::class)->middleware('can:prescriptions.view')->name('prescriptions.index');
             Route::get('/prescriptions/search', Search::class)->middleware('can:prescriptions.view')->name('prescriptions.search');
