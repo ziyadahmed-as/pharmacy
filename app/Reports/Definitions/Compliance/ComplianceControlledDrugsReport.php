@@ -118,4 +118,3 @@ class ComplianceControlledDrugsReport extends BaseReportDefinition
         ];
     }
 }
-

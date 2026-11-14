@@ -6,6 +6,7 @@ return [
     'notifications' => 'ማሳወቂያዎች',
     'security' => 'የእኔ ደህንነት',
     'staff' => 'የሠራተኛ መዛግብት',
+    'roster' => 'የፈረቃ ድልድል',
     'approvals' => 'ማጽደቂያዎች',
     'users' => 'የተጠቃሚ መለያዎች',
     'account_recovery' => 'የመለያ ማገገሚያ',

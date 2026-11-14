@@ -115,4 +115,3 @@ class ComplianceRecallsReport extends BaseReportDefinition
         ];
     }
 }
-

@@ -35,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(SettingsRepository::class);
         $this->app->singleton(ExpiredBatchQuarantiner::class, ExpiredBatchQuarantinerService::class);
         $this->app->singleton(ReportRegistry::class);
-        $this->app->singleton(\App\Reports\ReportRegistry::class);
+        $this->app->singleton(ReportRegistry::class);
 
         // Approval handlers (UC-34): later use cases add their handler class here.
         $handlers = [

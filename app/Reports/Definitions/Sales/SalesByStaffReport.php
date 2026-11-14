@@ -167,4 +167,3 @@ class SalesByStaffReport extends BaseReportDefinition
         ];
     }
 }
-

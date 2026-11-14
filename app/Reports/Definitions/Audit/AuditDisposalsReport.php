@@ -128,4 +128,3 @@ class AuditDisposalsReport extends BaseReportDefinition
         ];
     }
 }
-

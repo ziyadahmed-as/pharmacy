@@ -161,4 +161,3 @@ class SalesByPaymentMethodReport extends BaseReportDefinition
         ];
     }
 }
-

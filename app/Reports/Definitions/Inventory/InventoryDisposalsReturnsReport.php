@@ -128,4 +128,3 @@ class InventoryDisposalsReturnsReport extends BaseReportDefinition
         ];
     }
 }
-

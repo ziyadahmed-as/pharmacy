@@ -114,4 +114,3 @@ class InventoryNearExpiryReport extends BaseReportDefinition
         ];
     }
 }
-

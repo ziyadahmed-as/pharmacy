@@ -148,4 +148,3 @@ class ComplianceDisposalsReport extends BaseReportDefinition
         ];
     }
 }
-

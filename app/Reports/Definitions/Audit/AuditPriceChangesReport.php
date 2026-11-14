@@ -106,4 +106,3 @@ class AuditPriceChangesReport extends BaseReportDefinition
         ];
     }
 }
-

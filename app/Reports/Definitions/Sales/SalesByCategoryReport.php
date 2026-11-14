@@ -155,4 +155,3 @@ class SalesByCategoryReport extends BaseReportDefinition
         ];
     }
 }
-

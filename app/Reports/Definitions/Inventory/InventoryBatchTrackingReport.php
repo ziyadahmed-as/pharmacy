@@ -113,4 +113,3 @@ class InventoryBatchTrackingReport extends BaseReportDefinition
         ];
     }
 }
-

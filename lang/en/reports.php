@@ -189,4 +189,3 @@ return [
     'col_effective_from' => 'Effective From',
     'col_changed_by' => 'Changed By',
 ];
-

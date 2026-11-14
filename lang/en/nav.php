@@ -6,6 +6,7 @@ return [
     'notifications' => 'Notifications',
     'security' => 'My security',
     'staff' => 'Staff records',
+    'roster' => 'Roster & shifts',
     'approvals' => 'Approvals',
     'users' => 'User accounts',
     'account_recovery' => 'Account recovery',

@@ -8,6 +8,7 @@ use App\Models\BatchStock;
 use App\Models\DispensingEvent;
 use App\Models\Prescription;
 use App\Models\Product;
+use App\Models\RosterEntry;
 use App\Models\Sale;
 use App\Models\Shift;
 use App\Models\StockAlert;
@@ -141,6 +142,13 @@ class Dashboard extends Component
             }
         }
 
+        $onDutyToday = ($user->canAccessBusinessData() && Schema::hasTable('roster_entries'))
+            ? RosterEntry::with(['staff.user', 'till'])
+                ->whereDate('date', today())
+                ->orderBy('start_time')
+                ->get()
+            : collect();
+
         return view('livewire.dashboard', [
             'user' => $user,
             'actingRole' => ActingRole::for($user),
@@ -151,6 +159,7 @@ class Dashboard extends Component
             'activeShiftStats' => $activeShiftStats,
             'recentSales' => $recentSales,
             'recentAudits' => $recentAudits,
+            'onDutyToday' => $onDutyToday,
             'handlesControlledDrugs' => (bool) setting('pharmacy.handles_controlled_drugs', true),
         ])->layout('layouts.app', ['title' => __('nav.dashboard')]);
     }

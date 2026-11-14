@@ -81,6 +81,7 @@ final class Navigation
             ]],
             ['key' => 'staff', 'items' => [
                 ['label' => 'nav.staff', 'route' => 'staff.index', 'any' => ['staff.manage', 'staff.view.own']],
+                ['label' => 'nav.roster', 'route' => 'roster.index', 'any' => ['staff.manage', 'staff.view.own']],
             ]],
             ['key' => 'administration', 'items' => [
                 ['label' => 'nav.approvals', 'route' => 'approvals.index', 'any' => ['approvals.request']],

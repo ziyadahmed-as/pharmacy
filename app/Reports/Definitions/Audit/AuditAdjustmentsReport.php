@@ -116,4 +116,3 @@ class AuditAdjustmentsReport extends BaseReportDefinition
         ];
     }
 }
-
