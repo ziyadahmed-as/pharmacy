@@ -33,6 +33,7 @@ return [
     'backups' => 'የመረጃ ምትኬ እና ማግኛ',
     'restore_checklist' => 'የመልሶ ማግኛ ማረጋገጫ',
     'expenses' => 'የስራ ማስኬጃ ወጪዎች',
+    'payroll' => 'የደመወዝ ክፍያ',
     'cash_revenue' => 'የጥሬ ገንዘብ እና የገቢ ማጠቃለያዎች',
     'reports' => 'ሪፖርቶች እና ትንታኔዎች',
     'group' => [

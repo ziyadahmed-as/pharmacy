@@ -8,6 +8,7 @@ use App\Http\Controllers\DailyClosingReportController;
 use App\Http\Controllers\KeepAliveController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LogoutController;
+use App\Http\Controllers\PayslipDownloadController;
 use App\Http\Controllers\PrescriptionExportController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RefundReceiptController;
@@ -229,6 +230,14 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/finance/cash-revenue', CashRevenue::class)->middleware('can:finance.expense.view')->name('finance.cash-revenue');
             Route::get('/finance/cash-revenue/export/{format}', [CashRevenueExportController::class, 'export'])->whereIn('format', ['csv', 'excel', 'pdf'])->middleware('can:finance.expense.view')->name('finance.cash-revenue.export');
             Route::get('/finance/cash-revenue/print', [CashRevenueExportController::class, 'print'])->middleware('can:finance.expense.view')->name('finance.cash-revenue.print');
+
+            // UC-42: Process basic payroll (Stage 7)
+            Route::get('/finance/payroll', App\Livewire\Finance\Payroll\Index::class)
+                ->middleware('can:access-business-data')
+                ->name('payroll.index');
+            Route::get('/finance/payroll/payslip/{payrollLine}', PayslipDownloadController::class)
+                ->middleware('can:access-business-data')
+                ->name('payroll.payslip');
 
             // UC-30: Generate and export reports (Stage 6)
             Route::get('/reports', App\Livewire\Reports\Index::class)->middleware('can:access-business-data')->name('reports.index');

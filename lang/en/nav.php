@@ -33,6 +33,7 @@ return [
     'backups' => 'Backups & Recovery',
     'restore_checklist' => 'Restore Checklist',
     'expenses' => 'Operating expenses',
+    'payroll' => 'Payroll',
     'cash_revenue' => 'Cash & revenue summaries',
     'reports' => 'Reports & Analytics',
     'group' => [

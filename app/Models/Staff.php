@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * Staff record (UC-39). Never deleted: employment ends with status `ended`.
@@ -56,6 +57,21 @@ class Staff extends Model
     public function leaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class);
+    }
+
+    public function salaryProfile(): HasOne
+    {
+        return $this->hasOne(SalaryProfile::class);
+    }
+
+    public function salaryAdvances(): HasMany
+    {
+        return $this->hasMany(SalaryAdvance::class);
+    }
+
+    public function payrollLines(): HasMany
+    {
+        return $this->hasMany(PayrollLine::class);
     }
 
     public function licences(): HasMany

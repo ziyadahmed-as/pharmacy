@@ -84,6 +84,10 @@ final class Permissions
             'attendance.manage' => ['module' => 'staff', 'active' => true, 'roles' => [$OW, $PM, $PS]],
             'leave.request' => ['module' => 'staff', 'active' => true, 'roles' => [$OW, $PM, $PS]],
             'leave.manage' => ['module' => 'staff', 'active' => true, 'roles' => [$OW, $PM]],
+            // --- Payroll (Stage 7, UC-42) ---
+            'payroll.manage' => ['module' => 'finance', 'active' => true, 'roles' => [$OW, $PM]],
+            'payroll.view' => ['module' => 'finance', 'active' => true, 'roles' => [$OW, $PM]],
+            'payroll.view.own' => ['module' => 'finance', 'active' => true, 'roles' => [$PS]],
         ];
     }
 
