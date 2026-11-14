@@ -31,6 +31,7 @@ return [
     'restore_checklist' => 'Restore Checklist',
     'expenses' => 'Operating expenses',
     'cash_revenue' => 'Cash & revenue summaries',
+    'reports' => 'Reports & Analytics',
     'group' => [
         'catalogue' => 'Catalogue',
         'inventory' => 'Inventory',

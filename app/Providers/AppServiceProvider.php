@@ -18,6 +18,7 @@ use App\Approvals\Handlers\VoidSaleHandler;
 use App\Contracts\ExpiredBatchQuarantiner;
 use App\Enums\Role;
 use App\Models\User;
+use App\Reports\ReportRegistry;
 use App\Services\ExpiredBatchQuarantinerService;
 use App\Services\SettingsRepository;
 use App\Support\Permissions;
@@ -33,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(SettingsRepository::class);
         $this->app->singleton(ExpiredBatchQuarantiner::class, ExpiredBatchQuarantinerService::class);
+        $this->app->singleton(ReportRegistry::class);
 
         // Approval handlers (UC-34): later use cases add their handler class here.
         $handlers = [

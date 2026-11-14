@@ -11,6 +11,7 @@ use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\PrescriptionExportController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RefundReceiptController;
+use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\ShiftSummaryController;
 use App\Http\Controllers\StaffPhotoController;
 use App\Http\Controllers\StockExportController;
@@ -41,6 +42,7 @@ use App\Livewire\Pos as PosUi;
 use App\Livewire\Prescriptions\Register;
 use App\Livewire\Prescriptions\Search;
 use App\Livewire\Quarantine as QuarantineUi;
+use App\Livewire\Reports\Run;
 use App\Livewire\Returns as ReturnsUi;
 use App\Livewire\Sales as SalesUi;
 use App\Livewire\Settings as SettingsUi;
@@ -201,6 +203,12 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/finance/cash-revenue', CashRevenue::class)->middleware('can:finance.expense.view')->name('finance.cash-revenue');
             Route::get('/finance/cash-revenue/export/{format}', [CashRevenueExportController::class, 'export'])->whereIn('format', ['csv', 'excel', 'pdf'])->middleware('can:finance.expense.view')->name('finance.cash-revenue.export');
             Route::get('/finance/cash-revenue/print', [CashRevenueExportController::class, 'print'])->middleware('can:finance.expense.view')->name('finance.cash-revenue.print');
+
+            // UC-30: Generate and export reports (Stage 6)
+            Route::get('/reports', App\Livewire\Reports\Index::class)->middleware('can:access-business-data')->name('reports.index');
+            Route::get('/reports/{type}', Run::class)->middleware('can:access-business-data')->name('reports.run');
+            Route::get('/reports/{type}/export/{format}', [ReportExportController::class, 'export'])->whereIn('format', ['csv', 'excel', 'pdf'])->middleware('can:access-business-data')->name('reports.export');
+            Route::get('/reports/{type}/print', [ReportExportController::class, 'print'])->middleware('can:access-business-data')->name('reports.print');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

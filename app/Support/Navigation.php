@@ -76,7 +76,9 @@ final class Navigation
                 ['label' => 'nav.cash_revenue', 'route' => 'finance.cash-revenue', 'any' => ['finance.expense.view']],
                 ['label' => 'nav.expenses', 'route' => 'finance.expenses.index', 'any' => ['finance.expense.view']],
             ]],
-            ['key' => 'reports', 'items' => []],
+            ['key' => 'reports', 'items' => [
+                ['label' => 'nav.reports', 'route' => 'reports.index', 'any' => ['catalogue.view', 'stock.view', 'shifts.view', 'prescriptions.view', 'audit.view', 'finance.expense.view']],
+            ]],
             ['key' => 'staff', 'items' => [
                 ['label' => 'nav.staff', 'route' => 'staff.index', 'any' => ['staff.manage', 'staff.view.own']],
             ]],

@@ -31,6 +31,7 @@ return [
     'restore_checklist' => 'የመልሶ ማግኛ ማረጋገጫ',
     'expenses' => 'የስራ ማስኬጃ ወጪዎች',
     'cash_revenue' => 'የጥሬ ገንዘብ እና የገቢ ማጠቃለያዎች',
+    'reports' => 'ሪፖርቶች እና ትንታኔዎች',
     'group' => [
         'catalogue' => 'ካታሎግ',
         'inventory' => 'ክምችት',
