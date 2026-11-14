@@ -16,6 +16,7 @@ return [
     'stock_on_hand' => 'Stock on hand',
     'stock_ledger' => 'Stock ledger',
     'quarantine' => 'Quarantine stock',
+    'stock_adjustments' => 'Stock adjustments',
     'receive_stock' => 'Receive stock',
     'pos' => 'Point of Sale (POS)',
     'open_shift' => 'Open shift',

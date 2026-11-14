@@ -27,6 +27,7 @@ return [
     'running_balance_mismatch' => 'Controlled drug register running balance (:register) must equal stock ledger balance (:ledger).',
     'second_person_required' => 'Non-dispensing movements of controlled drugs require a second named person.',
     'second_person_cannot_be_same' => 'The second named person cannot be the same as the initiating user.',
+    'second_person_invalid' => 'The selected witness is invalid or unauthorized.',
     'unauthorized_to_dispense_licence' => 'You must hold a valid, unexpired professional licence to dispense controlled drugs.',
     'patient_prescriber_required' => 'Patient name and prescriber name must both be confirmed for controlled drug dispensing.',
     'register_immutable' => 'The controlled drug register is append-only and cannot be updated or deleted.',

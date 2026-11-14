@@ -558,3 +558,12 @@
 [2026-11-11 04:51:00] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
 [2026-11-11 04:52:17] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
 [2026-11-11 05:19:16] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
+[2026-11-14 07:12:48] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 07:12:48] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 07:14:57] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 07:14:57] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 07:16:31] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 07:16:31] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 07:19:55] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
+[2026-11-14 07:20:03] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 07:20:04] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 

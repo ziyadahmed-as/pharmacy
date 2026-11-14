@@ -27,6 +27,7 @@ return [
     'running_balance_mismatch' => 'የመዝገቡ ቀሪ ሂሳብ (:register) ከስቶክ ሌጀር ቀሪ (:ledger) ጋር እኩል መሆን አለበት።',
     'second_person_required' => 'ከማስተላለፍ ውጪ ያሉ የቁጥጥር ስር መድሃኒት እንቅስቃሴዎች ሁለተኛ ምስክር ያስፈልጋቸዋል።',
     'second_person_cannot_be_same' => 'ሁለተኛው ምስክር ከመዝጋቢው ሰው ጋር አንድ አይነት መሆን አይችልም።',
+    'second_person_invalid' => 'የተመረጠው ምስክር ልክ ያልሆነ ወይም ያልተፈቀደለት ነው።',
     'unauthorized_to_dispense_licence' => 'የቁጥጥር ስር መድሃኒት ለመስጠት ትክክለኛ የሙያ ፈቃድ ሊኖርዎ ይገባል።',
     'patient_prescriber_required' => 'የቁጥጥር ስር መድሃኒት ለመስጠት የታካሚ እና የሀኪም ስም መረጋገጥ አለበት።',
     'register_immutable' => 'የቁጥጥር ስር መድሃኒቶች መዝገብ የማይለወጥ እና የማይሰረዝ ነው።',

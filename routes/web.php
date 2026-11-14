@@ -27,6 +27,7 @@ use App\Livewire\Catalogue\Index;
 use App\Livewire\Catalogue\Show;
 use App\Livewire\Closing as ClosingUi;
 use App\Livewire\Dashboard;
+use App\Livewire\Inventory\Adjustments as AdjustmentsUi;
 use App\Livewire\Inventory\Receive;
 use App\Livewire\Inventory\ShowReceipt;
 use App\Livewire\Notifications;
@@ -103,6 +104,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-04: Stock Receipts
             Route::get('/inventory/receive', Receive::class)->middleware('can:stock.receive')->name('inventory.receive');
             Route::get('/inventory/receipts/{receipt}', ShowReceipt::class)->middleware('can:stock.receive')->name('inventory.receipts.show');
+
+            // UC-06: Stock Adjustments
+            Route::get('/inventory/adjustments', AdjustmentsUi\Index::class)->middleware('can:stock.adjust.request')->name('inventory.adjustments.index');
+            Route::get('/inventory/adjustments/create', AdjustmentsUi\Create::class)->middleware('can:stock.adjust.request')->name('inventory.adjustments.create');
 
             // UC-11: Stock on Hand & Ledger
             Route::get('/inventory/stock', StockUi\Index::class)->middleware('can:stock.view')->name('inventory.stock');

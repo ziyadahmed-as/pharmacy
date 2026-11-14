@@ -53,4 +53,9 @@ class Batch extends Model
     {
         return $this->hasMany(QuarantineRecord::class);
     }
+
+    public function sellableStockQuantity(): int
+    {
+        return (int) $this->batchStocks()->where('status', 'sellable')->sum('quantity');
+    }
 }

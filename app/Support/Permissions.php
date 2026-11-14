@@ -55,7 +55,7 @@ final class Permissions
             'stock.receipt.confirm' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $OW]],
             'stock.view' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $PS, $OW]],
             'cost.view' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $OW]],
-            'stock.adjust.request' => ['module' => 'inventory', 'active' => false, 'roles' => [$PM, $PS]],
+            'stock.adjust.request' => ['module' => 'inventory', 'active' => true, 'roles' => [$PM, $PS, $OW]],
             // --- Sales & Shifts (Stage 3) ---
             'shifts.open' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS, $OW]],
             'shifts.view' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS, $OW]],

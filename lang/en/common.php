@@ -44,4 +44,6 @@ return [
     'active' => 'Active',
     'inactive' => 'Inactive',
     'clear_filter' => 'Clear filter',
+    'status_pending' => 'Pending',
+    'processing' => 'Processing...',
 ];

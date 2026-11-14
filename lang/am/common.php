@@ -44,4 +44,6 @@ return [
     'active' => 'ንቁ',
     'inactive' => 'ቦዝኗል',
     'clear_filter' => 'ማጣሪያውን አጽዳ',
+    'status_pending' => 'በመጠባበቅ ላይ',
+    'processing' => 'በሂደት ላይ...',
 ];
