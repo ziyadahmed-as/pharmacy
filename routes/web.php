@@ -82,6 +82,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
         Route::middleware('acting.role')->group(function () {
             Route::get('/dashboard', Dashboard::class)->name('dashboard');
+            Route::get('/owner/dashboard', App\Livewire\Owner\Dashboard::class)->middleware('can:role-owner')->name('owner.dashboard');
             Route::get('/notifications', Notifications::class)->name('notifications');
             Route::get('/security', Security::class)->name('security');
 
