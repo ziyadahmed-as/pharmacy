@@ -146,4 +146,3 @@ class Index extends Component
         ]);
     }
 }
-

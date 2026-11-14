@@ -76,4 +76,3 @@ return [
     'owner_must_approve' => 'The Owner must approve a stocktake initiated by the Pharmacy Manager.',
     'initiator_cannot_approve' => 'The person who initiated the stocktake cannot approve it.',
 ];
-

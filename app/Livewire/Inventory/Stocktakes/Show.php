@@ -216,8 +216,8 @@ class Show extends Component
         }
 
         $creator = $this->stocktake->createdBy;
-        if ($creator && $creator->hasRole(\App\Enums\Role::PharmacyManager)) {
-            return $user->hasRole(\App\Enums\Role::Owner);
+        if ($creator && $creator->hasRole(Role::PharmacyManager)) {
+            return $user->hasRole(Role::Owner);
         }
 
         return $user->hasAnyRole(['pharmacy_manager', 'owner'])
@@ -240,4 +240,3 @@ class Show extends Component
         ]);
     }
 }
-

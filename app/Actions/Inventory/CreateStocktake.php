@@ -2,10 +2,7 @@
 
 namespace App\Actions\Inventory;
 
-use App\Enums\Role;
 use App\Models\Batch;
-use App\Models\BatchStock;
-use App\Models\Product;
 use App\Models\Stocktake;
 use App\Models\StocktakeLine;
 use App\Models\User;
@@ -137,4 +134,3 @@ class CreateStocktake
         });
     }
 }
-

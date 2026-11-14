@@ -3,16 +3,15 @@
 use App\Actions\Inventory\ApproveStocktake;
 use App\Actions\Inventory\CreateStocktake;
 use App\Actions\Inventory\RecordStocktakeCount;
-use App\Enums\Role as RoleEnum;
 use App\Livewire\Inventory\Stocktakes\Index;
 use App\Livewire\Inventory\Stocktakes\Show;
 use App\Models\AuditLog;
 use App\Models\Batch;
+use App\Models\Category;
 use App\Models\ControlledDrugRegister;
 use App\Models\Product;
-use App\Models\Stocktake;
-use App\Models\StocktakeLine;
 use App\Models\StockMovement;
+use App\Models\Stocktake;
 use App\Services\SettingsRepository;
 use App\Services\StockMovementService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -78,11 +77,14 @@ test('full stocktake creates a count sheet with every sellable batch', function 
 test('partial stocktake scoped by category creates lines only for that category', function () {
     $pm = pm();
 
-    $catProduct = makeStocktakeProduct(['category_id' => 7]);
+    $cat1 = Category::create(['name' => 'Antibiotics']);
+    $cat2 = Category::create(['name' => 'Analgesics']);
+
+    $catProduct = makeStocktakeProduct(['category_id' => $cat1->id]);
     $catBatch = makeStocktakeBatch($catProduct);
     StockMovementService::post($catBatch, 20, 'receipt', $catProduct, $pm, 'sellable');
 
-    $otherProduct = makeStocktakeProduct(['brand' => 'Other Med', 'generic_name' => 'Other', 'category_id' => 99]);
+    $otherProduct = makeStocktakeProduct(['brand' => 'Other Med', 'generic_name' => 'Other', 'category_id' => $cat2->id]);
     $otherBatch = makeStocktakeBatch($otherProduct);
     StockMovementService::post($otherBatch, 40, 'receipt', $otherProduct, $pm, 'sellable');
 
@@ -90,7 +92,7 @@ test('partial stocktake scoped by category creates lines only for that category'
     $stocktake = app(CreateStocktake::class)->execute($pm, [
         'type' => 'partial',
         'scope_type' => 'category',
-        'scope_value' => '7',
+        'scope_value' => (string) $cat1->id,
     ]);
 
     expect($stocktake->type)->toBe('partial')

@@ -2,7 +2,7 @@
 
 namespace App\Actions\Inventory;
 
-use App\Models\AdjustmentRequest;
+use App\Enums\Role;
 use App\Models\Stocktake;
 use App\Models\StocktakeLine;
 use App\Models\User;
@@ -189,8 +189,8 @@ class ApproveStocktake
 
         // If the PM created it, only the Owner may approve (like UC-06 A2)
         $creator = $stocktake->createdBy;
-        if ($creator && $creator->hasRole(\App\Enums\Role::PharmacyManager)) {
-            if (! $approver->hasRole(\App\Enums\Role::Owner)) {
+        if ($creator && $creator->hasRole(Role::PharmacyManager)) {
+            if (! $approver->hasRole(Role::Owner)) {
                 throw new AuthorizationException(__('stocktake.owner_must_approve'));
             }
         }
@@ -201,4 +201,3 @@ class ApproveStocktake
         }
     }
 }
-

@@ -5,7 +5,6 @@ namespace App\Actions\Inventory;
 use App\Models\Stocktake;
 use App\Models\StocktakeLine;
 use App\Models\User;
-use App\Services\AuditLogger;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -119,4 +118,3 @@ class RecordStocktakeCount
         return $line;
     }
 }
-

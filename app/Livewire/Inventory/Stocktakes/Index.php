@@ -60,7 +60,7 @@ class Index extends Component
         $this->showCreateModal = false;
     }
 
-    public function createStocktake(CreateStocktake $action): void
+    public function createStocktake(CreateStocktake $action)
     {
         $this->errorMessage = null;
         $user = Auth::user();
@@ -105,4 +105,3 @@ class Index extends Component
         ]);
     }
 }
-

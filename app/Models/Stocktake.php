@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,16 +12,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * Stocktake session (UC-07).
  *
  * @property int $id
- * @property string $type  full|partial
- * @property string|null $scope_type  location|category
+ * @property string $type full|partial
+ * @property string|null $scope_type location|category
  * @property string|null $scope_value
- * @property string $status  draft|counting|review|approved|rejected
+ * @property string $status draft|counting|review|approved|rejected
  * @property int $created_by
  * @property int|null $approved_by
- * @property \Carbon\Carbon|null $approved_at
+ * @property Carbon|null $approved_at
  * @property string|null $rejection_reason
- * @property \Carbon\Carbon $created_at
- * @property \Carbon\Carbon $updated_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
  */
 class Stocktake extends Model
 {
@@ -129,4 +130,3 @@ class Stocktake extends Model
         return $this->lines()->whereNull('counted_qty')->doesntExist();
     }
 }
-

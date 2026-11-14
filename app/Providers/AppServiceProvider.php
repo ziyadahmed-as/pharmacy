@@ -42,7 +42,7 @@ class AppServiceProvider extends ServiceProvider
             VoidSaleHandler::class,
             RefundApprovalHandler::class,
             StockAdjustmentHandler::class,
-            \App\Approvals\Handlers\StockAdjustmentHandler::class,
+            StockAdjustmentHandler::class,
         ];
         $this->app->tag($handlers, 'approval.handlers');
         $this->app->singleton(ApprovalHandlerRegistry::class, fn ($app) => new ApprovalHandlerRegistry($app->tagged('approval.handlers')));

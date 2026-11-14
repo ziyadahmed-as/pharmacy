@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -11,13 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property int $stocktake_id
  * @property int $batch_id
- * @property int $system_qty   Snapshot at stocktake creation
+ * @property int $system_qty Snapshot at stocktake creation
  * @property int|null $counted_qty
- * @property int|null $variance   counted_qty - system_qty
+ * @property int|null $variance counted_qty - system_qty
  * @property int|null $recount_qty
  * @property int|null $counted_by
  * @property int|null $second_person_id
- * @property \Carbon\Carbon|null $counted_at
+ * @property Carbon|null $counted_at
  */
 class StocktakeLine extends Model
 {
@@ -110,4 +111,3 @@ class StocktakeLine extends Model
         return $varianceValueSantim > $thresholdSantim;
     }
 }
-

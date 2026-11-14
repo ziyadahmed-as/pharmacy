@@ -76,4 +76,3 @@ return [
     'owner_must_approve' => 'ባለቤቱ የሥራ አስኪያጁ የጀመረውን ቆጠራ ማጽደቅ አለበት።',
     'initiator_cannot_approve' => 'ቆጠራ የጀመረው ሰው ሊያጸድቀው አይችልም።',
 ];
-
