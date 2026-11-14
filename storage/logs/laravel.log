@@ -567,3 +567,7 @@
 [2026-11-14 07:19:55] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
 [2026-11-14 07:20:03] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
 [2026-11-14 07:20:04] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-14 07:45:34] local.ERROR: A void function must not return a value {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): A void function must not return a value at C:/Users/hp/Pictures/2019/phbarmacy/Pharmacy-Stage1/PMS12/app/Livewire/Inventory/Stocktakes/Index.php:81)
+[stacktrace]
+#0 {main}
+"} 

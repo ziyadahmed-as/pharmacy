@@ -57,6 +57,7 @@ final class Navigation
                 ['label' => 'nav.stock_ledger', 'route' => 'inventory.ledger', 'any' => ['stock.view']],
                 ['label' => 'nav.quarantine', 'route' => 'inventory.quarantine', 'any' => ['stock.view']],
                 ['label' => 'nav.stock_adjustments', 'route' => 'inventory.adjustments.index', 'any' => ['stock.adjust.request']],
+                ['label' => 'nav.stocktakes', 'route' => 'inventory.stocktakes.index', 'any' => ['stock.stocktake']],
                 ['label' => 'nav.receive_stock', 'route' => 'inventory.receive', 'any' => ['stock.receive']],
             ]],
             ['key' => 'sales', 'items' => [

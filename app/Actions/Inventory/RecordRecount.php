@@ -54,3 +54,4 @@ class RecordRecount
         return $adjustmentRequest->fresh();
     }
 }
+

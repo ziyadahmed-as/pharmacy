@@ -17,6 +17,7 @@ return [
     'stock_ledger' => 'የክምችት እንቅስቃሴ መዝገብ',
     'quarantine' => 'የተለየ ክምችት',
     'stock_adjustments' => 'የክምችት ማስተካከያዎች',
+    'stocktakes' => 'ስቶክ ቆጠራ',
     'receive_stock' => 'ክምችት ተረከብ',
     'pos' => 'የሽያጭ ቦታ (POS)',
     'open_shift' => 'ፈረቃ ክፈት',
