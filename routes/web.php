@@ -50,6 +50,7 @@ use App\Livewire\Sales as SalesUi;
 use App\Livewire\Settings as SettingsUi;
 use App\Livewire\Shifts as ShiftsUi;
 use App\Livewire\Staff as StaffUi;
+use App\Livewire\Staff\Attendance\Leave;
 use App\Livewire\Stock as StockUi;
 use App\Livewire\Tills as TillsUi;
 use App\Livewire\Users as UsersUi;
@@ -99,6 +100,14 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/roster', StaffUi\Roster\Index::class)
                 ->middleware('can:viewAny,App\Models\RosterEntry')
                 ->name('roster.index');
+
+            // UC-41: attendance and leave
+            Route::get('/attendance', StaffUi\Attendance\Index::class)
+                ->middleware('can:attendance.manage')
+                ->name('attendance.index');
+            Route::get('/attendance/leave', Leave::class)
+                ->middleware('can:leave.request')
+                ->name('attendance.leave');
 
             // UC-35 / UC-36: user accounts, recovery (row actions on the list)
             Route::get('/users', UsersUi\Index::class)->middleware('can:users.view')->name('users.index');

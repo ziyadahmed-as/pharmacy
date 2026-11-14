@@ -43,6 +43,21 @@ class Staff extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function leaveBalances(): HasMany
+    {
+        return $this->hasMany(LeaveBalance::class);
+    }
+
+    public function leaveRequests(): HasMany
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
     public function licences(): HasMany
     {
         return $this->hasMany(StaffLicence::class)->orderByDesc('expires_at')->orderByDesc('id');

@@ -27,6 +27,7 @@ use App\Reports\Definitions\Sales\SalesByProductReport;
 use App\Reports\Definitions\Sales\SalesByStaffReport;
 use App\Reports\Definitions\Sales\SalesReturnsRefundsReport;
 use App\Reports\Definitions\Sales\SalesSummaryReport;
+use App\Reports\Definitions\Staff\MonthlyAttendanceReport;
 
 /**
  * Registry of all available report definitions (UC-30).
@@ -75,6 +76,9 @@ class ReportRegistry
         $this->register(new AuditAdjustmentsReport);
         $this->register(new AuditDisposalsReport);
         $this->register(new AuditPriceChangesReport);
+
+        // Staff (UC-41)
+        $this->register(new MonthlyAttendanceReport);
     }
 
     public function register(ReportDefinition $report): void
@@ -110,6 +114,7 @@ class ReportRegistry
             'inventory' => ['title' => __('reports.category_inventory'), 'reports' => []],
             'compliance' => ['title' => __('reports.category_compliance'), 'reports' => []],
             'audit' => ['title' => __('reports.category_audit'), 'reports' => []],
+            'staff' => ['title' => __('reports.category_staff'), 'reports' => []],
         ];
 
         foreach ($available as $key => $report) {

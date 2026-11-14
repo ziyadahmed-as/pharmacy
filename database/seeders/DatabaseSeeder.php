@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             BootstrapSeeder::class,
             UserSeeder::class,
             TillSeeder::class,
+            LeaveTypeSeeder::class,
         ]);
     }
 }

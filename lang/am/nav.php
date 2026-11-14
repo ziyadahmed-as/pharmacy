@@ -7,6 +7,8 @@ return [
     'security' => 'የእኔ ደህንነት',
     'staff' => 'የሠራተኛ መዛግብት',
     'roster' => 'የፈረቃ ድልድል',
+    'attendance' => 'የስራ መኖር',
+    'leave' => 'የፍቃድ ጥያቄዎች',
     'approvals' => 'ማጽደቂያዎች',
     'users' => 'የተጠቃሚ መለያዎች',
     'account_recovery' => 'የመለያ ማገገሚያ',

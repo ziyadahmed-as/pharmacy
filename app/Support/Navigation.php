@@ -82,6 +82,8 @@ final class Navigation
             ['key' => 'staff', 'items' => [
                 ['label' => 'nav.staff', 'route' => 'staff.index', 'any' => ['staff.manage', 'staff.view.own']],
                 ['label' => 'nav.roster', 'route' => 'roster.index', 'any' => ['staff.manage', 'staff.view.own']],
+                ['label' => 'nav.attendance', 'route' => 'attendance.index', 'any' => ['attendance.manage', 'attendance.view', 'attendance.view.own']],
+                ['label' => 'nav.leave', 'route' => 'attendance.leave', 'any' => ['leave.request', 'leave.manage']],
             ]],
             ['key' => 'administration', 'items' => [
                 ['label' => 'nav.approvals', 'route' => 'approvals.index', 'any' => ['approvals.request']],

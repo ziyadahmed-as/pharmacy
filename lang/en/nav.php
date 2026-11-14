@@ -7,6 +7,8 @@ return [
     'security' => 'My security',
     'staff' => 'Staff records',
     'roster' => 'Roster & shifts',
+    'attendance' => 'Attendance',
+    'leave' => 'Leave requests',
     'approvals' => 'Approvals',
     'users' => 'User accounts',
     'account_recovery' => 'Account recovery',

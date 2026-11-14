@@ -78,6 +78,12 @@ final class Permissions
             'finance.expense.record' => ['module' => 'finance', 'active' => true, 'roles' => [$OW, $PM]],
             'finance.expense.view' => ['module' => 'finance', 'active' => true, 'roles' => [$OW, $PM]],
             'reports.financial' => ['module' => 'reports', 'active' => false, 'roles' => [$OW, $PM]],
+            // --- Attendance & Leave (Stage 7, UC-41) ---
+            'attendance.view.own' => ['module' => 'staff', 'active' => true, 'roles' => [$PS]],
+            'attendance.view' => ['module' => 'staff', 'active' => true, 'roles' => [$OW, $PM]],
+            'attendance.manage' => ['module' => 'staff', 'active' => true, 'roles' => [$OW, $PM, $PS]],
+            'leave.request' => ['module' => 'staff', 'active' => true, 'roles' => [$OW, $PM, $PS]],
+            'leave.manage' => ['module' => 'staff', 'active' => true, 'roles' => [$OW, $PM]],
         ];
     }
 
