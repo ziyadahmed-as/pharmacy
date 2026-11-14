@@ -28,6 +28,7 @@ use App\Livewire\Catalogue\Index;
 use App\Livewire\Catalogue\Show;
 use App\Livewire\Closing as ClosingUi;
 use App\Livewire\Dashboard;
+use App\Livewire\Finance\Expenses as ExpensesUi;
 use App\Livewire\Inventory\Adjustments as AdjustmentsUi;
 use App\Livewire\Inventory\Disposals as DisposalsUi;
 use App\Livewire\Inventory\Receive;
@@ -46,6 +47,7 @@ use App\Livewire\Staff as StaffUi;
 use App\Livewire\Stock as StockUi;
 use App\Livewire\Tills as TillsUi;
 use App\Livewire\Users as UsersUi;
+use App\Models\Expense;
 use App\Models\Prescription;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -182,6 +184,16 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             Route::get('/controlled-drugs/register', App\Livewire\ControlledDrugs\Register::class)->middleware('can:controlled_drugs.view')->name('controlled-drugs.register');
             Route::get('/controlled-drugs/export/{format}', ControlledDrugExportController::class)->middleware('can:controlled_drugs.export')->name('controlled-drugs.export');
+
+            // UC-28: Operating expenses (Stage 6)
+            Route::get('/finance/expenses', ExpensesUi\Index::class)->middleware('can:finance.expense.view')->name('finance.expenses.index');
+            Route::get('/finance/expenses/{expense}/proof', function (Expense $expense) {
+                abort_unless(auth()->user()?->hasPermission('finance.expense.view'), 403);
+                abort_if(auth()->user()->hasRole(Role::SystemAdmin), 403);
+                abort_unless($expense->proof_path && Storage::disk('private')->exists($expense->proof_path), 404);
+
+                return Storage::disk('private')->response($expense->proof_path);
+            })->middleware('can:finance.expense.view')->name('finance.expenses.proof');
 
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');

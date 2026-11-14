@@ -72,7 +72,9 @@ final class Navigation
                 ['label' => 'nav.controlled_drug_register', 'route' => 'controlled-drugs.register', 'any' => ['controlled_drugs.view']],
             ]],
             ['key' => 'customers', 'items' => []],
-            ['key' => 'finance', 'items' => []],
+            ['key' => 'finance', 'items' => [
+                ['label' => 'nav.expenses', 'route' => 'finance.expenses.index', 'any' => ['finance.expense.view']],
+            ]],
             ['key' => 'reports', 'items' => []],
             ['key' => 'staff', 'items' => [
                 ['label' => 'nav.staff', 'route' => 'staff.index', 'any' => ['staff.manage', 'staff.view.own']],

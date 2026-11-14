@@ -75,6 +75,8 @@ final class Permissions
             'controlled_drugs.view' => ['module' => 'prescriptions', 'active' => true, 'roles' => [$OW, $PM]],
             'controlled_drugs.export' => ['module' => 'prescriptions', 'active' => true, 'roles' => [$OW, $PM]],
             'backup.run' => ['module' => 'administration', 'active' => true, 'roles' => [$SA]],
+            'finance.expense.record' => ['module' => 'finance', 'active' => true, 'roles' => [$OW, $PM]],
+            'finance.expense.view' => ['module' => 'finance', 'active' => true, 'roles' => [$OW, $PM]],
             'reports.financial' => ['module' => 'reports', 'active' => false, 'roles' => [$OW, $PM]],
         ];
     }

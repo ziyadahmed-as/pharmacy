@@ -29,6 +29,7 @@ return [
     'controlled_drug_register' => 'Controlled Drug Register',
     'backups' => 'Backups & Recovery',
     'restore_checklist' => 'Restore Checklist',
+    'expenses' => 'Operating expenses',
     'group' => [
         'catalogue' => 'Catalogue',
         'inventory' => 'Inventory',

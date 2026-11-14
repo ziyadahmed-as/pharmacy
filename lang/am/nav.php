@@ -29,6 +29,7 @@ return [
     'controlled_drug_register' => 'የቁጥጥር ስር መድሃኒቶች መዝገብ',
     'backups' => 'የመረጃ ምትኬ እና ማግኛ',
     'restore_checklist' => 'የመልሶ ማግኛ ማረጋገጫ',
+    'expenses' => 'የስራ ማስኬጃ ወጪዎች',
     'group' => [
         'catalogue' => 'ካታሎግ',
         'inventory' => 'ክምችት',
