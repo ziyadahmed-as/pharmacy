@@ -96,3 +96,4 @@ class SubmitPayrollApproval
         return $payrollRun->fresh();
     }
 }
+

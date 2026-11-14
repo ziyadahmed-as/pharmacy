@@ -239,6 +239,14 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                 ->middleware('can:access-business-data')
                 ->name('payroll.payslip');
 
+            // UC-42: Process basic payroll (Stage 7)
+            Route::get('/finance/payroll', App\Livewire\Finance\Payroll\Index::class)
+                ->middleware('can:access-business-data')
+                ->name('payroll.index');
+            Route::get('/finance/payroll/payslip/{payrollLine}', App\Http\Controllers\PayslipDownloadController::class)
+                ->middleware('can:access-business-data')
+                ->name('payroll.payslip');
+
             // UC-30: Generate and export reports (Stage 6)
             Route::get('/reports', App\Livewire\Reports\Index::class)->middleware('can:access-business-data')->name('reports.index');
             Route::get('/reports/{type}', Run::class)->middleware('can:access-business-data')->name('reports.run');

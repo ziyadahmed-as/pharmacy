@@ -58,3 +58,4 @@ class SalaryAdvance extends Model
         return $this->belongsTo(PayrollRun::class);
     }
 }
+

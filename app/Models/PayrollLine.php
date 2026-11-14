@@ -48,3 +48,4 @@ class PayrollLine extends Model
         return $this->belongsTo(Staff::class);
     }
 }
+
