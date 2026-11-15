@@ -10,7 +10,9 @@ use App\Models\ProductPrice;
 use App\Models\Sale;
 use App\Models\Shift;
 use App\Models\Till;
+use App\Support\AppendOnly;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 beforeEach(fn () => seedRoles());
@@ -274,9 +276,13 @@ test('pms:verify-sale-lines command detects mismatched or negative line subtotal
         idempotencyKey: (string) Str::uuid()
     );
 
-    // Corrupt one line subtotal to simulate legacy bad data
+    // Corrupt one line subtotal to simulate legacy bad data from before constraints existed
+    AppendOnly::drop('sale_lines');
+    AppendOnly::dropCheckConstraint('sale_lines', 'chk_sale_lines_subtotal');
     $line = $sale->lines()->first();
-    $line->update(['subtotal' => -500]);
+    DB::table('sale_lines')->where('id', $line->id)->update(['subtotal' => 500]);
+    AppendOnly::create('sale_lines');
+    AppendOnly::addCheckConstraint('sale_lines', 'chk_sale_lines_subtotal', 'subtotal >= 0', 'NEW.subtotal >= 0');
 
     $this->artisan('pms:verify-sale-lines')
         ->expectsOutputToContain('Found 1 sale(s) with mismatched line subtotals:')
