@@ -56,52 +56,57 @@ class Run extends Component
         $definition = $registry->get($type);
         abort_unless($definition && $definition->canView($user), 403);
 
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
+
         if ($this->startDate === '') {
-            $this->startDate = now()->startOfMonth()->toDateString();
+            $this->startDate = now()->timezone($tz)->startOfMonth()->format('Y-m-d');
         }
 
         if ($this->endDate === '') {
-            $this->endDate = now()->toDateString();
+            $this->endDate = business_date();
         }
     }
 
     public function setToday(): void
     {
         $this->mode = 'day';
-        $this->startDate = now()->toDateString();
-        $this->endDate = now()->toDateString();
+        $this->startDate = business_date();
+        $this->endDate = business_date();
         $this->groupBy = 'day';
     }
 
     public function setYesterday(): void
     {
         $this->mode = 'day';
-        $this->startDate = now()->subDay()->toDateString();
-        $this->endDate = now()->subDay()->toDateString();
+        $this->startDate = business_date(now()->subDay());
+        $this->endDate = business_date(now()->subDay());
         $this->groupBy = 'day';
     }
 
     public function setThisWeek(): void
     {
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
         $this->mode = 'week';
-        $this->startDate = now()->startOfWeek()->toDateString();
-        $this->endDate = now()->toDateString();
+        $this->startDate = now()->timezone($tz)->startOfWeek()->format('Y-m-d');
+        $this->endDate = business_date();
         $this->groupBy = 'day';
     }
 
     public function setThisMonth(): void
     {
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
         $this->mode = 'month';
-        $this->startDate = now()->startOfMonth()->toDateString();
-        $this->endDate = now()->toDateString();
+        $this->startDate = now()->timezone($tz)->startOfMonth()->format('Y-m-d');
+        $this->endDate = business_date();
         $this->groupBy = 'day';
     }
 
     public function setThisYear(): void
     {
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
         $this->mode = 'year';
-        $this->startDate = now()->startOfYear()->toDateString();
-        $this->endDate = now()->toDateString();
+        $this->startDate = now()->timezone($tz)->startOfYear()->format('Y-m-d');
+        $this->endDate = business_date();
         $this->groupBy = 'month';
     }
 

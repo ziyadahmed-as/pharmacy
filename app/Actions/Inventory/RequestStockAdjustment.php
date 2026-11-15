@@ -4,6 +4,7 @@ namespace App\Actions\Inventory;
 
 use App\Models\AdjustmentRequest;
 use App\Models\Batch;
+use App\Models\DailyClosing;
 use App\Models\User;
 use App\Services\ApprovalService;
 use App\Services\AuditLogger;
@@ -44,6 +45,10 @@ class RequestStockAdjustment
     {
         if ($user->isSystemAdmin() || ! $user->hasPermission('stock.adjust.request')) {
             throw new AuthorizationException(__('catalogue.unauthorized_stock_adjustment'));
+        }
+
+        if (DailyClosing::isLockedForDate(business_date())) {
+            throw new \RuntimeException(__('closing.day_is_locked_error'));
         }
 
         $batchId = $data['batch_id'] ?? null;
@@ -121,6 +126,10 @@ class RequestStockAdjustment
         }
 
         return DB::transaction(function () use ($user, $batch, $reasonType, $signedQuantity, $writtenReason, $secondPersonId) {
+            if (DailyClosing::isLockedForDate(business_date())) {
+                throw new \RuntimeException(__('closing.day_is_locked_error'));
+            }
+
             // 1. Create Adjustment Request record
             $adj = AdjustmentRequest::create([
                 'batch_id' => $batch->id,

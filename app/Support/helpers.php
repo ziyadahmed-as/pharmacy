@@ -18,3 +18,16 @@ if (! function_exists('local_time')) {
         return $time ? $time->copy()->timezone(config('pms.timezone', 'Africa/Addis_Ababa'))->format($format) : '—';
     }
 }
+
+if (! function_exists('business_date')) {
+    /**
+     * Business date in config('pms.timezone') = Africa/Addis_Ababa (Y-m-d).
+     */
+    function business_date(?CarbonInterface $at = null): string
+    {
+        $timezone = config('pms.timezone', 'Africa/Addis_Ababa');
+        $time = $at ? $at->copy()->timezone($timezone) : now()->timezone($timezone);
+
+        return $time->format('Y-m-d');
+    }
+}

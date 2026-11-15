@@ -58,7 +58,7 @@ class RecordPayrollPayment
             $expense = $this->recordExpense->execute($payer, [
                 'category' => Expense::CATEGORY_SALARIES,
                 'amount' => $payrollRun->total_net,
-                'date' => now()->toDateString(),
+                'date' => business_date(),
                 'description' => $description,
             ]);
 

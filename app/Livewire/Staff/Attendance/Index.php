@@ -119,7 +119,7 @@ class Index extends Component
         $todayRecord = $ownStaff
             ? Attendance::query()
                 ->where('staff_id', $ownStaff->id)
-                ->whereDate('date', today())
+                ->whereDate('date', business_date())
                 ->first()
             : null;
 

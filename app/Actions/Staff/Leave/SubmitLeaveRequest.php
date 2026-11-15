@@ -57,8 +57,8 @@ class SubmitLeaveRequest
         $leaveRequest = LeaveRequest::create([
             'staff_id' => $staff->id,
             'leave_type_id' => $leaveType->id,
-            'start_date' => $start->toDateString(),
-            'end_date' => $end->toDateString(),
+            'start_date' => business_date($start),
+            'end_date' => business_date($end),
             'days' => $days,
             'reason' => $reason,
             'status' => LeaveRequest::STATUS_PENDING,

@@ -38,7 +38,7 @@ class Day extends Component
         $user = Auth::user();
         abort_unless($user?->hasRole(Role::PharmacyManager) || $user?->hasRole(Role::Owner), 403);
 
-        $this->selectedDate = $date ? Carbon::parse($date)->toDateString() : Carbon::today()->toDateString();
+        $this->selectedDate = $date ? business_date(Carbon::parse($date)) : business_date();
         $this->loadDateData();
     }
 

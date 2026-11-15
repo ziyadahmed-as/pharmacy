@@ -88,9 +88,17 @@ class DailyClosing extends Model
         return $this->status === self::STATUS_LOCKED;
     }
 
-    public static function isLockedForDate(string|CarbonInterface $date): bool
+    public static function isLockedForDate(string|CarbonInterface|null $date = null): bool
     {
-        $dateStr = $date instanceof CarbonInterface ? $date->toDateString() : Carbon::parse($date)->toDateString();
+        if ($date === null) {
+            $dateStr = business_date();
+        } elseif ($date instanceof CarbonInterface) {
+            $dateStr = business_date($date);
+        } elseif (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            $dateStr = $date;
+        } else {
+            $dateStr = business_date(Carbon::parse($date));
+        }
 
         return static::query()
             ->where('date', $dateStr)

@@ -60,13 +60,14 @@ abstract class BaseReportDefinition implements ReportDefinition
      */
     protected function parseDateRange(array $filters): array
     {
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
         $start = ! empty($filters['start_date'])
-            ? Carbon::parse($filters['start_date'])->toDateString()
-            : now()->startOfMonth()->toDateString();
+            ? business_date(Carbon::parse($filters['start_date']))
+            : now()->timezone($tz)->startOfMonth()->format('Y-m-d');
 
         $end = ! empty($filters['end_date'])
-            ? Carbon::parse($filters['end_date'])->toDateString()
-            : now()->toDateString();
+            ? business_date(Carbon::parse($filters['end_date']))
+            : business_date();
 
         if (Carbon::parse($start)->isAfter(Carbon::parse($end))) {
             [$start, $end] = [$end, $start];

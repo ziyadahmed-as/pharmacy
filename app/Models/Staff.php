@@ -87,7 +87,7 @@ class Staff extends Model
     /** Valid on a date: expires_at is inclusive (a licence expiring today is still valid today). */
     public function hasValidLicence(?CarbonInterface $on = null): bool
     {
-        $day = ($on ?? now())->copy()->timezone(config('pms.timezone'))->toDateString();
+        $day = business_date($on);
 
         return $this->licences()->whereDate('expires_at', '>=', $day)->exists();
     }

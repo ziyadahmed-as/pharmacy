@@ -7,7 +7,6 @@ use App\Models\LeaveRequest;
 use App\Models\RosterEntry;
 use App\Services\AuditLogger;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Carbon;
 
 /**
  * Flags absences for scheduled staff who did not clock in on a given date (UC-41).
@@ -21,7 +20,7 @@ class RecordDailyAbsences
      */
     public function execute(?CarbonInterface $targetDate = null): array
     {
-        $date = ($targetDate ? Carbon::instance($targetDate) : now())->toDateString();
+        $date = business_date($targetDate);
 
         $rosterEntries = RosterEntry::with('staff')
             ->whereDate('date', $date)

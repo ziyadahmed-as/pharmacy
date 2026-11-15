@@ -18,7 +18,7 @@ class SalesTodayTile extends Component
 
     public function render(): View
     {
-        $today = now()->toDateString();
+        $today = business_date();
 
         $grossSales = (int) Sale::where('status', 'completed')
             ->whereDate('completed_at', $today)

@@ -25,7 +25,7 @@ class OnDutyToday extends Component
 
         $onDuty = RosterEntry::query()
             ->with(['staff.user', 'till'])
-            ->whereDate('date', today())
+            ->whereDate('date', business_date())
             ->orderBy('start_time')
             ->get();
 

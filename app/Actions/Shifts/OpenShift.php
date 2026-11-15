@@ -44,7 +44,7 @@ class OpenShift
         }
 
         // Refuse if day is locked (FR-3.10, AC-24)
-        if (DailyClosing::isLockedForDate(now())) {
+        if (DailyClosing::isLockedForDate(business_date())) {
             throw new \RuntimeException(__('closing.cannot_open_shift_on_locked_day'));
         }
 
@@ -61,6 +61,10 @@ class OpenShift
         return DB::transaction(function () use ($user, $tillModel, $openingFloatSantim) {
             // Lock till row to prevent race conditions
             $lockedTill = Till::where('id', $tillModel->id)->lockForUpdate()->firstOrFail();
+
+            if (DailyClosing::isLockedForDate(business_date())) {
+                throw new \RuntimeException(__('closing.cannot_open_shift_on_locked_day'));
+            }
 
             // Refuse if till already has an open shift (E1, AC-24)
             $existingTillShift = Shift::where('till_id', $lockedTill->id)

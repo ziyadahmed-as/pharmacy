@@ -49,8 +49,8 @@ class Leave extends Component
             abort(403);
         }
 
-        $this->startDate = now()->toDateString();
-        $this->endDate = now()->toDateString();
+        $this->startDate = business_date();
+        $this->endDate = business_date();
     }
 
     public function openForm(): void
@@ -60,8 +60,8 @@ class Leave extends Component
         }
 
         $this->reset(['leaveTypeId', 'startDate', 'endDate', 'reason']);
-        $this->startDate = now()->toDateString();
-        $this->endDate = now()->toDateString();
+        $this->startDate = business_date();
+        $this->endDate = business_date();
         $this->showForm = true;
     }
 

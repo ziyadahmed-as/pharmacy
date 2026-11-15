@@ -24,8 +24,8 @@ class RevenueSummaryQuery
 
     public function __construct(string $startDate, ?string $endDate = null)
     {
-        $this->startDate = Carbon::parse($startDate)->toDateString();
-        $this->endDate = Carbon::parse($endDate ?? $startDate)->toDateString();
+        $this->startDate = business_date(Carbon::parse($startDate));
+        $this->endDate = business_date(Carbon::parse($endDate ?? $startDate));
     }
 
     /**

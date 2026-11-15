@@ -34,7 +34,7 @@ class SendDailySummary
             throw new AuthorizationException(__('dashboard.owner.unauthorized'));
         }
 
-        $today = now()->toDateString();
+        $today = business_date();
         $pharmacyName = (string) setting('profile.name', config('app.name', 'Pharmacy'));
 
         // 1. Sales & Transactions

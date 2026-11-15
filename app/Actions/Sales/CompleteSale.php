@@ -13,6 +13,7 @@ use App\Models\Product;
 use App\Models\ProductUnit;
 use App\Models\Sale;
 use App\Models\SaleLine;
+use App\Models\Shift;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\CurrentShift;
@@ -67,7 +68,7 @@ class CompleteSale
         }
 
         // 1.5. Day lock check (FR-3.10, AC-24)
-        if (DailyClosing::isLockedForDate(now())) {
+        if (DailyClosing::isLockedForDate(business_date())) {
             throw new \RuntimeException(__('closing.day_is_locked_error'));
         }
 
@@ -87,6 +88,17 @@ class CompleteSale
 
         // 3. Atomically check idempotency and complete sale
         return DB::transaction(function () use ($user, $shift, $items, $payments, $idempotencyKey, $prescriptionId, $patientName, $prescriberName, $customerId) {
+            // Lock shift row
+            $lockedShift = Shift::where('id', $shift->id)->lockForUpdate()->first();
+            if (! $lockedShift || ! $lockedShift->isOpen()) {
+                throw new NoOpenShiftException(__('shifts.no_open_shift_error'));
+            }
+
+            // Day lock check inside transaction, after shift row is locked
+            if (DailyClosing::isLockedForDate(business_date())) {
+                throw new \RuntimeException(__('closing.day_is_locked_error'));
+            }
+
             // E5: Check idempotency key under lock
             $existing = Sale::where('idempotency_key', $idempotencyKey)->first();
             if ($existing) {

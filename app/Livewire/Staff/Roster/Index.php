@@ -70,7 +70,7 @@ class Index extends Component
         Gate::authorize('viewAny', RosterEntry::class);
 
         if (empty($this->currentDate)) {
-            $this->currentDate = now()->toDateString();
+            $this->currentDate = business_date();
         }
 
         if (! in_array($this->viewMode, ['week', 'month'], true)) {
@@ -262,7 +262,7 @@ class Index extends Component
             'activeStaff' => $activeStaff,
             'activeTills' => $activeTills,
             'periodTitle' => $periodTitle,
-            'todayDateStr' => today()->toDateString(),
+            'todayDateStr' => business_date(),
         ])->layout('layouts.app', ['title' => __('roster.title')]);
     }
 }
