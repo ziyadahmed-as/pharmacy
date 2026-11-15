@@ -34,6 +34,7 @@ class LedgerQuery
         $query = StockMovement::query()
             ->with([
                 'batch.product',
+                'location',
                 'user',
             ])
             ->orderByDesc('id');
@@ -44,6 +45,10 @@ class LedgerQuery
 
         if (! empty($f['batch_id'])) {
             $query->where('batch_id', $f['batch_id']);
+        }
+
+        if (! empty($f['location_id'])) {
+            $query->where('location_id', $f['location_id']);
         }
 
         if (! empty($f['type'])) {

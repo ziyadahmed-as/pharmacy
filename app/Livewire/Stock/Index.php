@@ -4,6 +4,7 @@ namespace App\Livewire\Stock;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\StorageLocation;
 use App\Services\StockOnHandQuery;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Url;
@@ -29,6 +30,9 @@ class Index extends Component
     #[Url]
     public ?int $category_id = null;
 
+    #[Url]
+    public ?int $location_id = null;
+
     /** @var array<int, bool> */
     public array $expanded = [];
 
@@ -45,7 +49,7 @@ class Index extends Component
 
     public function updating($property): void
     {
-        if (in_array($property, ['search', 'filter', 'category_id'], true)) {
+        if (in_array($property, ['search', 'filter', 'category_id', 'location_id'], true)) {
             $this->resetPage();
         }
     }
@@ -66,6 +70,7 @@ class Index extends Component
             'search' => $this->search ?: null,
             'filter' => $this->filter ?: null,
             'category_id' => $this->category_id ?: null,
+            'location_id' => $this->location_id ?: null,
         ]);
     }
 
@@ -88,6 +93,7 @@ class Index extends Component
             'products' => $products,
             'productMetrics' => $productMetrics,
             'categories' => Category::orderBy('name')->get(['id', 'name']),
+            'locations' => StorageLocation::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']),
             'canViewCost' => $canViewCost,
             'canExport' => $canViewCost,
             'exportQuery' => http_build_query($this->filters()),

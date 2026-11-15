@@ -130,18 +130,28 @@
                 @if ($type === 'partial')
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1">{{ __('stocktake.scope_type') }}</label>
-                        <select wire:model="scope_type" class="block w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20">
+                        <select wire:model.live="scope_type" class="block w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20">
                             <option value="category">{{ __('stocktake.scope_category') }}</option>
+                            <option value="location">{{ __('stocktake.scope_location') }}</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-slate-700 mb-1">{{ __('stocktake.scope_value') }} <span class="text-rose-500">*</span></label>
-                        <input
-                            type="text"
-                            wire:model="scope_value"
-                            placeholder="{{ __('stocktake.scope_value_placeholder') }}"
-                            class="block w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20"
-                        />
+                        @if ($scope_type === 'location')
+                            <select wire:model="scope_value" class="block w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20">
+                                <option value="">{{ __('stocktake.select_location') }}</option>
+                                @foreach ($locations as $loc)
+                                    <option value="{{ $loc->id }}">{{ $loc->name }} ({{ $loc->code }})</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <select wire:model="scope_value" class="block w-full rounded-xl border border-slate-300 py-2.5 px-3 text-sm focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20">
+                                <option value="">{{ __('stocktake.select_category') }}</option>
+                                @foreach ($categories as $cat)
+                                    <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                                @endforeach
+                            </select>
+                        @endif
                         @error('scope_value') <p class="mt-1 text-xs text-rose-600">{{ $message }}</p> @enderror
                     </div>
                 @endif

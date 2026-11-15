@@ -41,10 +41,13 @@ class StockOnHandQuery
         $query = Product::query()
             ->with([
                 'category',
-                'batches' => function ($bQ) use ($batchColumns) {
+                'batches' => function ($bQ) use ($batchColumns, $f) {
                     $bQ->select($batchColumns)
-                        ->with(['stocks' => function ($sQ) {
-                            $sQ->select(['id', 'batch_id', 'location', 'status', 'quantity']);
+                        ->when(! empty($f['location_id']), fn ($q) => $q->whereHas('stocks', fn ($s) => $s->where('location_id', $f['location_id'])))
+                        ->with(['stocks' => function ($sQ) use ($f) {
+                            $sQ->select(['id', 'batch_id', 'location_id', 'status', 'quantity'])
+                                ->with('location')
+                                ->when(! empty($f['location_id']), fn ($q) => $q->where('location_id', $f['location_id']));
                         }])
                         ->orderBy('expiry_date');
                 },
@@ -63,6 +66,11 @@ class StockOnHandQuery
         // Category filter
         if (! empty($f['category_id'])) {
             $query->where('category_id', $f['category_id']);
+        }
+
+        // Location filter
+        if (! empty($f['location_id'])) {
+            $query->whereHas('batches.stocks', fn ($sQ) => $sQ->where('location_id', $f['location_id'])->where('quantity', '>', 0));
         }
 
         // Status filters

@@ -67,6 +67,12 @@ class CreateStocktake
             $batchQuery->whereHas('product', fn (Builder $q) => $q->where('category_id', $scopeValue));
         }
 
+        if ($type === Stocktake::TYPE_PARTIAL && $scopeType === 'location' && $scopeValue) {
+            $batchQuery->whereHas('batchStocks', fn (Builder $q) => $q->where('status', 'sellable')
+                ->where('quantity', '>', 0)
+                ->where('location_id', $scopeValue));
+        }
+
         $batches = $batchQuery->orderBy('id')->get();
 
         if ($batches->isEmpty()) {

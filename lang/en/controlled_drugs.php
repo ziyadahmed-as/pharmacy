@@ -31,4 +31,5 @@ return [
     'unauthorized_to_dispense_licence' => 'You must hold a valid, unexpired professional licence to dispense controlled drugs.',
     'patient_prescriber_required' => 'Patient name and prescriber name must both be confirmed for controlled drug dispensing.',
     'register_immutable' => 'The controlled drug register is append-only and cannot be updated or deleted.',
+    'controlled_cabinet_location_required' => 'Controlled drug products must be stored in a controlled-cabinet location.',
 ];

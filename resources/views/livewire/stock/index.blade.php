@@ -25,7 +25,7 @@
     </div>
 
     <!-- Filters & Search -->
-    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
         <div>
             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{{ __('common.search') }}</label>
             <div class="relative">
@@ -51,6 +51,15 @@
                 <option value="">{{ __('common.all') }}</option>
                 @foreach ($categories as $cat)
                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{{ __('locations.locations') }}</label>
+            <select wire:model.live="location_id" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                <option value="">{{ __('common.all') }}</option>
+                @foreach ($locations as $loc)
+                    <option value="{{ $loc->id }}">{{ $loc->name }} ({{ $loc->code }})</option>
                 @endforeach
             </select>
         </div>
@@ -188,7 +197,7 @@
                                                                     <span class="ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">⏳ NEAR</span>
                                                                 @endif
                                                             </td>
-                                                            <td class="px-4 py-2 text-slate-500">{{ $stock->location ?? '-' }}</td>
+                                                            <td class="px-4 py-2 text-slate-700 font-medium">{{ $stock->location?->name ?? ($stock->location?->code ?? '-') }}</td>
                                                             <td class="px-4 py-2">
                                                                 @if ($stock->status === 'sellable')
                                                                     <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">Sellable</span>

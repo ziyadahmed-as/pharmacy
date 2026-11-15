@@ -6,6 +6,7 @@ use App\Models\Batch;
 use App\Models\BatchStock;
 use App\Models\Sale;
 use App\Models\StockMovement;
+use App\Models\StorageLocation;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -36,13 +37,13 @@ class StockMovementService
         Model $source,
         User $user,
         string $status = 'sellable',
-        ?string $location = null,
+        int|string|null $locationId = null,
         ?string $description = null,
         ?User $secondPerson = null,
         ?string $patientName = null,
         ?string $prescriberName = null
     ): StockMovement {
-        return DB::transaction(function () use ($batch, $signedQuantity, $type, $source, $user, $status, $location, $description, $secondPerson, $patientName, $prescriberName) {
+        return DB::transaction(function () use ($batch, $signedQuantity, $type, $source, $user, $status, $locationId, $description, $secondPerson, $patientName, $prescriberName) {
             $isControlled = $batch->product->classification === 'controlled';
             $handlesControlled = (bool) setting('pharmacy.handles_controlled_drugs', true);
 
@@ -57,11 +58,67 @@ class StockMovementService
                 }
             }
 
+            // Resolve location: integer ID or look up
+            $resolvedLocationId = null;
+            if (is_numeric($locationId)) {
+                $resolvedLocationId = (int) $locationId;
+            } elseif (is_string($locationId) && trim($locationId) !== '') {
+                $loc = StorageLocation::where('code', $locationId)
+                    ->orWhere('name', $locationId)
+                    ->first();
+                $resolvedLocationId = $loc?->id;
+            }
+
+            // Fallback to existing batch stock location or default location
+            if (! $resolvedLocationId) {
+                $existingStock = BatchStock::where('batch_id', $batch->id)
+                    ->where('status', $status)
+                    ->where('quantity', '>', 0)
+                    ->first()
+                    ?? BatchStock::where('batch_id', $batch->id)
+                        ->where('status', $status)
+                        ->first();
+
+                if ($existingStock && $existingStock->location_id) {
+                    $resolvedLocationId = $existingStock->location_id;
+                } elseif ($isControlled) {
+                    $resolvedLocationId = StorageLocation::getDefaultControlledCabinet()?->id;
+                } elseif ($status === 'quarantine') {
+                    $resolvedLocationId = StorageLocation::getDefaultQuarantine()?->id;
+                } else {
+                    $resolvedLocationId = StorageLocation::getDefaultDispensary()?->id;
+                }
+            }
+
+            // Mandatory controlled product location enforcement:
+            // "make the controlled-drug location mandatory for controlled products"
+            if ($isControlled && $status === 'sellable') {
+                $location = StorageLocation::find($resolvedLocationId);
+                if (! $location || $location->type !== StorageLocation::TYPE_CONTROLLED_CABINET) {
+                    throw new RuntimeException(__('controlled_drugs.controlled_cabinet_location_required', [
+                        'default' => 'Controlled drug products must be stored in a controlled-cabinet location.',
+                    ]));
+                }
+            }
+
             $stock = BatchStock::where('batch_id', $batch->id)
                 ->where('status', $status)
-                ->when($location, fn ($q) => $q->where('location', $location), fn ($q) => $q->whereNull('location'))
+                ->when($resolvedLocationId, fn ($q) => $q->where('location_id', $resolvedLocationId), fn ($q) => $q->whereNull('location_id'))
                 ->lockForUpdate()
                 ->first();
+
+            if (! $stock && $resolvedLocationId) {
+                // If there's an existing stock row for this batch and status with NULL location, associate it
+                $stock = BatchStock::where('batch_id', $batch->id)
+                    ->where('status', $status)
+                    ->whereNull('location_id')
+                    ->lockForUpdate()
+                    ->first();
+                if ($stock) {
+                    $stock->location_id = $resolvedLocationId;
+                    $stock->save();
+                }
+            }
 
             if (! $stock) {
                 if ($signedQuantity < 0) {
@@ -71,7 +128,7 @@ class StockMovementService
                 $stock = BatchStock::create([
                     'batch_id' => $batch->id,
                     'status' => $status,
-                    'location' => $location,
+                    'location_id' => $resolvedLocationId,
                     'quantity' => 0,
                 ]);
             }
@@ -90,6 +147,7 @@ class StockMovementService
 
             $movement = StockMovement::create([
                 'batch_id' => $batch->id,
+                'location_id' => $resolvedLocationId,
                 'type' => $type,
                 'quantity' => $signedQuantity,
                 'balance_after' => $newBalance,

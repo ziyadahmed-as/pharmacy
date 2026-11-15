@@ -13,6 +13,7 @@ class StockReceiptLine extends Model
     protected $fillable = [
         'stock_receipt_id',
         'product_id',
+        'location_id',
         'batch_no',
         'manufacturing_date',
         'expiry_date',
@@ -39,5 +40,10 @@ class StockReceiptLine extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(StorageLocation::class, 'location_id');
     }
 }

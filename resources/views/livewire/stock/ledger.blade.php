@@ -44,7 +44,7 @@
     @endif
 
     <!-- Filters & Search -->
-    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-sm grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
         <div>
             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{{ __('common.search') }}</label>
             <div class="relative">
@@ -55,11 +55,21 @@
             </div>
         </div>
         <div>
+            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{{ __('locations.locations') }}</label>
+            <select wire:model.live="location_id" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                <option value="">{{ __('common.all') }}</option>
+                @foreach ($locations as $loc)
+                    <option value="{{ $loc->id }}">{{ $loc->name }} ({{ $loc->code }})</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
             <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">{{ __('catalogue.movement_type') }}</label>
             <select wire:model.live="type" class="block w-full rounded-lg border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
                 <option value="">{{ __('common.all') }}</option>
                 <option value="receipt">{{ __('catalogue.type_receipt') }}</option>
                 <option value="sale">{{ __('catalogue.type_sale') }}</option>
+                <option value="transfer">{{ __('locations.move_stock') }}</option>
                 <option value="quarantine">{{ __('catalogue.type_quarantine') }}</option>
                 <option value="adjustment">{{ __('catalogue.type_adjustment') }}</option>
                 <option value="return">{{ __('catalogue.type_return') }}</option>
@@ -84,6 +94,7 @@
                         <th scope="col" class="px-4 py-3.5 text-left">{{ __('catalogue.movement_time') }}</th>
                         <th scope="col" class="px-4 py-3.5 text-left">{{ __('catalogue.product_name') }}</th>
                         <th scope="col" class="px-4 py-3.5 text-left">{{ __('catalogue.batch_no') }}</th>
+                        <th scope="col" class="px-4 py-3.5 text-left">{{ __('locations.locations') }}</th>
                         <th scope="col" class="px-4 py-3.5 text-center">{{ __('catalogue.movement_type') }}</th>
                         <th scope="col" class="px-4 py-3.5 text-right">{{ __('catalogue.quantity_change') }}</th>
                         <th scope="col" class="px-4 py-3.5 text-right">{{ __('catalogue.balance_after') }}</th>
@@ -109,6 +120,9 @@
                                 <a href="{{ route('inventory.ledger', ['batch_id' => $m->batch_id]) }}" class="hover:underline text-teal-700 font-bold transition">
                                     {{ $m->batch?->batch_no ?? '-' }}
                                 </a>
+                            </td>
+                            <td class="px-4 py-3.5 text-xs text-slate-700 whitespace-nowrap">
+                                {{ $m->location?->name ?? ($m->location?->code ?? '-') }}
                             </td>
                             <td class="px-4 py-3.5 text-center whitespace-nowrap">
                                 @switch($m->type)
