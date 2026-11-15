@@ -162,6 +162,7 @@ return [
     'col_items_count' => 'የእቃዎች ብዛት',
     'col_created_by' => 'የመዘገበው',
     'col_registered_at' => 'የተመዘገበበት ቀን',
+    'col_recall_no' => 'የመመለሻ #',
     'col_quarantined_qty' => 'የተለየ ብዛት',
     'col_disposed_qty' => 'የተወገደ ብዛት',
     'col_remaining_quarantined' => 'በተለየ ክፍል የቀረ',

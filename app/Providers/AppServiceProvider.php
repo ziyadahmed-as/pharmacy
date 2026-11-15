@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Approvals\ApprovalHandlerRegistry;
 use App\Approvals\Handlers\ChangeRolesHandler;
+use App\Approvals\Handlers\CloseRecallHandler;
 use App\Approvals\Handlers\CreateUserHandler;
 use App\Approvals\Handlers\DeactivateUserHandler;
 use App\Approvals\Handlers\ExpenseApprovalHandler;
@@ -53,6 +54,7 @@ class AppServiceProvider extends ServiceProvider
             RefundApprovalHandler::class,
             StockAdjustmentHandler::class,
             StockDisposalHandler::class,
+            CloseRecallHandler::class,
             RestoreApprovalHandler::class,
             ExpenseApprovalHandler::class,
             LeaveApprovalHandler::class,

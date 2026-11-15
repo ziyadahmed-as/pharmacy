@@ -7,6 +7,8 @@ use App\Models\Batch;
 use App\Models\BatchStock;
 use App\Models\Product;
 use App\Models\QuarantineRecord;
+use App\Models\Recall;
+use App\Models\RecallBatch;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -65,11 +67,14 @@ class SellabilityGuard
             );
         }
 
-        // 3. Recalled batch
+        // 3. Recalled batch (via open QuarantineRecord or open RecallBatch)
         $isRecalled = QuarantineRecord::where('batch_id', $batch->id)
             ->where('status', QuarantineRecord::STATUS_OPEN)
             ->where('reason', QuarantineRecord::REASON_RECALLED)
-            ->exists();
+            ->exists()
+            || RecallBatch::where('batch_id', $batch->id)
+                ->whereHas('recall', fn ($q) => $q->where('status', Recall::STATUS_OPEN))
+                ->exists();
 
         if ($isRecalled) {
             self::block(
