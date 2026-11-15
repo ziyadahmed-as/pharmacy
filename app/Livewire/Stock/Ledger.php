@@ -4,6 +4,7 @@ namespace App\Livewire\Stock;
 
 use App\Models\Batch;
 use App\Models\Product;
+use App\Models\StorageLocation;
 use App\Services\LedgerQuery;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Url;
@@ -38,6 +39,9 @@ class Ledger extends Component
     #[Url]
     public string $search = '';
 
+    #[Url]
+    public ?int $location_id = null;
+
     public function mount(): void
     {
         $this->authorizeView();
@@ -51,7 +55,7 @@ class Ledger extends Component
 
     public function updating($property): void
     {
-        if (in_array($property, ['product_id', 'batch_id', 'type', 'from', 'to', 'search'], true)) {
+        if (in_array($property, ['product_id', 'batch_id', 'type', 'from', 'to', 'search', 'location_id'], true)) {
             $this->resetPage();
         }
     }
@@ -62,6 +66,7 @@ class Ledger extends Component
         return array_filter([
             'product_id' => $this->product_id ?: null,
             'batch_id' => $this->batch_id ?: null,
+            'location_id' => $this->location_id ?: null,
             'type' => $this->type ?: null,
             'from' => $this->from ?: null,
             'to' => $this->to ?: null,
@@ -85,6 +90,7 @@ class Ledger extends Component
             'movements' => $movements,
             'selectedProduct' => $selectedProduct,
             'selectedBatch' => $selectedBatch,
+            'locations' => StorageLocation::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']),
             'canExport' => $canViewCost,
             'exportQuery' => http_build_query($this->filters()),
         ])->layout('layouts.app', ['title' => __('nav.stock_ledger')]);

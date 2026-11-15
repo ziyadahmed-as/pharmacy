@@ -78,7 +78,7 @@ class ConfirmStockReceipt
                     source: $receipt,
                     user: $actor,
                     status: $status,
-                    location: null,
+                    locationId: $line->location_id,
                     description: "Stock receipt {$receipt->reference} ({$line->flag})"
                 );
             }

@@ -4,7 +4,9 @@ namespace App\Livewire\Inventory\Stocktakes;
 
 use App\Actions\Inventory\CreateStocktake;
 use App\Enums\Role;
+use App\Models\Category;
 use App\Models\Stocktake;
+use App\Models\StorageLocation;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -101,6 +103,8 @@ class Index extends Component
 
         return view('livewire.inventory.stocktakes.index', [
             'stocktakes' => $query->paginate(15),
+            'categories' => Category::orderBy('name')->get(),
+            'locations' => StorageLocation::where('is_active', true)->orderBy('name')->get(),
             'canManage' => $user?->hasAnyRole(['pharmacy_manager', 'owner']),
         ]);
     }

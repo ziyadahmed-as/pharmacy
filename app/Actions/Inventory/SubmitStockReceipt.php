@@ -157,6 +157,7 @@ class SubmitStockReceipt
                     StockReceiptLine::create([
                         'stock_receipt_id' => $receipt->id,
                         'product_id' => $line['product_id'],
+                        'location_id' => ! empty($line['location_id']) ? (int) $line['location_id'] : null,
                         'batch_no' => trim($line['batch_no']),
                         'manufacturing_date' => ! empty($line['manufacturing_date']) ? Carbon::parse($line['manufacturing_date']) : null,
                         'expiry_date' => Carbon::parse($line['expiry_date']),

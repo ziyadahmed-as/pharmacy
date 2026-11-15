@@ -4,6 +4,7 @@ namespace App\Livewire\Inventory;
 
 use App\Actions\Inventory\SubmitStockReceipt;
 use App\Models\Product;
+use App\Models\StorageLocation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -40,6 +41,7 @@ class Receive extends Component
     {
         $this->lines[] = [
             'product_id' => '',
+            'location_id' => '',
             'batch_no' => '',
             'manufacturing_date' => '',
             'expiry_date' => '',
@@ -94,6 +96,7 @@ class Receive extends Component
 
         return view('livewire.inventory.receive', [
             'products' => Product::where('is_active', true)->orderBy('brand')->get(),
+            'locations' => StorageLocation::where('is_active', true)->orderBy('name')->get(),
             'canViewCost' => $canViewCost,
         ])->layout('layouts.app', ['title' => __('catalogue.receive_stock')]);
     }

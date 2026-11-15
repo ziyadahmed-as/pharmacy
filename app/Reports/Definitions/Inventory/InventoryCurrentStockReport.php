@@ -48,6 +48,7 @@ class InventoryCurrentStockReport extends BaseReportDefinition
     {
         return [
             'category_id' => true,
+            'location_id' => true,
             'status' => ['sellable', 'quarantine'],
             'search' => true,
         ];
@@ -80,7 +81,7 @@ class InventoryCurrentStockReport extends BaseReportDefinition
         $canCost = $this->canViewCost($user);
 
         $query = BatchStock::query()
-            ->with(['batch.product.category'])
+            ->with(['batch.product.category', 'location'])
             ->where('quantity', '>', 0);
 
         if (! empty($filters['status'])) {
@@ -89,6 +90,10 @@ class InventoryCurrentStockReport extends BaseReportDefinition
 
         if (! empty($filters['category_id'])) {
             $query->whereHas('batch.product', fn ($q) => $q->where('category_id', $filters['category_id']));
+        }
+
+        if (! empty($filters['location_id'])) {
+            $query->where('location_id', $filters['location_id']);
         }
 
         if (! empty($filters['search'])) {
@@ -127,7 +132,7 @@ class InventoryCurrentStockReport extends BaseReportDefinition
                 $product?->barcode ?? '-',
                 $batch?->batch_no ?? '-',
                 $this->formatDate($batch?->expiry_date, 'Y-m-d'),
-                $stock->location ?? '-',
+                $stock->location?->name ?? ($stock->location?->code ?? '-'),
                 $stock->status,
                 (string) $qty,
             ];

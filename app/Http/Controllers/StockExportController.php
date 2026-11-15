@@ -105,7 +105,7 @@ class StockExportController extends Controller
                         $p->barcode ?? '',
                         $batch->batch_no,
                         $exp,
-                        $stock->location ?? '-',
+                        $stock->location?->name ?? ($stock->location?->code ?? '-'),
                         $stock->status,
                         (string) $stock->quantity,
                         $unitCostEtb,
@@ -152,13 +152,14 @@ class StockExportController extends Controller
         $viewer = $request->user();
         $this->authorizeExport($viewer);
 
-        $filters = array_filter($request->only(['product_id', 'batch_id', 'type', 'from', 'to', 'search']));
+        $filters = array_filter($request->only(['product_id', 'batch_id', 'location_id', 'type', 'from', 'to', 'search']));
         $query = new LedgerQuery($filters);
 
         $header = [
             'Date & Time',
             'Product',
             'Batch #',
+            'Location',
             'Type',
             'In / Out',
             'Balance After',
@@ -174,6 +175,7 @@ class StockExportController extends Controller
                     local_time($m->created_at, 'Y-m-d H:i:s'),
                     $m->batch?->product?->brand ?? '-',
                     $m->batch?->batch_no ?? '-',
+                    $m->location?->name ?? ($m->location?->code ?? '-'),
                     $m->type,
                     $m->quantity > 0 ? "+{$m->quantity}" : (string) $m->quantity,
                     (string) $m->balance_after,

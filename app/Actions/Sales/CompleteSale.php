@@ -296,7 +296,7 @@ class CompleteSale
                         source: $sale,
                         user: $user,
                         status: 'sellable',
-                        location: null,
+                        locationId: null,
                         description: "Sale {$receiptNo}",
                         secondPerson: null,
                         patientName: $patientName,

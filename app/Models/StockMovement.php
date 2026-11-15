@@ -16,6 +16,7 @@ class StockMovement extends Model
 
     protected $fillable = [
         'batch_id',
+        'location_id',
         'type',
         'quantity',
         'balance_after',
@@ -50,6 +51,11 @@ class StockMovement extends Model
     public function batch(): BelongsTo
     {
         return $this->belongsTo(Batch::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(StorageLocation::class, 'location_id');
     }
 
     public function user(): BelongsTo

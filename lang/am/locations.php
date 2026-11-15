@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'የማከማቻ ቦታዎች',
+    'subtitle' => 'መደርደሪያዎችን፣ ማቀዝቀዣዎችን፣ ቁጥጥር ስር ያሉ ካቢኔቶችን እና የለይቶ ማቆያ ቦታዎችን ያስተዳድሩ።',
+    'locations' => 'የማከማቻ ቦታዎች',
+    'add_location' => 'ቦታ ጨምር',
+    'new_location' => 'አዲስ የማከማቻ ቦታ',
+    'edit_location' => 'የማከማቻ ቦታ አርትዕ',
+    'code' => 'ኮድ',
+    'name' => 'ስም',
+    'type' => 'ዓይነት',
+    'status' => 'ሁኔታ',
+    'is_active' => 'ንቁ',
+    'items_count' => 'የዕቃዎች ብዛት',
+    'deactivate' => 'አቦዝን',
+    'activate' => 'አንቃ',
+    'no_locations_found' => 'ምንም የማከማቻ ቦታ አልተገኘም።',
+    'created_successfully' => 'የማከማቻ ቦታው በተሳካ ሁኔታ ተፈጥሯል።',
+    'updated_successfully' => 'የማከማቻ ቦታው በተሳካ ሁኔታ ተሻሽሏል።',
+    'status_updated_successfully' => 'የማከማቻ ቦታው ሁኔታ ተሻሽሏል።',
+    'quantity_must_be_positive' => 'የተዘዋወረው ብዛት ከዜሮ በላይ መሆን አለበት።',
+    'source_and_destination_must_differ' => 'መነሻ እና መድረሻ የማከማቻ ቦታዎች የተለያዩ መሆን አለባቸው።',
+    'source_location_inactive' => 'መነሻው የማከማቻ ቦታ ንቁ አይደለም።',
+    'destination_location_inactive' => 'መድረሻው የማከማቻ ቦታ ንቁ አይደለም።',
+    'move_stock' => 'ዕቃ አዘዋውር',
+    'filter_location' => 'በቦታ አጣራ',
+];

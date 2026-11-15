@@ -31,4 +31,5 @@ return [
     'unauthorized_to_dispense_licence' => 'የቁጥጥር ስር መድሃኒት ለመስጠት ትክክለኛ የሙያ ፈቃድ ሊኖርዎ ይገባል።',
     'patient_prescriber_required' => 'የቁጥጥር ስር መድሃኒት ለመስጠት የታካሚ እና የሀኪም ስም መረጋገጥ አለበት።',
     'register_immutable' => 'የቁጥጥር ስር መድሃኒቶች መዝገብ የማይለወጥ እና የማይሰረዝ ነው።',
+    'controlled_cabinet_location_required' => 'ቁጥጥር ስር ያሉ መድሃኒቶች በቁጥጥር ካቢኔ ቦታ ብቻ መቀመጥ አለባቸው።',
 ];

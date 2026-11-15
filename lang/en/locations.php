@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'title' => 'Storage Locations',
+    'subtitle' => 'Manage shelves, refrigerators, controlled cabinets, dispensaries and quarantine areas.',
+    'locations' => 'Storage Locations',
+    'add_location' => 'Add Location',
+    'new_location' => 'New Storage Location',
+    'edit_location' => 'Edit Storage Location',
+    'code' => 'Code',
+    'name' => 'Name',
+    'type' => 'Type',
+    'status' => 'Status',
+    'is_active' => 'Active',
+    'items_count' => 'Stock Items',
+    'deactivate' => 'Deactivate',
+    'activate' => 'Activate',
+    'no_locations_found' => 'No storage locations found.',
+    'created_successfully' => 'Storage location created successfully.',
+    'updated_successfully' => 'Storage location updated successfully.',
+    'status_updated_successfully' => 'Storage location status updated.',
+    'quantity_must_be_positive' => 'Quantity moved must be greater than zero.',
+    'source_and_destination_must_differ' => 'Source and destination locations must be different.',
+    'source_location_inactive' => 'Source location is inactive.',
+    'destination_location_inactive' => 'Destination location is inactive.',
+    'move_stock' => 'Move Stock',
+    'filter_location' => 'Filter by Location',
+];
