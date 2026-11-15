@@ -5,10 +5,12 @@ namespace App\Actions\Sales;
 use App\Actions\Credits\CompleteCreditSale;
 use App\Exceptions\NoOpenShiftException;
 use App\Exceptions\PaymentMismatchException;
+use App\Exceptions\PrescriptionNotDispensableException;
 use App\Exceptions\SellabilityException;
 use App\Models\CreditAccount;
 use App\Models\DailyClosing;
 use App\Models\Payment;
+use App\Models\Prescription;
 use App\Models\Product;
 use App\Models\ProductUnit;
 use App\Models\Sale;
@@ -19,9 +21,11 @@ use App\Services\AuditLogger;
 use App\Services\CurrentShift;
 use App\Services\DocumentSequence;
 use App\Services\FefoBatchResolver;
+use App\Services\LicenceGate;
 use App\Services\PriceResolver;
 use App\Services\StockMovementService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -87,214 +91,263 @@ class CompleteSale
         }
 
         // 3. Atomically check idempotency and complete sale
-        return DB::transaction(function () use ($user, $shift, $items, $payments, $idempotencyKey, $prescriptionId, $patientName, $prescriberName, $customerId) {
-            // Lock shift row
-            $lockedShift = Shift::where('id', $shift->id)->lockForUpdate()->first();
-            if (! $lockedShift || ! $lockedShift->isOpen()) {
-                throw new NoOpenShiftException(__('shifts.no_open_shift_error'));
-            }
+        try {
+            return DB::transaction(function () use ($user, $shift, $items, $payments, $idempotencyKey, $prescriptionId, $patientName, $prescriberName, $customerId) {
+                // Lock shift row
+                $lockedShift = Shift::where('id', $shift->id)->lockForUpdate()->first();
+                if (! $lockedShift || ! $lockedShift->isOpen()) {
+                    throw new NoOpenShiftException(__('shifts.no_open_shift_error'));
+                }
 
-            // Day lock check inside transaction, after shift row is locked
-            if (DailyClosing::isLockedForDate(business_date())) {
-                throw new \RuntimeException(__('closing.day_is_locked_error'));
-            }
+                // Day lock check inside transaction, after shift row is locked
+                if (DailyClosing::isLockedForDate(business_date())) {
+                    throw new \RuntimeException(__('closing.day_is_locked_error'));
+                }
 
-            // E5: Check idempotency key under lock
+                // E5: Check idempotency key under lock
+                $existing = Sale::where('idempotency_key', $idempotencyKey)->first();
+                if ($existing) {
+                    return $existing->load(['lines.product', 'lines.batch', 'lines.unit', 'payments', 'shift.till', 'user']);
+                }
+
+                // STEP 3: Prescription verification inside action
+                if ($prescriptionId !== null) {
+                    $prescription = Prescription::with('lines.product')->find($prescriptionId);
+                    if (! $prescription) {
+                        throw new PrescriptionNotDispensableException(__('prescriptions.prescription_not_found'));
+                    }
+
+                    if (! $prescription->isDispensable()) {
+                        throw new PrescriptionNotDispensableException(__('prescriptions.not_dispensable', ['status' => $prescription->statusLabel()]));
+                    }
+
+                    if ($prescription->isExpiredForDispensing() || $prescription->isExpired()) {
+                        throw new PrescriptionNotDispensableException(__('prescriptions.dispensing_expired'));
+                    }
+
+                    if (! app(LicenceGate::class)->allows($user, 'prescription.dispense')) {
+                        throw new PrescriptionNotDispensableException(__('prescriptions.dispense_refused_licence'));
+                    }
+
+                    foreach ($items as $item) {
+                        $product = Product::findOrFail($item['product_id']);
+                        $pLine = $prescription->lines->firstWhere('product_id', $product->id);
+                        if (! $pLine) {
+                            throw new PrescriptionNotDispensableException(__('prescriptions.product_not_in_prescription', ['product' => $product->brand]));
+                        }
+
+                        $unit = ! empty($item['unit_id']) ? ProductUnit::find($item['unit_id']) : null;
+                        $factor = $unit ? $unit->factor : 1;
+                        $quantityInBaseUnits = max(1, (int) $item['quantity']) * $factor;
+                        $remaining = $pLine->remainingQuantity();
+
+                        if ($quantityInBaseUnits > $remaining && empty($item['override_reason'])) {
+                            throw new PrescriptionNotDispensableException(__('prescriptions.quantity_exceeds_prescribed', [
+                                'requested' => $quantityInBaseUnits,
+                                'remaining' => $remaining,
+                            ]));
+                        }
+                    }
+                }
+
+                $plannedLines = [];
+                $saleTotalSantim = 0;
+
+                // 4. Validate products, prices, FEFO and build planned lines
+                foreach ($items as $item) {
+                    $product = Product::findOrFail($item['product_id']);
+
+                    // A3: Prescription / Controlled drug restriction
+                    if (in_array($product->classification, ['rx', 'controlled'], true) && $prescriptionId === null) {
+                        throw new InvalidArgumentException(__('sales.prescription_required_error', ['product' => $product->brand]));
+                    }
+
+                    $unit = ! empty($item['unit_id']) ? ProductUnit::findOrFail($item['unit_id']) : null;
+                    $factor = $unit ? $unit->factor : 1;
+                    $quantityInUnit = max(1, (int) $item['quantity']);
+                    $quantityInBaseUnits = $quantityInUnit * $factor;
+
+                    // Price resolution
+                    $priceRecord = PriceResolver::at($product, $unit);
+                    if (! $priceRecord) {
+                        throw new InvalidArgumentException(__('sales.no_price_configured', ['product' => $product->brand]));
+                    }
+
+                    $unitPriceSantim = (int) $priceRecord->price;
+                    $lineSubtotal = $quantityInUnit * $unitPriceSantim;
+                    $saleTotalSantim += $lineSubtotal;
+
+                    // Resolve FEFO batches (or manual override)
+                    $allocations = FefoBatchResolver::resolve(
+                        product: $product,
+                        requestedQuantity: $quantityInBaseUnits,
+                        overrideBatchId: ! empty($item['batch_id']) ? (int) $item['batch_id'] : null,
+                        overrideReason: $item['override_reason'] ?? null,
+                        actor: $user
+                    );
+
+                    // If split across batches, calculate proportional subtotals
+                    $totalAllocatedQty = array_sum(array_column($allocations, 'quantity'));
+                    $allocatedSubtotal = 0;
+                    foreach ($allocations as $idx => $alloc) {
+                        $allocQty = $alloc['quantity'];
+                        // Proportion of total subtotal for this split
+                        if ($idx === count($allocations) - 1) {
+                            $allocSubtotal = $lineSubtotal - $allocatedSubtotal;
+                        } else {
+                            $allocSubtotal = (int) round(($lineSubtotal * $allocQty) / $totalAllocatedQty);
+                            $allocatedSubtotal += $allocSubtotal;
+                        }
+
+                        $plannedLines[] = [
+                            'product_id' => $product->id,
+                            'unit_id' => $unit?->id,
+                            'batch_id' => $alloc['batch']->id,
+                            'batch' => $alloc['batch'],
+                            'quantity' => $allocQty,
+                            'unit_price' => $unitPriceSantim,
+                            'subtotal' => $allocSubtotal,
+                            'is_fefo_override' => $alloc['is_override'],
+                            'override_reason' => $alloc['override_reason'],
+                        ];
+                    }
+                }
+
+                // 5. Payment reconciliation (E3, AC-22)
+                $totalPaymentsSantim = 0;
+                foreach ($payments as $payment) {
+                    $amount = (int) $payment['amount'];
+                    if ($amount <= 0) {
+                        throw new InvalidArgumentException(__('sales.payment_amount_invalid'));
+                    }
+                    $totalPaymentsSantim += $amount;
+                }
+
+                if ($totalPaymentsSantim !== $saleTotalSantim) {
+                    throw new PaymentMismatchException(__('sales.payment_mismatch_error', [
+                        'total' => number_format($saleTotalSantim / 100, 2),
+                        'paid' => number_format($totalPaymentsSantim / 100, 2),
+                    ]));
+                }
+
+                // 5b. Credit payment validation (UC-26 FR-5.3)
+                $creditAmount = 0;
+                $creditAccount = null;
+                foreach ($payments as $payment) {
+                    if (($payment['method'] ?? '') === 'credit') {
+                        $creditAmount += (int) $payment['amount'];
+                    }
+                }
+
+                if ($creditAmount > 0) {
+                    if (! $customerId) {
+                        throw new InvalidArgumentException(__('credits.no_credit_account'));
+                    }
+
+                    $creditAccount = CreditAccount::where('customer_id', $customerId)->first();
+                    if (! $creditAccount) {
+                        throw new InvalidArgumentException(__('credits.no_credit_account'));
+                    }
+
+                    if (! $creditAccount->hasRoom($creditAmount)) {
+                        throw new \RuntimeException(__('credits.credit_limit_exceeded', [
+                            'available' => number_format($creditAccount->availableCredit() / 100, 2),
+                            'requested' => number_format($creditAmount / 100, 2),
+                        ]));
+                    }
+                }
+
+                // 6. Generate sequential gapless receipt number
+                $receiptNo = DocumentSequence::next('sale', 'REC');
+
+                // 7. Create Sale record
+                $sale = Sale::create([
+                    'receipt_no' => $receiptNo,
+                    'shift_id' => $shift->id,
+                    'user_id' => $user->id,
+                    'customer_id' => $customerId,
+                    'prescription_id' => $prescriptionId,
+                    'status' => 'completed',
+                    'total' => $saleTotalSantim,
+                    'idempotency_key' => $idempotencyKey,
+                    'reprint_count' => 0,
+                    'completed_at' => now(),
+                ]);
+
+                // 8. Create Sale Lines and post stock movements
+                foreach ($plannedLines as $lineData) {
+                    SaleLine::create([
+                        'sale_id' => $sale->id,
+                        'product_id' => $lineData['product_id'],
+                        'unit_id' => $lineData['unit_id'],
+                        'batch_id' => $lineData['batch_id'],
+                        'quantity' => $lineData['quantity'],
+                        'unit_price' => $lineData['unit_price'],
+                        'subtotal' => $lineData['subtotal'],
+                        'is_fefo_override' => $lineData['is_fefo_override'],
+                        'override_reason' => $lineData['override_reason'],
+                    ]);
+
+                    // Post stock movement deduction (BR-04)
+                    StockMovementService::post(
+                        batch: $lineData['batch'],
+                        signedQuantity: -$lineData['quantity'],
+                        type: 'sale',
+                        source: $sale,
+                        user: $user,
+                        status: 'sellable',
+                        location: null,
+                        description: "Sale {$receiptNo}",
+                        secondPerson: null,
+                        patientName: $patientName,
+                        prescriberName: $prescriberName
+                    );
+                }
+
+                // 9. Record Payments
+                foreach ($payments as $paymentData) {
+                    Payment::create([
+                        'sale_id' => $sale->id,
+                        'method' => $paymentData['method'],
+                        'amount' => (int) $paymentData['amount'],
+                        'reference' => ! empty($paymentData['reference']) ? trim($paymentData['reference']) : null,
+                    ]);
+                }
+
+                // 9b. Charge credit account if applicable (UC-26)
+                if ($creditAmount > 0 && $creditAccount) {
+                    (new CompleteCreditSale)->execute($user, $sale, $creditAccount);
+                }
+
+                // 10. Audit log (BR-15)
+                AuditLogger::record(
+                    action: 'sale.completed',
+                    subject: $sale,
+                    old: [],
+                    new: [
+                        'receipt_no' => $sale->receipt_no,
+                        'total' => $sale->total,
+                        'shift_id' => $shift->id,
+                        'lines_count' => count($plannedLines),
+                        'payments_count' => count($payments),
+                    ],
+                    metadata: [
+                        'total_etb' => $sale->totalEtb(),
+                        'receipt_no' => $sale->receipt_no,
+                    ],
+                    user: $user,
+                    description: "Sale {$sale->receipt_no} completed for {$sale->totalEtb()} ETB"
+                );
+
+                return $sale->load(['lines.product', 'lines.batch', 'lines.unit', 'payments', 'shift.till', 'user']);
+            });
+        } catch (UniqueConstraintViolationException $e) {
             $existing = Sale::where('idempotency_key', $idempotencyKey)->first();
             if ($existing) {
                 return $existing->load(['lines.product', 'lines.batch', 'lines.unit', 'payments', 'shift.till', 'user']);
             }
 
-            $plannedLines = [];
-            $saleTotalSantim = 0;
-
-            // 4. Validate products, prices, FEFO and build planned lines
-            foreach ($items as $item) {
-                $product = Product::findOrFail($item['product_id']);
-
-                // A3: Prescription / Controlled drug restriction
-                if (in_array($product->classification, ['rx', 'controlled'], true) && $prescriptionId === null) {
-                    throw new InvalidArgumentException(__('sales.prescription_required_error', ['product' => $product->brand]));
-                }
-
-                $unit = ! empty($item['unit_id']) ? ProductUnit::findOrFail($item['unit_id']) : null;
-                $factor = $unit ? $unit->factor : 1;
-                $quantityInUnit = max(1, (int) $item['quantity']);
-                $quantityInBaseUnits = $quantityInUnit * $factor;
-
-                // Price resolution
-                $priceRecord = PriceResolver::at($product, $unit);
-                if (! $priceRecord) {
-                    throw new InvalidArgumentException(__('sales.no_price_configured', ['product' => $product->brand]));
-                }
-
-                $unitPriceSantim = (int) $priceRecord->price;
-                $lineSubtotal = $quantityInUnit * $unitPriceSantim;
-                $saleTotalSantim += $lineSubtotal;
-
-                // Resolve FEFO batches (or manual override)
-                $allocations = FefoBatchResolver::resolve(
-                    product: $product,
-                    requestedQuantity: $quantityInBaseUnits,
-                    overrideBatchId: ! empty($item['batch_id']) ? (int) $item['batch_id'] : null,
-                    overrideReason: $item['override_reason'] ?? null,
-                    actor: $user
-                );
-
-                // If split across batches, calculate proportional subtotals
-                $totalAllocatedQty = array_sum(array_column($allocations, 'quantity'));
-                $allocatedSubtotal = 0;
-                foreach ($allocations as $idx => $alloc) {
-                    $allocQty = $alloc['quantity'];
-                    // Proportion of total subtotal for this split
-                    if ($idx === count($allocations) - 1) {
-                        $allocSubtotal = $lineSubtotal - $allocatedSubtotal;
-                    } else {
-                        $allocSubtotal = (int) round(($lineSubtotal * $allocQty) / $totalAllocatedQty);
-                        $allocatedSubtotal += $allocSubtotal;
-                    }
-
-                    $plannedLines[] = [
-                        'product_id' => $product->id,
-                        'unit_id' => $unit?->id,
-                        'batch_id' => $alloc['batch']->id,
-                        'batch' => $alloc['batch'],
-                        'quantity' => $allocQty,
-                        'unit_price' => $unitPriceSantim,
-                        'subtotal' => $allocSubtotal,
-                        'is_fefo_override' => $alloc['is_override'],
-                        'override_reason' => $alloc['override_reason'],
-                    ];
-                }
-            }
-
-            // 5. Payment reconciliation (E3, AC-22)
-            $totalPaymentsSantim = 0;
-            foreach ($payments as $payment) {
-                $amount = (int) $payment['amount'];
-                if ($amount <= 0) {
-                    throw new InvalidArgumentException(__('sales.payment_amount_invalid'));
-                }
-                $totalPaymentsSantim += $amount;
-            }
-
-            if ($totalPaymentsSantim !== $saleTotalSantim) {
-                throw new PaymentMismatchException(__('sales.payment_mismatch_error', [
-                    'total' => number_format($saleTotalSantim / 100, 2),
-                    'paid' => number_format($totalPaymentsSantim / 100, 2),
-                ]));
-            }
-
-            // 5b. Credit payment validation (UC-26 FR-5.3)
-            $creditAmount = 0;
-            $creditAccount = null;
-            foreach ($payments as $payment) {
-                if (($payment['method'] ?? '') === 'credit') {
-                    $creditAmount += (int) $payment['amount'];
-                }
-            }
-
-            if ($creditAmount > 0) {
-                if (! $customerId) {
-                    throw new InvalidArgumentException(__('credits.no_credit_account'));
-                }
-
-                $creditAccount = CreditAccount::where('customer_id', $customerId)->first();
-                if (! $creditAccount) {
-                    throw new InvalidArgumentException(__('credits.no_credit_account'));
-                }
-
-                if (! $creditAccount->hasRoom($creditAmount)) {
-                    throw new \RuntimeException(__('credits.credit_limit_exceeded', [
-                        'available' => number_format($creditAccount->availableCredit() / 100, 2),
-                        'requested' => number_format($creditAmount / 100, 2),
-                    ]));
-                }
-            }
-
-            // 6. Generate sequential gapless receipt number
-            $receiptNo = DocumentSequence::next('sale', 'REC');
-
-            // 7. Create Sale record
-            $sale = Sale::create([
-                'receipt_no' => $receiptNo,
-                'shift_id' => $shift->id,
-                'user_id' => $user->id,
-                'customer_id' => $customerId,
-                'prescription_id' => $prescriptionId,
-                'status' => 'completed',
-                'total' => $saleTotalSantim,
-                'idempotency_key' => $idempotencyKey,
-                'reprint_count' => 0,
-                'completed_at' => now(),
-            ]);
-
-            // 8. Create Sale Lines and post stock movements
-            foreach ($plannedLines as $lineData) {
-                SaleLine::create([
-                    'sale_id' => $sale->id,
-                    'product_id' => $lineData['product_id'],
-                    'unit_id' => $lineData['unit_id'],
-                    'batch_id' => $lineData['batch_id'],
-                    'quantity' => $lineData['quantity'],
-                    'unit_price' => $lineData['unit_price'],
-                    'subtotal' => $lineData['subtotal'],
-                    'is_fefo_override' => $lineData['is_fefo_override'],
-                    'override_reason' => $lineData['override_reason'],
-                ]);
-
-                // Post stock movement deduction (BR-04)
-                StockMovementService::post(
-                    batch: $lineData['batch'],
-                    signedQuantity: -$lineData['quantity'],
-                    type: 'sale',
-                    source: $sale,
-                    user: $user,
-                    status: 'sellable',
-                    location: null,
-                    description: "Sale {$receiptNo}",
-                    secondPerson: null,
-                    patientName: $patientName,
-                    prescriberName: $prescriberName
-                );
-            }
-
-            // 9. Record Payments
-            foreach ($payments as $paymentData) {
-                Payment::create([
-                    'sale_id' => $sale->id,
-                    'method' => $paymentData['method'],
-                    'amount' => (int) $paymentData['amount'],
-                    'reference' => ! empty($paymentData['reference']) ? trim($paymentData['reference']) : null,
-                ]);
-            }
-
-            // 9b. Charge credit account if applicable (UC-26)
-            if ($creditAmount > 0 && $creditAccount) {
-                (new CompleteCreditSale)->execute($user, $sale, $creditAccount);
-            }
-
-            // 10. Audit log (BR-15)
-            AuditLogger::record(
-                action: 'sale.completed',
-                subject: $sale,
-                old: [],
-                new: [
-                    'receipt_no' => $sale->receipt_no,
-                    'total' => $sale->total,
-                    'shift_id' => $shift->id,
-                    'lines_count' => count($plannedLines),
-                    'payments_count' => count($payments),
-                ],
-                metadata: [
-                    'total_etb' => $sale->totalEtb(),
-                    'receipt_no' => $sale->receipt_no,
-                ],
-                user: $user,
-                description: "Sale {$sale->receipt_no} completed for {$sale->totalEtb()} ETB"
-            );
-
-            return $sale->load(['lines.product', 'lines.batch', 'lines.unit', 'payments', 'shift.till', 'user']);
-        });
+            throw $e;
+        }
     }
 }

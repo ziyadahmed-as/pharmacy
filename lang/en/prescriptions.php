@@ -33,6 +33,8 @@ return [
     'dispense_refused_licence' => 'You must hold a valid, unexpired professional licence to dispense prescriptions.',
     'not_dispensable' => 'This prescription cannot be dispensed because its status is ":status".',
     'dispensing_expired' => 'This prescription has expired and can no longer be dispensed.',
+    'prescription_not_found' => 'Prescription was not found.',
+    'product_not_in_prescription' => 'Product ":product" is not on this prescription.',
     'line_fully_dispensed' => '":product" has already been fully dispensed on this prescription.',
     'controlled_drug_use_uc22' => 'Controlled drug dispensing must follow the controlled-drug workflow.',
     'quantity_exceeds_prescribed' => 'Requested quantity (:requested) exceeds the remaining prescribed quantity (:remaining). Provide an override reason.',

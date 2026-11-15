@@ -2,8 +2,6 @@
 
 namespace App\Exceptions;
 
-use RuntimeException;
-
 /**
  * Thrown when the requested dispense quantity exceeds the prescribed remaining
  * quantity and no licensed override reason was provided.
@@ -16,4 +14,4 @@ use RuntimeException;
  *
  * @ac AC-12
  */
-class QuantityExceedsPrescriptionException extends RuntimeException {}
+class QuantityExceedsPrescriptionException extends PrescriptionNotDispensableException {}

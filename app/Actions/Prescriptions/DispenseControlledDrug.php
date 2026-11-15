@@ -90,7 +90,7 @@ class DispenseControlledDrug
 
         // 2. LicenceGate: valid unexpired licence required for controlled dispensing (BR-12, AC-13)
         if (! $this->licenceGate->allows($user, 'controlled.dispense')) {
-            throw new AuthorizationException(__('controlled_drugs.unauthorized_to_dispense_licence'));
+            throw new PrescriptionNotDispensableException(__('controlled_drugs.unauthorized_to_dispense_licence'));
         }
 
         // 3. Open shift check

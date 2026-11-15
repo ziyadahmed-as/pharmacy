@@ -79,7 +79,7 @@ class DispensePrescriptionLine
 
         // 2. LicenceGate (BR-12, FR-10.3, AC-13)
         if (! $this->licenceGate->allows($user, 'prescription.dispense')) {
-            throw new AuthorizationException(__('prescriptions.dispense_refused_licence'));
+            throw new PrescriptionNotDispensableException(__('prescriptions.dispense_refused_licence'));
         }
 
         // 3. Open shift check
@@ -185,7 +185,7 @@ class DispensePrescriptionLine
                 'product_id' => $product->id,
                 'quantity' => $alloc['quantity'],
                 'batch_id' => $alloc['batch']->id,
-                'override_reason' => $alloc['override_reason'],
+                'override_reason' => $overrideReason ?? $alloc['override_reason'],
             ];
         }
 

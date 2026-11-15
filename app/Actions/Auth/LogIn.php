@@ -40,23 +40,31 @@ class LogIn
             throw $generic;
         }
 
-        if ($user->account_status === User::STATUS_PENDING) {
-            AuditLogger::record('auth.login.failed', $user, [], [], ['reason' => 'pending_approval'], $user);
+        if (! Hash::check($password, $user->password)) {
+            $this->recordFailure($user);
             throw $generic;
         }
 
-        if (! $user->is_active) {
-            AuditLogger::record('auth.login.failed', $user, [], [], ['reason' => 'deactivated'], $user);
-            throw ValidationException::withMessages(['username' => __('auth.deactivated')]);
+        // Timed unlock check
+        if ($user->locked_at !== null) {
+            $lockoutMinutes = (int) setting('security.lockout_minutes', 15);
+            if ($lockoutMinutes > 0 && $user->locked_at->copy()->addMinutes($lockoutMinutes)->isPast()) {
+                $user->forceFill([
+                    'locked_at' => null,
+                    'failed_login_attempts' => 0,
+                ])->save();
+                AuditLogger::record('auth.user.unlocked', $user, [], ['unlocked_by' => 'timed_lockout'], ['lockout_minutes' => $lockoutMinutes], $user);
+            }
         }
 
         if ($user->isLocked()) {
             AuditLogger::record('auth.login.failed', $user, [], [], ['reason' => 'locked'], $user);
-            throw ValidationException::withMessages(['username' => __('auth.locked')]);
+            throw $generic;
         }
 
-        if (! Hash::check($password, $user->password)) {
-            $this->recordFailure($user);
+        if (! $user->is_active || $user->account_status !== User::STATUS_ACTIVE) {
+            $reason = $user->account_status === User::STATUS_PENDING ? 'pending_approval' : 'deactivated';
+            AuditLogger::record('auth.login.failed', $user, [], [], ['reason' => $reason], $user);
             throw $generic;
         }
 

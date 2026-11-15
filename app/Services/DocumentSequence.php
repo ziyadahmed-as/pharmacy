@@ -16,11 +16,7 @@ class DocumentSequence
             $seq = DocumentSequenceModel::where('type', $type)->lockForUpdate()->first();
 
             if (! $seq) {
-                $seq = DocumentSequenceModel::create([
-                    'type' => $type,
-                    'next_value' => 1,
-                    'prefix' => $prefix,
-                ]);
+                throw new \RuntimeException("Document sequence for '{$type}' does not exist. Sequences must be pre-configured.");
             }
 
             $currentVal = $seq->next_value;

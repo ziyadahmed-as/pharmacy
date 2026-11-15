@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\DocumentSequence;
 use Carbon\Carbon;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -108,79 +109,88 @@ class SubmitStockReceipt
             }
         }
 
-        return DB::transaction(function () use ($data, $actor, $receiptDate, $overrideReason) {
-            $reference = DocumentSequence::next('stock_receipt', 'REC');
-            $requiresConfirmation = (bool) setting('inventory.receipt_requires_confirmation', true);
+        try {
+            return DB::transaction(function () use ($data, $actor, $receiptDate, $overrideReason) {
+                $reference = DocumentSequence::next('stock_receipt', 'REC');
+                $requiresConfirmation = (bool) setting('inventory.receipt_requires_confirmation', true);
 
-            // Check if any line exceeds maximum level (UC-05 Step 4)
-            $maxLevelWarnings = [];
-            foreach ($data['lines'] as $line) {
-                $prod = Product::find($line['product_id']);
-                if ($prod && $prod->max_level !== null && $prod->max_level > 0) {
-                    $currentSellable = (int) DB::table('batch_stocks')
-                        ->join('batches', 'batches.id', '=', 'batch_stocks.batch_id')
-                        ->where('batches.product_id', $prod->id)
-                        ->where('batch_stocks.status', 'sellable')
-                        ->sum('batch_stocks.quantity');
+                // Check if any line exceeds maximum level (UC-05 Step 4)
+                $maxLevelWarnings = [];
+                foreach ($data['lines'] as $line) {
+                    $prod = Product::find($line['product_id']);
+                    if ($prod && $prod->max_level !== null && $prod->max_level > 0) {
+                        $currentSellable = (int) DB::table('batch_stocks')
+                            ->join('batches', 'batches.id', '=', 'batch_stocks.batch_id')
+                            ->where('batches.product_id', $prod->id)
+                            ->where('batch_stocks.status', 'sellable')
+                            ->sum('batch_stocks.quantity');
 
-                    $resulting = $currentSellable + (int) $line['quantity'];
-                    if ($resulting > $prod->max_level) {
-                        $maxLevelWarnings[] = __('catalogue.receipt_warning_exceeds_max', [
-                            'brand' => $prod->brand,
-                            'max' => $prod->max_level,
-                            'resulting' => $resulting,
-                        ]);
+                        $resulting = $currentSellable + (int) $line['quantity'];
+                        if ($resulting > $prod->max_level) {
+                            $maxLevelWarnings[] = __('catalogue.receipt_warning_exceeds_max', [
+                                'brand' => $prod->brand,
+                                'max' => $prod->max_level,
+                                'resulting' => $resulting,
+                            ]);
+                        }
                     }
                 }
-            }
 
-            $notes = $data['notes'] ?? '';
-            if (! empty($maxLevelWarnings)) {
-                $notes = trim($notes."\n".implode(' ', $maxLevelWarnings));
-            }
+                $notes = $data['notes'] ?? '';
+                if (! empty($maxLevelWarnings)) {
+                    $notes = trim($notes."\n".implode(' ', $maxLevelWarnings));
+                }
 
-            $receipt = StockReceipt::create([
-                'reference' => $reference,
-                'supplier_name' => $data['supplier_name'],
-                'delivery_note_no' => $data['delivery_note_no'] ?? null,
-                'receipt_date' => $receiptDate,
-                'status' => $requiresConfirmation ? 'pending_confirmation' : 'posted',
-                'idempotency_key' => $data['idempotency_key'],
-                'notes' => $notes ?: null,
-                'created_by' => $actor->id,
-            ]);
-
-            foreach ($data['lines'] as $line) {
-                $flag = $line['flag'] ?? 'ok';
-                StockReceiptLine::create([
-                    'stock_receipt_id' => $receipt->id,
-                    'product_id' => $line['product_id'],
-                    'batch_no' => trim($line['batch_no']),
-                    'manufacturing_date' => ! empty($line['manufacturing_date']) ? Carbon::parse($line['manufacturing_date']) : null,
-                    'expiry_date' => Carbon::parse($line['expiry_date']),
-                    'quantity' => (int) $line['quantity'],
-                    'unit_cost' => isset($line['unit_cost']) && $actor->hasPermission('cost.view')
-                        ? (is_int($line['unit_cost']) ? $line['unit_cost'] : (int) round(((float) $line['unit_cost']) * 100))
-                        : null,
-                    'flag' => in_array($flag, ['ok', 'short', 'over', 'damaged'], true) ? $flag : 'ok',
+                $receipt = StockReceipt::create([
+                    'reference' => $reference,
+                    'supplier_name' => $data['supplier_name'],
+                    'delivery_note_no' => $data['delivery_note_no'] ?? null,
+                    'receipt_date' => $receiptDate,
+                    'status' => $requiresConfirmation ? 'pending_confirmation' : 'posted',
+                    'idempotency_key' => $data['idempotency_key'],
+                    'notes' => $notes ?: null,
+                    'created_by' => $actor->id,
                 ]);
+
+                foreach ($data['lines'] as $line) {
+                    $flag = $line['flag'] ?? 'ok';
+                    StockReceiptLine::create([
+                        'stock_receipt_id' => $receipt->id,
+                        'product_id' => $line['product_id'],
+                        'batch_no' => trim($line['batch_no']),
+                        'manufacturing_date' => ! empty($line['manufacturing_date']) ? Carbon::parse($line['manufacturing_date']) : null,
+                        'expiry_date' => Carbon::parse($line['expiry_date']),
+                        'quantity' => (int) $line['quantity'],
+                        'unit_cost' => isset($line['unit_cost']) && $actor->hasPermission('cost.view')
+                            ? (is_int($line['unit_cost']) ? $line['unit_cost'] : (int) round(((float) $line['unit_cost']) * 100))
+                            : null,
+                        'flag' => in_array($flag, ['ok', 'short', 'over', 'damaged'], true) ? $flag : 'ok',
+                    ]);
+                }
+
+                AuditLogger::record(
+                    'stock.receipt.submitted',
+                    $receipt,
+                    [],
+                    ['reference' => $reference, 'supplier' => $receipt->supplier_name, 'lines_count' => count($data['lines'])],
+                    ['override_reason' => $overrideReason],
+                    $actor
+                );
+
+                // If confirmation is NOT required, post immediately
+                if (! $requiresConfirmation) {
+                    (new ConfirmStockReceipt)->execute($receipt, $actor);
+                }
+
+                return $receipt;
+            });
+        } catch (UniqueConstraintViolationException $e) {
+            $existing = StockReceipt::where('idempotency_key', $idempotencyKey)->first();
+            if ($existing) {
+                return $existing;
             }
 
-            AuditLogger::record(
-                'stock.receipt.submitted',
-                $receipt,
-                [],
-                ['reference' => $reference, 'supplier' => $receipt->supplier_name, 'lines_count' => count($data['lines'])],
-                ['override_reason' => $overrideReason],
-                $actor
-            );
-
-            // If confirmation is NOT required, post immediately
-            if (! $requiresConfirmation) {
-                (new ConfirmStockReceipt)->execute($receipt, $actor);
-            }
-
-            return $receipt;
-        });
+            throw $e;
+        }
     }
 }

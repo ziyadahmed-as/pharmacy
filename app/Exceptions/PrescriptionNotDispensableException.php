@@ -2,11 +2,11 @@
 
 namespace App\Exceptions;
 
-use RuntimeException;
+use Illuminate\Auth\Access\AuthorizationException;
 
 /**
  * Thrown when a prescription is not in a dispensable state (not Verified /
- * Partially Dispensed, already fully dispensed, expired, or not found).
+ * Partially Dispensed, already fully dispensed, expired, not found, or user fails LicenceGate).
  *
  * @uc UC-21
  *
@@ -14,4 +14,4 @@ use RuntimeException;
  *
  * @ac AC-03, AC-12
  */
-class PrescriptionNotDispensableException extends RuntimeException {}
+class PrescriptionNotDispensableException extends AuthorizationException {}
