@@ -79,7 +79,7 @@ class CompliancePrescriptionsReport extends BaseReportDefinition
         [$start, $end] = $this->parseDateRange($filters);
 
         $query = Prescription::query()
-            ->with(['customer', 'creator', 'lines'])
+            ->with(['customer', 'creator', 'lines', 'prescriber'])
             ->whereDate('prescription_date', '>=', $start)
             ->whereDate('prescription_date', '<=', $end)
             ->orderByDesc('id');
@@ -93,6 +93,8 @@ class CompliancePrescriptionsReport extends BaseReportDefinition
             $query->where(function ($q) use ($term) {
                 $q->where('prescription_number', 'like', $term)
                     ->orWhere('prescriber_name', 'like', $term)
+                    ->orWhere('prescriber_registration_no', 'like', $term)
+                    ->orWhereHas('prescriber', fn ($pr) => $pr->where('licence_number', 'like', $term))
                     ->orWhereHas('customer', fn ($c) => $c->where('name', 'like', $term)->orWhere('phone', 'like', $term));
             });
         }
@@ -105,11 +107,15 @@ class CompliancePrescriptionsReport extends BaseReportDefinition
         foreach ($prescriptions as $p) {
             $statusCounts[$p->status] = ($statusCounts[$p->status] ?? 0) + 1;
 
+            $prescriberText = $p->prescriber?->licence_number
+                ? "{$p->prescriber_name} ({$p->prescriber->licence_number})"
+                : $p->prescriber_name;
+
             $rows[] = [
                 $p->prescription_number,
                 $this->formatDate($p->prescription_date, 'Y-m-d'),
                 $p->customer?->name ?? 'Guest',
-                $p->prescriber_name,
+                $prescriberText,
                 ucfirst(str_replace('_', ' ', $p->status)),
                 (string) $p->lines->count(),
                 $p->creator?->name ?? 'User #'.$p->created_by,

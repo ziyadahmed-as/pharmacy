@@ -4,6 +4,7 @@ namespace App\Actions\Prescriptions;
 
 use App\Actions\Customers\SaveCustomer;
 use App\Models\Customer;
+use App\Models\Prescriber;
 use App\Models\Prescription;
 use App\Models\Product;
 use App\Models\User;
@@ -47,10 +48,33 @@ class RegisterPrescription
         array $patientData,
         array $lines,
         ?string $scanPath = null,
+        ?int $prescriberId = null,
     ): Prescription {
         // 1. Authorisation
         if (! $user->hasPermission('prescriptions.register')) {
             throw new AuthorizationException(__('prescriptions.unauthorized_to_register'));
+        }
+
+        // Resolve Prescriber if ID passed or by match
+        $prescriber = null;
+        if ($prescriberId) {
+            $prescriber = Prescriber::find($prescriberId);
+            if ($prescriber) {
+                $prescriberName = $prescriber->name;
+                if (! empty($prescriber->licence_number)) {
+                    $prescriberRegNo = $prescriber->licence_number;
+                }
+            }
+        } else {
+            $prescriber = Prescriber::where('licence_number', trim($prescriberRegNo))
+                ->whereNotNull('licence_number')
+                ->where('licence_number', '!=', '')
+                ->first()
+                ?? Prescriber::where('name', trim($prescriberName))->first();
+
+            if ($prescriber) {
+                $prescriberId = $prescriber->id;
+            }
         }
 
         // 2. Validate mandatory fields (E2)
@@ -133,7 +157,18 @@ class RegisterPrescription
             $validatedLines[] = compact('product', 'dose', 'qty', 'refillsAllowed');
         }
 
-        return DB::transaction(function () use ($user, $prescriberName, $prescriberRegNo, $parsedDate, $patientData, $validatedLines, $scanPath) {
+        // Controlled prescriptions need a prescriber with a licence number
+        $hasControlled = collect($validatedLines)->contains(fn ($l) => $l['product']->classification === 'controlled');
+        if ($hasControlled) {
+            $effectiveLicence = trim((string) ($prescriber?->licence_number ?? $prescriberRegNo));
+            if ($effectiveLicence === '') {
+                throw new InvalidArgumentException(__('prescriptions.controlled_requires_prescriber_licence', [
+                    'default' => 'Prescriptions containing controlled substances require a prescriber with a valid licence number.',
+                ]));
+            }
+        }
+
+        return DB::transaction(function () use ($user, $prescriberId, $prescriberName, $prescriberRegNo, $parsedDate, $patientData, $validatedLines, $scanPath) {
             // 6. Resolve or create customer (A1)
             $customer = $this->resolveCustomer($user, $patientData);
 
@@ -144,6 +179,7 @@ class RegisterPrescription
             $prescription = Prescription::create([
                 'prescription_number' => $prescriptionNumber,
                 'customer_id' => $customer->id,
+                'prescriber_id' => $prescriberId,
                 'prescriber_name' => $prescriberName,
                 'prescriber_registration_no' => $prescriberRegNo,
                 'prescription_date' => $parsedDate->toDateString(),
@@ -186,6 +222,7 @@ class RegisterPrescription
                 new: [
                     'prescription_number' => $prescriptionNumber,
                     'customer_id' => $customer->id,
+                    'prescriber_id' => $prescriberId,
                     'prescriber' => $prescriberName,
                     'prescriber_reg' => $prescriberRegNo,
                     'line_count' => count($validatedLines),

@@ -14,6 +14,7 @@ return [
     'cannot_reject_status' => 'Cannot reject a prescription in :status status.',
     'prescriber_name_required' => 'Prescriber name is required.',
     'prescriber_reg_no_required' => 'Prescriber registration number is required.',
+    'controlled_requires_prescriber_licence' => 'Prescriptions containing controlled substances require a prescriber with a valid licence number.',
     'at_least_one_line_required' => 'At least one prescription line is required.',
     'invalid_date' => 'The prescription date is invalid.',
     'date_cannot_be_in_future' => 'The prescription date cannot be in the future.',

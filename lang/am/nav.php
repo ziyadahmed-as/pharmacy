@@ -28,6 +28,7 @@ return [
     'shifts' => 'የገንዘብ ፈረቃዎች',
     'tills' => 'ካሳዎች',
     'prescriptions' => 'ማዘዣዎች (ቀመሮች)',
+    'prescribers' => 'የሀኪሞች መዝገብ',
     'prescriptions_search' => 'የቀመር ፍለጋ',
     'controlled_drug_register' => 'የቁጥጥር ስር መድሃኒቶች መዝገብ',
     'backups' => 'የመረጃ ምትኬ እና ማግኛ',

@@ -76,7 +76,7 @@ class Show extends Component
 
     public function mount(Prescription $prescription): void
     {
-        $this->prescription = $prescription->load(['lines.product', 'customer']);
+        $this->prescription = $prescription->load(['lines.product', 'customer', 'prescriber']);
         // Pre-select first dispensable line
         $first = $this->prescription->lines->first(fn ($l) => ! $l->isFullyDispensed());
         if ($first) {
@@ -199,7 +199,7 @@ class Show extends Component
                 : __('prescriptions.dispensing_success', ['receipt_no' => $sale->receipt_no]);
 
             // Refresh prescription to reflect new status
-            $this->prescription->refresh()->load(['lines.product', 'customer']);
+            $this->prescription->refresh()->load(['lines.product', 'customer', 'prescriber']);
             $this->showOverrideModal = false;
             $this->showRepeatWarning = false;
             $this->overrideReason = '';

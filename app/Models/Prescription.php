@@ -59,6 +59,7 @@ class Prescription extends Model
     protected $fillable = [
         'prescription_number',
         'customer_id',
+        'prescriber_id',
         'prescriber_name',
         'prescriber_registration_no',
         'prescription_date',
@@ -86,6 +87,11 @@ class Prescription extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function prescriber(): BelongsTo
+    {
+        return $this->belongsTo(Prescriber::class);
     }
 
     public function creator(): BelongsTo

@@ -54,6 +54,7 @@ class ControlledDrugRegister extends Model
         'quantity',
         'running_balance',
         'patient_name',
+        'prescriber_id',
         'prescriber_name',
         'user_id',
         'second_person_id',
@@ -89,6 +90,11 @@ class ControlledDrugRegister extends Model
     public function batch(): BelongsTo
     {
         return $this->belongsTo(Batch::class);
+    }
+
+    public function prescriber(): BelongsTo
+    {
+        return $this->belongsTo(Prescriber::class);
     }
 
     public function user(): BelongsTo

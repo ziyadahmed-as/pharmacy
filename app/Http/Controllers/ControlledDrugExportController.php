@@ -42,7 +42,7 @@ class ControlledDrugExportController extends Controller
         $viewer = $request->user();
         abort_if($viewer->isSystemAdmin(), 403);
 
-        $query = ControlledDrugRegister::with(['product', 'batch', 'user', 'secondPerson', 'sale'])
+        $query = ControlledDrugRegister::with(['product', 'batch', 'user', 'secondPerson', 'sale', 'prescriber'])
             ->orderBy('id', 'desc');
 
         if ($request->filled('type')) {
@@ -56,6 +56,13 @@ class ControlledDrugExportController extends Controller
         $rows = [];
         $query->chunk(500, function ($chunk) use (&$rows) {
             foreach ($chunk as $entry) {
+                $prescriberText = $entry->prescriber_name ?? '';
+                if ($entry->prescriber?->licence_number) {
+                    $prescriberText = $prescriberText !== ''
+                        ? "{$prescriberText} ({$entry->prescriber->licence_number})"
+                        : $entry->prescriber->licence_number;
+                }
+
                 $rows[] = [
                     $entry->created_at->format('Y-m-d H:i:s'),
                     $entry->product->brand,
@@ -64,7 +71,7 @@ class ControlledDrugExportController extends Controller
                     (string) $entry->quantity,
                     (string) $entry->running_balance,
                     $entry->patient_name ?? '',
-                    $entry->prescriber_name ?? '',
+                    $prescriberText,
                     $entry->user->name,
                     $entry->secondPerson?->name ?? '',
                     $entry->sale?->receipt_no ?? ($entry->notes ?? ''),

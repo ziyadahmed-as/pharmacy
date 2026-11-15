@@ -14,6 +14,7 @@ return [
     'cannot_reject_status' => 'በ:status ሁኔታ ላይ ያለን ቀመር ውድቅ ማድረግ አይቻልም።',
     'prescriber_name_required' => 'የሀኪሙ ስም ያስፈልጋል።',
     'prescriber_reg_no_required' => 'የሀኪሙ የምዝገባ ቁጥር ያስፈልጋል።',
+    'controlled_requires_prescriber_licence' => 'በቁጥጥር ስር ያሉ መድሃኒቶች ትክክለኛ የፈቃድ ቁጥር ባለው ሀኪም ብቻ መታዘዝ አለባቸው።',
     'at_least_one_line_required' => 'ቢያንስ አንድ የቀመር መስመር ያስፈልጋል።',
     'invalid_date' => 'የቀመሩ ቀን የተሳሳተ ነው።',
     'date_cannot_be_in_future' => 'የቀመሩ ቀን ወደ ፊት ሊሆን አይችልም።',

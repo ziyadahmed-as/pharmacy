@@ -224,6 +224,11 @@
                             <label class="block text-xs font-medium text-purple-900 mb-1">{{ __('controlled_drugs.confirmed_prescriber') }}</label>
                             <input type="text" wire:model="confirmedPrescriberName"
                                    class="block w-full border-purple-300 rounded-md shadow-sm sm:text-sm focus:ring-purple-500 focus:border-purple-500" />
+                            @if($prescription->prescriber?->licence_number || $prescription->prescriber_registration_no)
+                                <span class="text-xs text-purple-700 mt-0.5 block font-mono">
+                                    {{ __('prescribers.licence_number', ['default' => 'Licence #']) }}: {{ $prescription->prescriber?->licence_number ?: $prescription->prescriber_registration_no }}
+                                </span>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -261,6 +266,30 @@
                             {{ __('prescriptions.dispense') }}
                         </button>
                     @endif
+                </div>
+            @endif
+
+            {{-- Dispensing Label Preview --}}
+            @if($this->selectedLine())
+                <div class="mt-4 p-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 text-xs text-slate-700 space-y-1.5 font-mono">
+                    <div class="font-bold uppercase tracking-wider text-slate-800 text-center pb-1 border-b border-dashed border-slate-300">
+                        {{ setting('profile.name') ?: 'Pharmacy' }} &mdash; {{ __('prescribers.dispensing_label', ['default' => 'Dispensing Label']) }}
+                    </div>
+                    <div class="flex justify-between">
+                        <span><strong>{{ __('prescriptions.fields.patient') }}:</strong> {{ $prescription->customer->name }}</span>
+                        <span><strong>Rx:</strong> {{ $prescription->prescription_number }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span><strong>{{ __('prescribers.prescriber', ['default' => 'Prescriber']) }}:</strong> {{ $prescription->prescriber_name }}</span>
+                        <span><strong>Licence:</strong> {{ $prescription->prescriber?->licence_number ?: ($prescription->prescriber_registration_no ?: '—') }}</span>
+                    </div>
+                    <div>
+                        <strong>{{ __('prescriptions.fields.product') }}:</strong> {{ $this->selectedLine()->product->brand }} ({{ $this->selectedLine()->dose }}) &times; {{ $this->quantity }}
+                    </div>
+                    <div class="flex justify-between text-slate-500 pt-1 border-t border-dashed border-slate-300">
+                        <span>Date: {{ now()->toDateString() }}</span>
+                        <span>Dispenser: {{ auth()->user()->name }}</span>
+                    </div>
                 </div>
             @endif
 

@@ -39,6 +39,7 @@ class CancelAndReRegister
         array $patientData,
         array $lines,
         ?string $scanPath = null,
+        ?int $prescriberId = null,
     ): Prescription {
         if (! $user->hasPermission('prescriptions.register')) {
             throw new AuthorizationException(__('prescriptions.unauthorized_to_register'));
@@ -53,7 +54,7 @@ class CancelAndReRegister
             throw new InvalidArgumentException(__('prescriptions.cannot_cancel_inactive'));
         }
 
-        return DB::transaction(function () use ($user, $original, $cancellationReason, $prescriberName, $prescriberRegNo, $prescriptionDate, $patientData, $lines, $scanPath) {
+        return DB::transaction(function () use ($user, $original, $cancellationReason, $prescriberName, $prescriberRegNo, $prescriptionDate, $patientData, $lines, $scanPath, $prescriberId) {
             // Register the new prescription first
             $newPrescription = $this->register->execute(
                 $user,
@@ -63,6 +64,7 @@ class CancelAndReRegister
                 $patientData,
                 $lines,
                 $scanPath,
+                $prescriberId,
             );
 
             // Cancel the original and link to replacement

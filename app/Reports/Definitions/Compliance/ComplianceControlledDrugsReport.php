@@ -73,7 +73,7 @@ class ComplianceControlledDrugsReport extends BaseReportDefinition
         [$start, $end] = $this->parseDateRange($filters);
 
         $query = ControlledDrugRegister::query()
-            ->with(['product', 'batch', 'user', 'secondPerson'])
+            ->with(['product', 'batch', 'user', 'secondPerson', 'prescriber'])
             ->whereDate('created_at', '>=', $start)
             ->whereDate('created_at', '<=', $end)
             ->orderBy('id');
@@ -84,7 +84,8 @@ class ComplianceControlledDrugsReport extends BaseReportDefinition
                 $q->whereHas('product', fn ($p) => $p->where('brand', 'like', $term)->orWhere('generic_name', 'like', $term))
                     ->orWhereHas('batch', fn ($b) => $b->where('batch_no', 'like', $term))
                     ->orWhere('patient_name', 'like', $term)
-                    ->orWhere('prescriber_name', 'like', $term);
+                    ->orWhere('prescriber_name', 'like', $term)
+                    ->orWhereHas('prescriber', fn ($pr) => $pr->where('licence_number', 'like', $term));
             });
         }
 
@@ -92,6 +93,13 @@ class ComplianceControlledDrugsReport extends BaseReportDefinition
 
         $rows = [];
         foreach ($entries as $e) {
+            $prescriberText = $e->prescriber_name ?? '-';
+            if ($e->prescriber?->licence_number) {
+                $prescriberText = $e->prescriber_name
+                    ? "{$e->prescriber_name} ({$e->prescriber->licence_number})"
+                    : $e->prescriber->licence_number;
+            }
+
             $rows[] = [
                 $this->formatDate($e->created_at),
                 $e->product?->brand ?? 'Unknown',
@@ -100,7 +108,7 @@ class ComplianceControlledDrugsReport extends BaseReportDefinition
                 (string) $e->quantity,
                 (string) $e->running_balance,
                 $e->patient_name ?? '-',
-                $e->prescriber_name ?? '-',
+                $prescriberText,
                 $e->user?->name ?? 'User #'.$e->user_id,
                 $e->secondPerson?->name ?? '-',
             ];

@@ -170,6 +170,7 @@ class StockMovementService
 
                 $actualPatient = $patientName;
                 $actualPrescriber = $prescriberName;
+                $prescriberId = null;
                 $sale = null;
 
                 if ($source instanceof Sale) {
@@ -179,6 +180,9 @@ class StockMovementService
                     }
                     if (! $actualPrescriber && $source->prescription) {
                         $actualPrescriber = $source->prescription->prescriber_name;
+                    }
+                    if ($source->prescription) {
+                        $prescriberId = $source->prescription->prescriber_id;
                     }
                 }
 
@@ -194,7 +198,8 @@ class StockMovementService
                     prescriberName: $actualPrescriber,
                     sale: $sale,
                     stockMovement: $movement,
-                    notes: $description
+                    notes: $description,
+                    prescriberId: $prescriberId
                 );
             }
 

@@ -42,7 +42,7 @@ class PrescriptionExportController extends Controller
             'q', 'patient', 'prescriber', 'drug', 'date_from', 'date_to', 'status', 'suspect_only',
         ]);
 
-        $query = PrescriptionSearch::build($filters)->with(['customer', 'creator', 'lines.product']);
+        $query = PrescriptionSearch::build($filters)->with(['customer', 'creator', 'lines.product', 'prescriber']);
 
         $rows = [];
         $query->chunk(500, function ($chunk) use (&$rows) {
@@ -56,7 +56,7 @@ class PrescriptionExportController extends Controller
                     $rx->prescription_date->format('Y-m-d'),
                     $rx->customer->name,
                     $rx->prescriber_name,
-                    $rx->prescriber_registration_no,
+                    $rx->prescriber_registration_no ?: ($rx->prescriber?->licence_number ?? ''),
                     ucfirst(str_replace('_', ' ', $rx->status)),
                     $drugs,
                     $rx->creator->name ?? '',

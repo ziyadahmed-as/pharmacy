@@ -52,6 +52,7 @@ class Show extends Component
         abort_unless($user->hasPermission('prescriptions.view'), 403);
 
         $this->prescription = $prescription;
+        $this->prescription->loadMissing(['customer', 'prescriber', 'lines.product', 'creator', 'verifier', 'rejecter']);
 
         // Audit view of prescription (UC-23 STEP 3)
         AuditLogger::record(
