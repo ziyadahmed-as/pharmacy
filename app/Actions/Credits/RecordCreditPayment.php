@@ -5,6 +5,7 @@ namespace App\Actions\Credits;
 use App\Enums\Role;
 use App\Models\CreditAccount;
 use App\Models\CreditPayment;
+use App\Models\DailyClosing;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\DocumentSequence;
@@ -36,8 +37,16 @@ class RecordCreditPayment
             throw new \InvalidArgumentException(__('credits.payment_amount_invalid'));
         }
 
+        if (DailyClosing::isLockedForDate(business_date())) {
+            throw new \RuntimeException(__('closing.day_is_locked_error'));
+        }
+
         return DB::transaction(function () use ($actor, $account, $amountSantim, $method, $reference, $notes) {
             $account = CreditAccount::lockForUpdate()->findOrFail($account->id);
+
+            if (DailyClosing::isLockedForDate(business_date())) {
+                throw new \RuntimeException(__('closing.day_is_locked_error'));
+            }
 
             if ($amountSantim > $account->balance) {
                 throw new \RuntimeException(__('credits.payment_exceeds_balance'));

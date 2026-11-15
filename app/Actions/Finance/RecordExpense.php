@@ -3,6 +3,7 @@
 namespace App\Actions\Finance;
 
 use App\Enums\Role;
+use App\Models\DailyClosing;
 use App\Models\Expense;
 use App\Models\User;
 use App\Services\ApprovalService;
@@ -69,10 +70,15 @@ class RecordExpense
         }
 
         $date = ! empty($data['date'])
-            ? Carbon::parse($data['date'])->toDateString()
-            : now()->toDateString();
+            ? business_date(Carbon::parse($data['date']))
+            : business_date();
 
         $proofPath = ! empty($data['proof_path']) ? (string) $data['proof_path'] : null;
+
+        // Early day lock check
+        if (DailyClosing::isLockedForDate($date)) {
+            throw new RuntimeException(__('closing.day_is_locked_error'));
+        }
 
         // Approval determination (FR-6.2, OQ-06)
         // Owner entries are posted immediately.
@@ -91,6 +97,9 @@ class RecordExpense
         $approvedBy = $needsApproval ? null : $user->id;
 
         return DB::transaction(function () use ($user, $category, $amount, $date, $description, $proofPath, $status, $approvedBy, $needsApproval) {
+            if (DailyClosing::isLockedForDate($date)) {
+                throw new RuntimeException(__('closing.day_is_locked_error'));
+            }
             /** @var Expense $expense */
             $expense = Expense::create([
                 'category' => $category,

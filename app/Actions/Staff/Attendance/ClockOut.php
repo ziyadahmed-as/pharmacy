@@ -23,7 +23,7 @@ class ClockOut
     public function execute(Staff $staff, User $actor, ?CarbonInterface $time = null, ?string $notes = null): Attendance
     {
         $clockOutTime = $time ? Carbon::instance($time) : now();
-        $date = $clockOutTime->toDateString();
+        $date = business_date($clockOutTime);
 
         $attendance = Attendance::where('staff_id', $staff->id)
             ->whereDate('date', $date)

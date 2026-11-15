@@ -79,6 +79,10 @@ class ProcessReturn
             throw new RuntimeException(__('sales.refund_error_locked_day'));
         }
 
+        if (DailyClosing::isLockedForDate(business_date())) {
+            throw new RuntimeException(__('closing.day_is_locked_error'));
+        }
+
         // 3. Check Return Window (A1)
         $windowDays = (int) setting('sales.return_window_days', 14);
         if ($windowDays > 0 && $sale->completed_at) {
@@ -157,6 +161,19 @@ class ProcessReturn
         }
 
         return DB::transaction(function () use ($user, $sale, $activeShift, $validatedLines, $totalRefund, $primaryPaymentMethod, $generalReason, $requiresApproval) {
+            $lockedShift = Shift::where('id', $activeShift->id)->lockForUpdate()->first();
+            if (! $lockedShift || ! $lockedShift->isOpen()) {
+                throw new RuntimeException(__('shifts.no_open_shift_error'));
+            }
+
+            if (DailyClosing::isLockedForDate(business_date())) {
+                throw new RuntimeException(__('closing.day_is_locked_error'));
+            }
+
+            if ($sale->completed_at && DailyClosing::isLockedForDate($sale->completed_at)) {
+                throw new RuntimeException(__('sales.refund_error_locked_day'));
+            }
+
             $refundNo = DocumentSequence::next('refund', 'RFD');
 
             $status = $requiresApproval ? SaleReturn::STATUS_PENDING_APPROVAL : SaleReturn::STATUS_COMPLETED;

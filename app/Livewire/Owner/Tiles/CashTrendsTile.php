@@ -19,7 +19,7 @@ class CashTrendsTile extends Component
 
     public function render(): View
     {
-        $today = now()->toDateString();
+        $today = business_date();
 
         // 1. Today's tender breakdown
         $cashTender = (int) Payment::query()
@@ -39,7 +39,7 @@ class CashTrendsTile extends Component
         // 2. 7-Day Sales Trend
         $trend = [];
         for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i)->toDateString();
+            $date = business_date(now()->subDays($i));
             $dayGross = (int) Sale::where('status', 'completed')->whereDate('completed_at', $date)->sum('total');
             $dayRefunds = (int) SaleReturn::where('status', 'completed')->whereDate('completed_at', $date)->sum('total_refund');
             $dayNet = max(0, $dayGross - $dayRefunds);

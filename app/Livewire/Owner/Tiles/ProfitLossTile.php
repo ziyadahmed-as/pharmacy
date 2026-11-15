@@ -29,7 +29,7 @@ class ProfitLossTile extends Component
             return view('livewire.owner.tiles.unauthorized-tile');
         }
 
-        $today = now()->toDateString();
+        $today = business_date();
 
         // 1. Revenue
         $grossSales = (int) Sale::where('status', 'completed')

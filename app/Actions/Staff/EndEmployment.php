@@ -34,7 +34,7 @@ class EndEmployment
             $old = ['status' => $locked->status, 'end_date' => $locked->end_date?->toDateString()];
             $locked->forceFill([
                 'status' => Staff::ENDED,
-                'end_date' => $endDate ?: now()->timezone(config('pms.timezone'))->toDateString(),
+                'end_date' => $endDate ?: business_date(),
             ])->save();
 
             AuditLogger::record('staff.staff.employment_ended', $locked, $old, [

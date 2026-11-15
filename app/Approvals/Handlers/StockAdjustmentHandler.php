@@ -7,6 +7,7 @@ use App\Enums\Role;
 use App\Exceptions\ApprovalException;
 use App\Models\AdjustmentRequest;
 use App\Models\ApprovalRequest;
+use App\Models\DailyClosing;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\StockMovementService;
@@ -71,6 +72,11 @@ class StockAdjustmentHandler implements ApprovalHandler
         }
 
         DB::transaction(function () use ($adj, $approver) {
+            // Day lock check inside transaction
+            if (DailyClosing::isLockedForDate(business_date())) {
+                throw new RuntimeException(__('closing.day_is_locked_error'));
+            }
+
             // 1. Post ledger movement (and controlled register entry if applicable)
             StockMovementService::post(
                 batch: $adj->batch,

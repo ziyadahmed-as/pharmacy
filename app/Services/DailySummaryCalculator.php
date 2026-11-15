@@ -6,6 +6,7 @@ use App\Models\HeldSale;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use App\Models\Shift;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
@@ -20,7 +21,14 @@ class DailySummaryCalculator
      */
     public static function calculateSystemTotals(string $date): array
     {
-        $shifts = Shift::whereDate('opened_at', $date)
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
+        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $date.' 00:00:00', $tz)->utc();
+        $endUtc = Carbon::createFromFormat('Y-m-d H:i:s', $date.' 23:59:59', $tz)->utc();
+
+        $shifts = Shift::where(function ($q) use ($startUtc, $endUtc, $date) {
+            $q->whereBetween('opened_at', [$startUtc, $endUtc])
+                ->orWhereDate('opened_at', $date);
+        })
             ->where('status', 'closed')
             ->get();
 
@@ -41,8 +49,15 @@ class DailySummaryCalculator
      */
     public static function getShifts(string $date): Collection
     {
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
+        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $date.' 00:00:00', $tz)->utc();
+        $endUtc = Carbon::createFromFormat('Y-m-d H:i:s', $date.' 23:59:59', $tz)->utc();
+
         return Shift::with(['till', 'user'])
-            ->whereDate('opened_at', $date)
+            ->where(function ($q) use ($startUtc, $endUtc, $date) {
+                $q->whereBetween('opened_at', [$startUtc, $endUtc])
+                    ->orWhereDate('opened_at', $date);
+            })
             ->orderBy('id')
             ->get();
     }
@@ -52,8 +67,15 @@ class DailySummaryCalculator
      */
     public static function getUnresolvedHeldSales(string $date): Collection
     {
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
+        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $date.' 00:00:00', $tz)->utc();
+        $endUtc = Carbon::createFromFormat('Y-m-d H:i:s', $date.' 23:59:59', $tz)->utc();
+
         return HeldSale::with(['user', 'shift.till'])
-            ->whereDate('created_at', $date)
+            ->where(function ($q) use ($startUtc, $endUtc, $date) {
+                $q->whereBetween('created_at', [$startUtc, $endUtc])
+                    ->orWhereDate('created_at', $date);
+            })
             ->where('status', HeldSale::STATUS_HELD)
             ->get();
     }
@@ -63,15 +85,28 @@ class DailySummaryCalculator
      */
     public static function getTransactionMetrics(string $date): array
     {
-        $salesTotal = (int) Sale::whereDate('completed_at', $date)
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
+        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $date.' 00:00:00', $tz)->utc();
+        $endUtc = Carbon::createFromFormat('Y-m-d H:i:s', $date.' 23:59:59', $tz)->utc();
+
+        $salesTotal = (int) Sale::where(function ($q) use ($startUtc, $endUtc, $date) {
+            $q->whereBetween('completed_at', [$startUtc, $endUtc])
+                ->orWhereDate('completed_at', $date);
+        })
             ->where('status', 'completed')
             ->sum('total');
 
-        $refundsTotal = (int) SaleReturn::whereDate('completed_at', $date)
+        $refundsTotal = (int) SaleReturn::where(function ($q) use ($startUtc, $endUtc, $date) {
+            $q->whereBetween('completed_at', [$startUtc, $endUtc])
+                ->orWhereDate('completed_at', $date);
+        })
             ->where('status', SaleReturn::STATUS_COMPLETED)
             ->sum('total_refund');
 
-        $voidsTotal = (int) Sale::whereDate('completed_at', $date)
+        $voidsTotal = (int) Sale::where(function ($q) use ($startUtc, $endUtc, $date) {
+            $q->whereBetween('completed_at', [$startUtc, $endUtc])
+                ->orWhereDate('completed_at', $date);
+        })
             ->where('status', 'voided')
             ->sum('total');
 

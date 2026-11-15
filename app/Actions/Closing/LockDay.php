@@ -44,7 +44,7 @@ class LockDay
             throw new AuthorizationException(__('closing.unauthorized_to_lock_day'));
         }
 
-        $formattedDate = Carbon::parse($date)->toDateString();
+        $formattedDate = business_date(Carbon::parse($date));
 
         // 2. Cannot lock an already locked day
         if (DailyClosing::isLockedForDate($formattedDate)) {
@@ -52,8 +52,15 @@ class LockDay
         }
 
         // 3. E1: Refuse when ANY shift of the day is still open
-        $openShiftsCount = Shift::whereDate('opened_at', $formattedDate)
-            ->where('status', 'open')
+        $tz = config('pms.timezone', 'Africa/Addis_Ababa');
+        $startUtc = Carbon::createFromFormat('Y-m-d H:i:s', $formattedDate.' 00:00:00', $tz)->utc();
+        $endUtc = Carbon::createFromFormat('Y-m-d H:i:s', $formattedDate.' 23:59:59', $tz)->utc();
+
+        $openShiftsCount = Shift::where('status', 'open')
+            ->where(function ($q) use ($startUtc, $endUtc, $formattedDate) {
+                $q->whereBetween('opened_at', [$startUtc, $endUtc])
+                    ->orWhereDate('opened_at', $formattedDate);
+            })
             ->count();
 
         if ($openShiftsCount > 0) {

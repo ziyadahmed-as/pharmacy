@@ -78,17 +78,17 @@ class Dashboard extends Component
                     Prescription::STATUS_PARTIALLY_DISPENSED,
                 ])->count();
                 $stats['today_dispensed_count'] = Schema::hasTable('dispensing_events')
-                    ? DispensingEvent::whereDate('dispensed_at', today())->count()
+                    ? DispensingEvent::whereDate('dispensed_at', business_date())->count()
                     : 0;
             }
 
             // 4. Management & Store Totals (Owner & PM only - staff never see store margins/costs)
             if ($user->hasAnyRole(['owner', 'pharmacy_manager'])) {
                 if (Schema::hasTable('sales')) {
-                    $stats['today_sales_revenue'] = (int) Sale::whereDate('completed_at', today())
+                    $stats['today_sales_revenue'] = (int) Sale::whereDate('completed_at', business_date())
                         ->where('status', 'completed')
                         ->sum('total');
-                    $stats['today_sales_count'] = Sale::whereDate('completed_at', today())
+                    $stats['today_sales_count'] = Sale::whereDate('completed_at', business_date())
                         ->where('status', 'completed')
                         ->count();
 
@@ -117,9 +117,9 @@ class Dashboard extends Component
             $stats['active_users'] = Schema::hasTable('users') ? User::where('account_status', User::STATUS_ACTIVE)->count() : 0;
 
             if (Schema::hasTable('audit_logs')) {
-                $stats['today_audits'] = AuditLog::whereDate('created_at', today())->count();
+                $stats['today_audits'] = AuditLog::whereDate('created_at', business_date())->count();
                 $stats['failed_logins_today'] = AuditLog::where('action', 'auth.login.failed')
-                    ->whereDate('created_at', today())
+                    ->whereDate('created_at', business_date())
                     ->count();
 
                 $recentAudits = AuditLog::with('user')
@@ -144,7 +144,7 @@ class Dashboard extends Component
 
         $onDutyToday = ($user->canAccessBusinessData() && Schema::hasTable('roster_entries'))
             ? RosterEntry::with(['staff.user', 'till'])
-                ->whereDate('date', today())
+                ->whereDate('date', business_date())
                 ->orderBy('start_time')
                 ->get()
             : collect();

@@ -24,7 +24,7 @@ class ClockIn
     public function execute(Staff $staff, User $actor, ?CarbonInterface $time = null, ?string $notes = null): Attendance
     {
         $clockInTime = $time ? Carbon::instance($time) : now();
-        $date = $clockInTime->toDateString();
+        $date = business_date($clockInTime);
 
         $existing = Attendance::where('staff_id', $staff->id)
             ->whereDate('date', $date)

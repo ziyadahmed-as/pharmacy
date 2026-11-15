@@ -17,9 +17,9 @@ class ExpiringItemsTile extends Component
 
     public function render(): View
     {
-        $today = now()->toDateString();
+        $today = business_date();
         $thresholdDays = (int) setting('inventory.near_expiry_days', 90);
-        $thresholdDate = now()->addDays($thresholdDays)->toDateString();
+        $thresholdDate = business_date(now()->addDays($thresholdDays));
 
         // Expired batches with remaining stock
         $expiredCount = Batch::query()

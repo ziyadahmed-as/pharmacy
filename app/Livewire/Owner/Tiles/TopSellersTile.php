@@ -18,7 +18,7 @@ class TopSellersTile extends Component
 
     public function render(): View
     {
-        $today = now()->toDateString();
+        $today = business_date();
 
         $topProducts = SaleLine::query()
             ->join('sales', 'sale_lines.sale_id', '=', 'sales.id')

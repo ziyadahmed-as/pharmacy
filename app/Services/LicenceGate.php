@@ -26,7 +26,7 @@ class LicenceGate
         }
 
         $allowed = array_values(array_filter((array) setting('prescriptions.licence_categories_allowed', [])));
-        $today = now()->copy()->timezone(config('pms.timezone'))->toDateString();
+        $today = business_date();
 
         $query = $staff->licences()->whereDate('expires_at', '>=', $today);
 
