@@ -57,6 +57,12 @@
                 </div>
 
                 <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.product_code') }}</label>
+                    <input type="text" wire:model="product_code" placeholder="e.g. PRD-0001" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm font-mono focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                    @error('product_code') <span class="text-xs text-rose-600 mt-1 block font-medium">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.generic_name') }} (INN) <span class="text-rose-500">*</span></label>
                     <input type="text" wire:model="generic_name" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition" required>
                     @error('generic_name') <span class="text-xs text-rose-600 mt-1 block font-medium">{{ $message }}</span> @enderror
@@ -130,12 +136,22 @@
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.preferred_supplier') }}</label>
                     <input type="text" wire:model="preferred_supplier_name" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
                 </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.min_shelf_life_days') }}</label>
+                    <input type="number" wire:model="min_shelf_life_days" placeholder="e.g. 180" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                </div>
             </div>
 
-            <div class="mt-4 pt-3">
+            <div class="mt-4 pt-3 flex flex-wrap items-center gap-6">
                 <label class="inline-flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" wire:model="loose_allowed" class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500">
                     <span class="text-sm font-medium text-slate-700">{{ __('catalogue.allow_loose_sales') }}</span>
+                </label>
+
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" wire:model="is_cold_chain" class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500">
+                    <span class="text-sm font-medium text-slate-700">{{ __('catalogue.cold_chain_required') }}</span>
                 </label>
             </div>
         </div>
@@ -193,6 +209,43 @@
                 @empty
                     <p class="text-xs text-slate-400 italic py-2">No additional units defined. Uses base unit only.</p>
                 @endforelse
+            </div>
+        </div>
+
+        {{-- Section 5: Clinical Drug Information (DDD 5.3 drug_information) --}}
+        <div>
+            <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <svg class="h-4 w-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800">{{ __('catalogue.clinical_information') }}</h3>
+            </div>
+
+            <div class="mt-4 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.indications') }}</label>
+                    <textarea wire:model="indications" rows="2" placeholder="e.g. Treatment of mild to moderate bacterial infections" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.dosage_guidance') }}</label>
+                        <textarea wire:model="dosage_guidance" rows="2" placeholder="e.g. 500mg every 8 hours with meals" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.contraindications') }}</label>
+                        <textarea wire:model="contraindications" rows="2" placeholder="e.g. Known penicillin hypersensitivity" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.side_effects') }}</label>
+                        <textarea wire:model="side_effects" rows="2" placeholder="e.g. Nausea, rash, diarrhea" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">{{ __('catalogue.interactions') }}</label>
+                        <textarea wire:model="interactions" rows="2" placeholder="e.g. Probenecid, methotrexate, warfarin" class="mt-1 block w-full rounded-xl border border-slate-300 py-2 px-3 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition"></textarea>
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -329,4 +329,18 @@ return [
     'reason_found_stock' => 'የተገኘ ዕቃ',
     'submit_adjustment_request' => 'የማስተካከያ ጥያቄ አስገባ',
     'adjustment_requested_successfully' => 'የዕቃ ማስተካከያ ጥያቄ በተሳካ ሁኔታ ለማፅደቅ ቀርቧል።',
+
+    // Clinical Drug Information & Substitutes (DDD 5.3)
+    'clinical_information' => 'የመድኃኒት ክሊኒካዊ መረጃ',
+    'indications' => 'የሚሰጥባቸው ሁኔታዎች',
+    'dosage_guidance' => 'የአወሳሰድ መመሪያ',
+    'side_effects' => 'የጎንዮሽ ጉዳቶች',
+    'contraindications' => 'መወሰድ የሌለባቸው ሁኔታዎች',
+    'interactions' => 'የመድኃኒት መስተጋብሮች',
+    'no_clinical_information' => 'ለዚህ ምርት እስካሁን የተመዘገበ ክሊኒካዊ መረጃ የለም።',
+    'suggested_substitutes' => 'ተለዋጭ የምርት አማራጮች',
+    'cold_chain' => 'ቀዝቃዛ ሰንሰለት',
+    'cold_chain_required' => 'ቀዝቃዛ ቦታ ማከማቻ ያስፈልገዋል (2-8°C)',
+    'product_code' => 'የምርት ኮድ',
+    'min_shelf_life_days' => 'አነስተኛ የመቆያ ጊዜ (ቀናት)',
 ];

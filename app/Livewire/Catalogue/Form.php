@@ -32,9 +32,13 @@ class Form extends Component
 
     public ?int $category_id = null;
 
+    public string $product_code = '';
+
     public string $barcode = '';
 
     public string $storage_condition = '';
+
+    public bool $is_cold_chain = false;
 
     public string $classification = 'otc';
 
@@ -46,7 +50,20 @@ class Form extends Component
 
     public int $min_level = 0;
 
+    public ?int $min_shelf_life_days = null;
+
     public string $preferred_supplier_name = '';
+
+    // Clinical Drug Information (DDD 5.3)
+    public string $indications = '';
+
+    public string $dosage_guidance = '';
+
+    public string $side_effects = '';
+
+    public string $contraindications = '';
+
+    public string $interactions = '';
 
     public array $units = [];
 
@@ -67,14 +84,25 @@ class Form extends Component
             $this->unit = $product->unit ?? 'piece';
             $this->manufacturer = $product->manufacturer ?? '';
             $this->category_id = $product->category_id;
+            $this->product_code = $product->product_code ?? '';
             $this->barcode = $product->barcode ?? '';
             $this->storage_condition = $product->storage_condition ?? '';
+            $this->is_cold_chain = (bool) $product->is_cold_chain;
             $this->classification = $product->classification ?? 'otc';
             $this->loose_allowed = $product->loose_allowed;
             $this->reorder_level = $product->reorder_level;
             $this->max_level = $product->max_level;
             $this->min_level = $product->min_level;
+            $this->min_shelf_life_days = $product->min_shelf_life_days;
             $this->preferred_supplier_name = $product->preferred_supplier_name ?? '';
+
+            if ($product->drugInformation) {
+                $this->indications = $product->drugInformation->indications ?? '';
+                $this->dosage_guidance = $product->drugInformation->dosage_guidance ?? '';
+                $this->side_effects = $product->drugInformation->side_effects ?? '';
+                $this->contraindications = $product->drugInformation->contraindications ?? '';
+                $this->interactions = $product->drugInformation->interactions ?? '';
+            }
 
             $this->units = $product->units->map(fn ($u) => ['name' => $u->name, 'factor' => $u->factor])->toArray();
         }
@@ -111,15 +139,25 @@ class Form extends Component
             'unit' => $this->unit,
             'manufacturer' => $this->manufacturer,
             'category_id' => $this->category_id,
+            'product_code' => $this->product_code ?: null,
             'barcode' => $this->barcode,
             'storage_condition' => $this->storage_condition,
+            'is_cold_chain' => $this->is_cold_chain,
             'classification' => $this->classification,
             'loose_allowed' => $this->loose_allowed,
             'reorder_level' => $this->reorder_level,
             'max_level' => $this->max_level,
             'min_level' => $this->min_level,
+            'min_shelf_life_days' => $this->min_shelf_life_days,
             'preferred_supplier_name' => $this->preferred_supplier_name,
             'units' => $this->units,
+            'drug_information' => [
+                'indications' => $this->indications ?: null,
+                'dosage_guidance' => $this->dosage_guidance ?: null,
+                'side_effects' => $this->side_effects ?: null,
+                'contraindications' => $this->contraindications ?: null,
+                'interactions' => $this->interactions ?: null,
+            ],
         ];
 
         try {

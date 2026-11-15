@@ -329,4 +329,18 @@ return [
     'reason_found_stock' => 'Found Stock',
     'submit_adjustment_request' => 'Submit Adjustment Request',
     'adjustment_requested_successfully' => 'Stock adjustment request submitted successfully for approval.',
+
+    // Clinical Drug Information & Substitutes (DDD 5.3)
+    'clinical_information' => 'Clinical Drug Information',
+    'indications' => 'Indications',
+    'dosage_guidance' => 'Dosage Guidance',
+    'side_effects' => 'Side Effects',
+    'contraindications' => 'Contraindications',
+    'interactions' => 'Drug Interactions',
+    'no_clinical_information' => 'No clinical guidance recorded for this product yet.',
+    'suggested_substitutes' => 'Suggested Product Substitutes',
+    'cold_chain' => 'Cold Chain',
+    'cold_chain_required' => 'Requires Cold-Chain Storage (2-8°C)',
+    'product_code' => 'Product Code',
+    'min_shelf_life_days' => 'Min Shelf Life (days)',
 ];

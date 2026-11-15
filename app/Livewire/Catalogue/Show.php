@@ -12,7 +12,13 @@ class Show extends Component
 
     public function mount(Product $product): void
     {
-        $this->product = $product->load(['category', 'units', 'prices.user']);
+        $this->product = $product->load([
+            'category.parent',
+            'units',
+            'prices.user',
+            'drugInformation.updater',
+            'substitutes.latestPrice',
+        ]);
     }
 
     public function render()

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Catalogue;
 
+use App\Models\DrugInformation;
 use App\Models\Product;
 use App\Models\ProductUnit;
 use App\Models\User;
@@ -105,16 +106,19 @@ class SaveProduct
             $target->strength = $data['strength'] ?? null;
             $target->dosage_form = $data['dosage_form'] ?? null;
             $target->pack_size = $data['pack_size'] ?? null;
+            $target->product_code = ! empty($data['product_code']) ? $data['product_code'] : null;
             $target->unit = $data['unit'] ?? 'piece';
             $target->manufacturer = $data['manufacturer'] ?? null;
             $target->category_id = $data['category_id'] ?? null;
             $target->barcode = ! empty($data['barcode']) ? $data['barcode'] : null;
             $target->storage_condition = $data['storage_condition'] ?? null;
+            $target->is_cold_chain = (bool) ($data['is_cold_chain'] ?? false);
             $target->classification = $data['classification'];
             $target->loose_allowed = (bool) ($data['loose_allowed'] ?? false);
             $target->reorder_level = (int) ($data['reorder_level'] ?? 0);
             $target->max_level = (int) ($data['max_level'] ?? 0);
             $target->min_level = (int) ($data['min_level'] ?? 0);
+            $target->min_shelf_life_days = isset($data['min_shelf_life_days']) ? (int) $data['min_shelf_life_days'] : null;
             $target->preferred_supplier_name = $data['preferred_supplier_name'] ?? null;
 
             if ($isNew) {
@@ -122,6 +126,11 @@ class SaveProduct
             }
 
             $target->save();
+
+            // Save drug clinical information if provided
+            if (isset($data['drug_information']) && is_array($data['drug_information'])) {
+                DrugInformation::saveFor($target, $data['drug_information'], $actor);
+            }
 
             // Save units if provided
             if (isset($data['units']) && is_array($data['units'])) {
