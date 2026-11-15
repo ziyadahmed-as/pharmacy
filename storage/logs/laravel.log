@@ -714,3 +714,18 @@ Low Stock: 0 items | Expiring: 0 batches
 [2026-11-15 15:13:24] testing.WARNING: Refill reminder delivery failed to +251999999999: Carrier network timeout  
 [2026-11-15 15:13:24] testing.INFO: Refill reminder SMS sent to +251911000001 (ID: MSG-QQYIG7T5DU): Reminder 1  
 [2026-11-15 15:13:24] testing.INFO: Refill reminder SMS sent to +251911000002 (ID: MSG-9V5JABSTSX): Reminder 2  
+[2026-11-15 16:35:38] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
+[2026-11-15 16:35:55] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-15 16:35:55] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-15 16:36:03] testing.INFO: Refill reminder SMS sent to +251911998877 (ID: MSG-H9CEOAE8DE): [City Central Pharmacy] Daily Summary (15 Nov 2026):
+Net Sales: 0.00 ETB (0 sales)
+Cash: 0.00 ETB | Digital: 0.00 ETB
+Low Stock: 0 items | Expiring: 0 batches  
+[2026-11-15 16:36:03] testing.INFO: Refill reminder SMS sent to +251911998877 (ID: MSG-AISPOPHCLA): [City Central Pharmacy] Daily Summary (15 Nov 2026):
+Net Sales: 0.00 ETB (0 sales)
+Cash: 0.00 ETB | Digital: 0.00 ETB
+Low Stock: 0 items | Expiring: 0 batches  
+[2026-11-15 16:36:10] testing.INFO: Refill reminder SMS sent to +251911888888 (ID: MSG-VRPGRAJHQR): Dear Derartu, your refill is due.  
+[2026-11-15 16:36:10] testing.WARNING: Refill reminder delivery failed to +251999999999: Carrier network timeout  
+[2026-11-15 16:36:10] testing.INFO: Refill reminder SMS sent to +251911000001 (ID: MSG-5GSA0IBYAC): Reminder 1  
+[2026-11-15 16:36:10] testing.INFO: Refill reminder SMS sent to +251911000002 (ID: MSG-9EYNJSNP3T): Reminder 2  

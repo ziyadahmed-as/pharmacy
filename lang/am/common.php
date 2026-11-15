@@ -48,4 +48,7 @@ return [
     'processing' => 'በሂደት ላይ...',
     'activate' => 'አንቃ',
     'deactivate' => 'አቦዝን',
+    'download' => 'አውርድ',
+    'uploading' => 'በመጫን ላይ',
+    'delete' => 'ሰርዝ',
 ];

@@ -46,6 +46,9 @@
 
     {{-- Responsive Metric Tiles Grid (1 col mobile, 2 col tablet, 3 col desktop) --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {{-- Tile 0: Monthly Sales Target --}}
+        <livewire:owner.tiles.sales-target-tile />
+
         {{-- Tile 1: Sales Today --}}
         <livewire:owner.tiles.sales-today-tile />
 

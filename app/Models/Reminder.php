@@ -47,6 +47,7 @@ class Reminder extends Model
     protected $fillable = [
         'customer_id',
         'prescription_line_id',
+        'staff_document_id',
         'due_date',
         'channel',
         'status',
@@ -74,6 +75,11 @@ class Reminder extends Model
     public function prescriptionLine(): BelongsTo
     {
         return $this->belongsTo(PrescriptionLine::class);
+    }
+
+    public function staffDocument(): BelongsTo
+    {
+        return $this->belongsTo(StaffDocument::class);
     }
 
     public function sentBy(): BelongsTo

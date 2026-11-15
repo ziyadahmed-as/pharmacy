@@ -91,23 +91,67 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Shift Sales Target Progress --}}
+                @if ($salesTargetProgress)
+                    <div class="mt-4 pt-3 border-t border-emerald-200/80">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-xs mb-1.5">
+                            <span class="font-semibold text-emerald-950">
+                                {{ $salesTargetProgress['is_personal'] ? __('sales.targets.my_monthly_target') : __('sales.targets.pharmacy_monthly_target') }}
+                                <span class="font-normal text-emerald-700">({{ $salesTargetProgress['period_label'] }})</span>
+                            </span>
+                            <span class="font-bold font-mono text-emerald-950">
+                                {{ number_format($salesTargetProgress['achieved_amount'] / 100, 2) }} / {{ number_format($salesTargetProgress['target_amount'] / 100, 2) }} ETB
+                                <span class="ml-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold {{ $salesTargetProgress['percentage'] >= 100 ? 'bg-emerald-200 text-emerald-900' : 'bg-white/80 text-emerald-800' }}">
+                                    {{ $salesTargetProgress['percentage'] }}%
+                                </span>
+                            </span>
+                        </div>
+                        <div class="w-full bg-emerald-200/60 rounded-full h-2.5 overflow-hidden">
+                            <div class="h-2.5 rounded-full bg-emerald-600 transition-all duration-500" style="width: {{ min(100, $salesTargetProgress['percentage']) }}%"></div>
+                        </div>
+                    </div>
+                @endif
             </div>
         @else
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="p-2.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-200">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2.5 rounded-lg bg-amber-50 text-amber-600 border border-amber-200">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-900">{{ __('dashboard.shift_none_title') }}</h2>
+                            <p class="text-xs text-slate-500">{{ __('dashboard.shift_none_subtitle') }}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h2 class="text-sm font-bold text-slate-900">{{ __('dashboard.shift_none_title') }}</h2>
-                        <p class="text-xs text-slate-500">{{ __('dashboard.shift_none_subtitle') }}</p>
-                    </div>
+                    <a href="{{ route('shifts.open') }}" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition shadow-sm">
+                        {{ __('dashboard.btn_open_shift') }} &rarr;
+                    </a>
                 </div>
-                <a href="{{ route('shifts.open') }}" class="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition shadow-sm">
-                    {{ __('dashboard.btn_open_shift') }} &rarr;
-                </a>
+
+                {{-- Target Progress when shift is not open --}}
+                @if ($salesTargetProgress)
+                    <div class="pt-3 border-t border-slate-100">
+                        <div class="flex items-center justify-between text-xs mb-1.5">
+                            <span class="font-semibold text-slate-800">
+                                {{ $salesTargetProgress['is_personal'] ? __('sales.targets.my_monthly_target') : __('sales.targets.pharmacy_monthly_target') }}
+                                <span class="font-normal text-slate-500">({{ $salesTargetProgress['period_label'] }})</span>
+                            </span>
+                            <span class="font-bold font-mono text-slate-900">
+                                {{ number_format($salesTargetProgress['achieved_amount'] / 100, 2) }} / {{ number_format($salesTargetProgress['target_amount'] / 100, 2) }} ETB
+                                <span class="ml-1.5 px-2 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800">
+                                    {{ $salesTargetProgress['percentage'] }}%
+                                </span>
+                            </span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                            <div class="h-2.5 rounded-full bg-teal-600 transition-all duration-500" style="width: {{ min(100, $salesTargetProgress['percentage']) }}%"></div>
+                        </div>
+                    </div>
+                @endif
             </div>
         @endif
     @endif

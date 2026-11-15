@@ -48,4 +48,7 @@ return [
     'processing' => 'Processing...',
     'activate' => 'Activate',
     'deactivate' => 'Deactivate',
+    'download' => 'Download',
+    'uploading' => 'Uploading',
+    'delete' => 'Delete',
 ];

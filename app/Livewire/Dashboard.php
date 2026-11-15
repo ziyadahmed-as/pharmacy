@@ -10,7 +10,9 @@ use App\Models\Prescription;
 use App\Models\Product;
 use App\Models\RosterEntry;
 use App\Models\Sale;
+use App\Models\SalesTarget;
 use App\Models\Shift;
+use App\Models\Staff;
 use App\Models\StockAlert;
 use App\Models\StockReceipt;
 use App\Models\User;
@@ -66,6 +68,52 @@ class Dashboard extends Component
                     $activeShiftStats = [
                         'sales_count' => $activeShift->sales()->where('status', 'completed')->count(),
                         'sales_total' => (int) $activeShift->sales()->where('status', 'completed')->sum('total'),
+                    ];
+                }
+            }
+
+            // 2b. Sales Target Progress for current staff or pharmacy
+            $salesTargetProgress = null;
+            if (Schema::hasTable('sales_targets')) {
+                $currentPeriod = now()->format('Y-m');
+                $staff = Schema::hasTable('staff') ? Staff::where('user_id', $user->id)->first() : null;
+
+                $target = null;
+                if ($staff) {
+                    $target = SalesTarget::where('staff_id', $staff->id)
+                        ->where('period', $currentPeriod)
+                        ->first();
+                }
+
+                if (! $target) {
+                    $target = SalesTarget::whereNull('staff_id')
+                        ->where('period', $currentPeriod)
+                        ->first();
+                }
+
+                if ($target) {
+                    $startOfMonth = now()->startOfMonth();
+                    $endOfMonth = now()->endOfMonth();
+
+                    $achievedQuery = Sale::where('status', 'completed')
+                        ->whereBetween('completed_at', [$startOfMonth, $endOfMonth]);
+
+                    if ($target->staff_id !== null) {
+                        $achievedQuery->where('user_id', $user->id);
+                    }
+
+                    $achievedSantim = (int) $achievedQuery->sum('total');
+                    $targetSantim = $target->amount;
+                    $percentage = $targetSantim > 0 ? round(($achievedSantim / $targetSantim) * 100, 1) : 0.0;
+
+                    $salesTargetProgress = [
+                        'target' => $target,
+                        'target_amount' => $targetSantim,
+                        'achieved_amount' => $achievedSantim,
+                        'remaining_amount' => max(0, $targetSantim - $achievedSantim),
+                        'percentage' => $percentage,
+                        'is_personal' => $target->staff_id !== null,
+                        'period_label' => now()->format('F Y'),
                     ];
                 }
             }
@@ -157,6 +205,7 @@ class Dashboard extends Component
             'stats' => $stats,
             'activeShift' => $activeShift,
             'activeShiftStats' => $activeShiftStats,
+            'salesTargetProgress' => $salesTargetProgress ?? null,
             'recentSales' => $recentSales,
             'recentAudits' => $recentAudits,
             'onDutyToday' => $onDutyToday,

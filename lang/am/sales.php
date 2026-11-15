@@ -168,4 +168,20 @@ return [
     'original_receipt' => 'የመጀመሪያ ደረሰኝ',
     'refund_footer_note' => 'የደንበኛ ዕቃ መመለሻ ደረሰኝ · :app',
     'refund_error_locked_day' => 'የሒሳብ ቀኑ ተዘግቷል። ፈቃድ ያለው ማስተካከያ ይጠቀሙ።',
+
+    // Sales targets (STEP 2)
+    'targets' => [
+        'unauthorized' => 'የሽያጭ ግቦችን ለማስቀመጥ ፈቃድ የለዎትም።',
+        'invalid_period' => 'ልክ ያልሆነ የወር ቅርጸት። YYYY-MM ይጠበቃል።',
+        'amount_required' => 'የሽያጭ ግብ መጠን ከዜሮ በላይ መሆን አለበት።',
+        'staff_not_found' => 'የተጠቀሰው ሠራተኛ አልተገኘም።',
+        'set_target' => 'የሽያጭ ግብ አስቀምጥ',
+        'monthly_target_etb' => 'የወር የሽያጭ ግብ መጠን (ETB)',
+        'remaining' => 'የሚቀረው',
+        'days_left' => 'የቀሩት ቀናት',
+        'days' => 'ቀናት',
+        'no_target_set' => 'ለዚህ ጊዜ የተወሰነ የወር የሽያጭ ግብ የለም።',
+        'my_monthly_target' => 'የእኔ የሽያጭ ግብ',
+        'pharmacy_monthly_target' => 'የፋርማሲው የሽያጭ ግብ',
+    ],
 ];
