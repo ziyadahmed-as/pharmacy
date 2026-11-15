@@ -168,4 +168,20 @@ return [
     'original_receipt' => 'Original Receipt',
     'refund_footer_note' => 'Operational Customer Return Receipt · :app',
     'refund_error_locked_day' => 'The accounting day is locked. Use an approved adjustment instead.',
+
+    // Sales targets (STEP 2)
+    'targets' => [
+        'unauthorized' => 'You are not authorized to set sales targets.',
+        'invalid_period' => 'Invalid sales target period format. Expected YYYY-MM.',
+        'amount_required' => 'Sales target amount must be greater than zero.',
+        'staff_not_found' => 'Specified staff member was not found.',
+        'set_target' => 'Set Sales Target',
+        'monthly_target_etb' => 'Monthly Target Amount (ETB)',
+        'remaining' => 'Remaining',
+        'days_left' => 'Days Left',
+        'days' => 'days',
+        'no_target_set' => 'No monthly sales target set for this period.',
+        'my_monthly_target' => 'My Sales Target',
+        'pharmacy_monthly_target' => 'Pharmacy Sales Target',
+    ],
 ];

@@ -14,6 +14,7 @@ use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\RefundReceiptController;
 use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\ShiftSummaryController;
+use App\Http\Controllers\StaffDocumentController;
 use App\Http\Controllers\StaffPhotoController;
 use App\Http\Controllers\StockExportController;
 use App\Livewire\Alerts as AlertsUi;
@@ -95,6 +96,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
                 Route::get('/staff/{staff}', StaffUi\Show::class)->name('staff.show');
                 Route::get('/staff/{staff}/edit', StaffUi\Edit::class)->middleware('can:staff.manage')->name('staff.edit');
                 Route::get('/staff/{staff}/photo', StaffPhotoController::class)->name('staff.photo');
+                Route::get('/staff/{staff}/documents/{document}', [StaffDocumentController::class, 'show'])->name('staff.documents.show');
             });
 
             // UC-40: roster and shifts

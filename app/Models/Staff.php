@@ -79,6 +79,16 @@ class Staff extends Model
         return $this->hasMany(StaffLicence::class)->orderByDesc('expires_at')->orderByDesc('id');
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(StaffDocument::class)->orderByDesc('created_at');
+    }
+
+    public function salesTargets(): HasMany
+    {
+        return $this->hasMany(SalesTarget::class)->orderByDesc('period');
+    }
+
     public function currentLicence(): ?StaffLicence
     {
         return $this->licences()->first();

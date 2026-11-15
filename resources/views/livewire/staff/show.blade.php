@@ -116,4 +116,123 @@
             @endif
         </section>
     </div>
+
+    {{-- Section 3: Staff Documents (UC-39 FR-10.3) --}}
+    <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div>
+                <h2 class="text-base font-bold text-slate-900">{{ __('staff.documents.title') }}</h2>
+                <p class="text-xs text-slate-500">{{ __('staff.documents.subtitle') }}</p>
+            </div>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                {{ count($staff->documents) }} {{ __('staff.documents.count') }}
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-100 text-xs">
+                <thead>
+                    <tr class="text-left text-slate-400 font-semibold uppercase tracking-wider">
+                        <th class="py-2.5 px-3">{{ __('staff.documents.type') }}</th>
+                        <th class="py-2.5 px-3">{{ __('staff.documents.file') }}</th>
+                        <th class="py-2.5 px-3">{{ __('staff.documents.dates') }}</th>
+                        <th class="py-2.5 px-3">{{ __('staff.documents.status') }}</th>
+                        <th class="py-2.5 px-3 text-right">{{ __('common.actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @forelse ($staff->documents as $doc)
+                        <tr wire:key="doc-{{ $doc->id }}" class="hover:bg-slate-50/60 transition">
+                            <td class="py-3 px-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-800">
+                                    {{ __('staff.documents.types.'.$doc->type) }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-3">
+                                <p class="font-semibold text-slate-900">{{ $doc->file_name ?: 'document' }}</p>
+                                <p class="text-[11px] text-slate-400">{{ $doc->formattedSize() }} · {{ $doc->created_at?->diffForHumans() }}</p>
+                            </td>
+                            <td class="py-3 px-3 text-slate-600">
+                                <div><span class="text-slate-400">{{ __('staff.issued_at') }}:</span> {{ $doc->issued_at?->toDateString() ?: '—' }}</div>
+                                <div><span class="text-slate-400">{{ __('staff.expires_at') }}:</span> {{ $doc->expires_at?->toDateString() ?: '—' }}</div>
+                            </td>
+                            <td class="py-3 px-3">
+                                @if (! $doc->expires_at)
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600">
+                                        {{ __('staff.documents.no_expiry') }}
+                                    </span>
+                                @elseif ($doc->isExpired())
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 ring-1 ring-rose-600/20">
+                                        {{ __('staff.documents.expired') }}
+                                    </span>
+                                @elseif ($doc->isExpiringSoon(30))
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 ring-1 ring-amber-600/20">
+                                        {{ __('staff.documents.expiring_soon') }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20">
+                                        {{ __('staff.documents.valid') }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="py-3 px-3 text-right space-x-2">
+                                <a href="{{ route('staff.documents.show', [$staff, $doc]) }}" target="_blank" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-teal-50 text-teal-700 hover:bg-teal-100 transition">
+                                    {{ __('common.download') }}
+                                </a>
+                                @if ($canManage)
+                                    <button type="button" wire:click="deleteDocument({{ $doc->id }})" wire:confirm="{{ __('staff.documents.confirm_delete') }}" class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition">
+                                        {{ __('common.delete') }}
+                                    </button>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" class="py-6 text-center text-slate-400 italic">
+                                {{ __('staff.documents.none') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if ($canManage && $staff->status !== 'ended')
+            <form wire:submit="uploadDocument" class="mt-4 space-y-4 border-t border-slate-100 pt-4">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">{{ __('staff.documents.upload_heading') }}</h3>
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    <div>
+                        <label for="doc_type" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">{{ __('staff.documents.type') }}</label>
+                        <select id="doc_type" wire:model="doc_type" class="mt-1 w-full rounded-xl border border-slate-300 py-1.5 px-3 text-xs focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                            @foreach (\App\Models\StaffDocument::TYPES as $t)
+                                <option value="{{ $t }}">{{ __('staff.documents.types.'.$t) }}</option>
+                            @endforeach
+                        </select>
+                        @error('doc_type')<p class="mt-1 text-xs text-rose-600 font-medium">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="doc_file" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">{{ __('staff.documents.file') }} (max 5MB)</label>
+                        <input id="doc_file" type="file" wire:model="doc_file" accept=".pdf,.png,.jpg,.jpeg,.webp" class="mt-1 w-full text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
+                        @error('doc_file')<p class="mt-1 text-xs text-rose-600 font-medium">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="doc_issued" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">{{ __('staff.issued_at') }}</label>
+                        <input id="doc_issued" type="date" wire:model="doc_issued" class="mt-1 w-full rounded-xl border border-slate-300 py-1.5 px-3 text-xs focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                        @error('doc_issued')<p class="mt-1 text-xs text-rose-600 font-medium">{{ $message }}</p>@enderror
+                    </div>
+                    <div>
+                        <label for="doc_expires" class="block text-xs font-semibold uppercase tracking-wider text-slate-600">{{ __('staff.expires_at') }}</label>
+                        <input id="doc_expires" type="date" wire:model="doc_expires" class="mt-1 w-full rounded-xl border border-slate-300 py-1.5 px-3 text-xs focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition">
+                        @error('doc_expires')<p class="mt-1 text-xs text-rose-600 font-medium">{{ $message }}</p>@enderror
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button type="submit" wire:loading.attr="disabled" class="rounded-xl bg-teal-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+                        <span wire:loading.remove>{{ __('staff.documents.upload_btn') }}</span>
+                        <span wire:loading>{{ __('common.uploading') }}...</span>
+                    </button>
+                </div>
+            </form>
+        @endif
+    </section>
 </div>

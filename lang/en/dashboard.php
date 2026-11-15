@@ -100,6 +100,7 @@ return [
         'title' => 'Owner Executive Dashboard',
         'subtitle' => 'Real-time performance, inventory valuation, cash flows, and margins',
         'executive_view' => 'Executive View',
+        'sales_target_title' => 'Monthly Sales Target',
         'send_daily_summary_btn' => 'Send Daily Summary (SMS)',
         'all_reports' => 'All Business Reports',
         'sales_today' => 'Sales Today',

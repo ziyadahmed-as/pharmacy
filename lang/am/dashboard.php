@@ -100,6 +100,7 @@ return [
         'title' => 'የባለቤት የስራ አመራር ዳሽቦርድ',
         'subtitle' => 'የቀጥታ የስራ አፈጻጸም፣ የእቃ ክምችት ዋጋ፣ የገንዘብ ፍሰት እና የትርፍ ህዳግ',
         'executive_view' => 'የስራ አመራር እይታ',
+        'sales_target_title' => 'የወር የሽያጭ ግብ',
         'send_daily_summary_btn' => 'የዕለቱን ማጠቃለያ ላክ (በSMS)',
         'all_reports' => 'ሁሉም የንግድ ሪፖርቶች',
         'sales_today' => 'የዛሬ ሽያጮች',
