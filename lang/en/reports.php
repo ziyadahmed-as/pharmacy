@@ -162,6 +162,7 @@ return [
     'col_items_count' => 'Items Count',
     'col_created_by' => 'Created By',
     'col_registered_at' => 'Registered At',
+    'col_recall_no' => 'Recall #',
     'col_quarantined_qty' => 'Quarantined Qty',
     'col_disposed_qty' => 'Disposed Qty',
     'col_remaining_quarantined' => 'Remaining in Quarantine',

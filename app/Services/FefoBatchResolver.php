@@ -8,6 +8,8 @@ use App\Exceptions\SellabilityException;
 use App\Models\Batch;
 use App\Models\Product;
 use App\Models\QuarantineRecord;
+use App\Models\Recall;
+use App\Models\RecallBatch;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -32,10 +34,15 @@ class FefoBatchResolver
      */
     public static function getEligibleBatches(Product $product): Collection
     {
-        // 1. Recalled batches must not be eligible
+        // 1. Recalled batches must not be eligible (via open QuarantineRecord or open RecallBatch)
         $recalledBatchIds = QuarantineRecord::where('status', QuarantineRecord::STATUS_OPEN)
             ->where('reason', QuarantineRecord::REASON_RECALLED)
             ->pluck('batch_id')
+            ->merge(
+                RecallBatch::whereHas('recall', fn ($q) => $q->where('status', Recall::STATUS_OPEN))
+                    ->pluck('batch_id')
+            )
+            ->unique()
             ->all();
 
         return Batch::query()

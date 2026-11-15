@@ -23,6 +23,7 @@ class DocumentSequenceSeeder extends Seeder
             ['type' => 'refund', 'prefix' => 'RFD', 'next_value' => 1],
             ['type' => 'prescription', 'prefix' => 'RX', 'next_value' => 1],
             ['type' => 'credit_payment', 'prefix' => 'CPR', 'next_value' => 1],
+            ['type' => 'recall', 'prefix' => 'RCL', 'next_value' => 1],
         ];
 
         foreach ($sequences as $seq) {

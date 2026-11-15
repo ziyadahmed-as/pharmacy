@@ -4,13 +4,14 @@ namespace App\Reports\Definitions\Compliance;
 
 use App\Enums\Role;
 use App\Models\QuarantineRecord;
+use App\Models\Recall;
 use App\Models\User;
 use App\Reports\Definitions\BaseReportDefinition;
 
 /**
- * Recall traceability compliance report (UC-30).
+ * Recall traceability compliance report (UC-10, UC-30).
  *
- * @uc UC-30 @fr FR-7.4, FR-2.11, FR-2.12 @ac AC-29
+ * @uc UC-10, UC-30 @fr FR-7.4, FR-2.11, FR-2.12 @ac AC-29
  */
 class ComplianceRecallsReport extends BaseReportDefinition
 {
@@ -54,6 +55,7 @@ class ComplianceRecallsReport extends BaseReportDefinition
     {
         return [
             __('reports.col_date'),
+            __('reports.col_recall_no'),
             __('reports.col_product'),
             __('reports.col_batch_no'),
             __('reports.col_expiry_date'),
@@ -69,19 +71,65 @@ class ComplianceRecallsReport extends BaseReportDefinition
     {
         [$start, $end] = $this->parseDateRange($filters);
 
-        $records = QuarantineRecord::query()
-            ->with(['batch.product', 'disposals'])
-            ->where('reason', QuarantineRecord::REASON_RECALLED)
-            ->whereDate('created_at', '>=', $start)
-            ->whereDate('created_at', '<=', $end)
+        $recalls = Recall::query()
+            ->with(['product', 'batches.batch.quarantineRecords.disposals', 'creator'])
+            ->whereDate('recall_date', '>=', $start)
+            ->whereDate('recall_date', '<=', $end)
             ->orderByDesc('id')
             ->get();
 
         $rows = [];
         $totRecalled = 0;
         $totDisposed = 0;
+        $processedBatchIds = [];
 
-        foreach ($records as $rec) {
+        foreach ($recalls as $recall) {
+            foreach ($recall->batches as $recallBatch) {
+                $batch = $recallBatch->batch;
+                $processedBatchIds[] = $recallBatch->batch_id;
+
+                $disposedQty = 0;
+                $quarantinedQty = $recallBatch->quantity_quarantined;
+
+                if ($batch) {
+                    $disposedQty = (int) $batch->quarantineRecords
+                        ->flatMap->disposals
+                        ->where('status', 'approved')
+                        ->sum('quantity');
+                }
+
+                $remaining = max(0, $quarantinedQty - $disposedQty);
+
+                $totRecalled += $quarantinedQty;
+                $totDisposed += $disposedQty;
+
+                $rows[] = [
+                    $this->formatDate($recall->recall_date),
+                    $recall->recall_no,
+                    $recall->product?->brand ?? 'Unknown',
+                    $batch?->batch_no ?? '-',
+                    $this->formatDate($batch?->expiry_date, 'Y-m-d'),
+                    (string) $quarantinedQty,
+                    (string) $disposedQty,
+                    (string) $remaining,
+                    ucfirst($recall->status),
+                    $recall->reason ?? '-',
+                ];
+            }
+        }
+
+        // Also include any legacy QuarantineRecord entries with reason = 'recalled'
+        // that were not initiated through the Recall model
+        $legacyRecords = QuarantineRecord::query()
+            ->with(['batch.product', 'disposals'])
+            ->where('reason', QuarantineRecord::REASON_RECALLED)
+            ->whereNotIn('batch_id', $processedBatchIds)
+            ->whereDate('created_at', '>=', $start)
+            ->whereDate('created_at', '<=', $end)
+            ->orderByDesc('id')
+            ->get();
+
+        foreach ($legacyRecords as $rec) {
             $disposedQty = (int) $rec->disposals->where('status', 'approved')->sum('quantity');
             $remaining = max(0, $rec->quantity - $disposedQty);
 
@@ -90,6 +138,7 @@ class ComplianceRecallsReport extends BaseReportDefinition
 
             $rows[] = [
                 $this->formatDate($rec->created_at),
+                '-',
                 $rec->batch?->product?->brand ?? 'Unknown',
                 $rec->batch?->batch_no ?? '-',
                 $this->formatDate($rec->batch?->expiry_date, 'Y-m-d'),
