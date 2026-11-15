@@ -132,11 +132,23 @@
             </div>
             <div>
                 <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('prescriptions.fields.prescriber_name') }}</dt>
-                <dd class="mt-1 text-sm text-slate-900 dark:text-white">{{ $prescription->prescriber_name }}</dd>
+                <dd class="mt-1 text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>{{ $prescription->prescriber_name }}</span>
+                    @if($prescription->prescriber)
+                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium {{ $prescription->prescriber->is_active ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300' }}">
+                            {{ $prescription->prescriber->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                        @if($prescription->prescriber->facility)
+                            <span class="text-xs text-slate-500">({{ $prescription->prescriber->facility }})</span>
+                        @endif
+                    @endif
+                </dd>
             </div>
             <div>
                 <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('prescriptions.fields.prescriber_registration_no') }}</dt>
-                <dd class="mt-1 text-sm font-mono text-slate-900 dark:text-white">{{ $prescription->prescriber_registration_no }}</dd>
+                <dd class="mt-1 text-sm font-mono text-slate-900 dark:text-white">
+                    {{ $prescription->prescriber_registration_no ?: ($prescription->prescriber?->licence_number ?? '—') }}
+                </dd>
             </div>
             <div>
                 <dt class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{{ __('prescriptions.fields.patient') }}</dt>

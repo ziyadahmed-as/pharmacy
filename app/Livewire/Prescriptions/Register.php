@@ -5,7 +5,9 @@ namespace App\Livewire\Prescriptions;
 use App\Actions\Prescriptions\RegisterPrescription;
 use App\Enums\Role;
 use App\Models\Customer;
+use App\Models\Prescriber;
 use App\Models\Product;
+use App\Services\AuditLogger;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +24,25 @@ use RuntimeException;
 class Register extends Component
 {
     use WithFileUploads;
+
+    public ?int $prescriberId = null;
+
+    public string $prescriberSearch = '';
+
+    public array $prescriberSearchResults = [];
+
+    public ?string $prescriberWarning = null;
+
+    // Quick add prescriber modal
+    public bool $showQuickAddModal = false;
+
+    public string $quickAddName = '';
+
+    public string $quickAddLicence = '';
+
+    public string $quickAddFacility = '';
+
+    public string $quickAddPhone = '';
 
     public string $prescriberName = '';
 
@@ -51,6 +72,96 @@ class Register extends Component
     public array $productSearchResults = [];
 
     public ?string $activeLineSearch = null;
+
+    public function updatedPrescriberSearch(): void
+    {
+        $term = trim($this->prescriberSearch);
+        if (strlen($term) >= 1) {
+            $this->prescriberSearchResults = Prescriber::search($term)
+                ->take(8)
+                ->get()
+                ->toArray();
+        } else {
+            $this->prescriberSearchResults = [];
+        }
+    }
+
+    public function selectPrescriber(int $id): void
+    {
+        $prescriber = Prescriber::find($id);
+        if (! $prescriber) {
+            return;
+        }
+
+        $this->prescriberId = $prescriber->id;
+        $this->prescriberName = $prescriber->name;
+        $this->prescriberRegNo = (string) ($prescriber->licence_number ?? '');
+        $this->prescriberSearch = $prescriber->displayText();
+        $this->prescriberSearchResults = [];
+
+        if (! $prescriber->is_active) {
+            $this->prescriberWarning = __('prescribers.inactive_warning', [
+                'name' => $prescriber->name,
+                'default' => "Warning: Prescriber {$prescriber->name} is marked as inactive.",
+            ]);
+        } else {
+            $this->prescriberWarning = null;
+        }
+    }
+
+    public function clearPrescriber(): void
+    {
+        $this->prescriberId = null;
+        $this->prescriberName = '';
+        $this->prescriberRegNo = '';
+        $this->prescriberSearch = '';
+        $this->prescriberSearchResults = [];
+        $this->prescriberWarning = null;
+    }
+
+    public function openQuickAddPrescriber(): void
+    {
+        $this->reset(['quickAddName', 'quickAddLicence', 'quickAddFacility', 'quickAddPhone']);
+        if ($this->prescriberSearch && ! $this->prescriberId) {
+            $this->quickAddName = trim($this->prescriberSearch);
+        }
+        $this->resetErrorBag();
+        $this->showQuickAddModal = true;
+    }
+
+    public function saveQuickAddPrescriber(): void
+    {
+        $this->validate([
+            'quickAddName' => ['required', 'string', 'max:255'],
+            'quickAddLicence' => ['nullable', 'string', 'max:64', 'unique:prescribers,licence_number'],
+            'quickAddFacility' => ['nullable', 'string', 'max:255'],
+            'quickAddPhone' => ['nullable', 'string', 'max:32'],
+        ]);
+
+        $cleanLicence = trim($this->quickAddLicence) !== '' ? trim($this->quickAddLicence) : null;
+        $cleanFacility = trim($this->quickAddFacility) !== '' ? trim($this->quickAddFacility) : null;
+        $cleanPhone = trim($this->quickAddPhone) !== '' ? trim($this->quickAddPhone) : null;
+
+        $prescriber = Prescriber::create([
+            'name' => trim($this->quickAddName),
+            'licence_number' => $cleanLicence,
+            'facility' => $cleanFacility,
+            'phone' => $cleanPhone,
+            'is_active' => true,
+        ]);
+
+        AuditLogger::record(
+            action: 'prescriber.created',
+            subject: $prescriber,
+            old: [],
+            new: $prescriber->only(['name', 'licence_number', 'facility', 'phone', 'is_active']),
+            user: Auth::user(),
+            description: "Quick-added prescriber {$prescriber->name}"
+        );
+
+        $this->selectPrescriber($prescriber->id);
+        $this->showQuickAddModal = false;
+    }
 
     public function mount(): void
     {
@@ -192,6 +303,7 @@ class Register extends Component
                 $patientData,
                 $lines,
                 $scanPath,
+                $this->prescriberId,
             );
 
             session()->flash('success', __('prescriptions.prescription_registered_successfully'));

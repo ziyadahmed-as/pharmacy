@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Batch;
 use App\Models\ControlledDrugRegister as ControlledDrugRegisterEntry;
+use App\Models\Prescriber;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\StockMovement;
@@ -41,7 +42,8 @@ class ControlledDrugRegister
         ?string $prescriberName = null,
         ?Sale $sale = null,
         ?StockMovement $stockMovement = null,
-        ?string $notes = null
+        ?string $notes = null,
+        ?int $prescriberId = null
     ): ControlledDrugRegisterEntry {
         // Feature switch check (OQ-01)
         if (! (bool) setting('pharmacy.handles_controlled_drugs', true)) {
@@ -77,6 +79,10 @@ class ControlledDrugRegister
             }
         }
 
+        if (! $prescriberId && $prescriberName) {
+            $prescriberId = Prescriber::where('name', $prescriberName)->value('id');
+        }
+
         return ControlledDrugRegisterEntry::create([
             'product_id' => $product->id,
             'batch_id' => $batch->id,
@@ -84,6 +90,7 @@ class ControlledDrugRegister
             'quantity' => $quantity,
             'running_balance' => $runningBalance,
             'patient_name' => $patientName,
+            'prescriber_id' => $prescriberId,
             'prescriber_name' => $prescriberName,
             'user_id' => $user->id,
             'second_person_id' => $secondPerson?->id,

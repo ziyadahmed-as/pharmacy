@@ -199,6 +199,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/reminders', App\Livewire\Reminders\Index::class)->middleware('can:prescriptions.dispense')->name('reminders.index');
 
             // UC-19, UC-20, UC-21, UC-22, UC-23: Prescriptions and Controlled Drugs (Stage 4)
+            Route::get('/prescribers', App\Livewire\Prescribers\Index::class)->middleware('can:prescriptions.view')->name('prescribers.index');
             Route::get('/prescriptions', App\Livewire\Prescriptions\Index::class)->middleware('can:prescriptions.view')->name('prescriptions.index');
             Route::get('/prescriptions/search', Search::class)->middleware('can:prescriptions.view')->name('prescriptions.search');
             Route::get('/prescriptions/export/{format}', PrescriptionExportController::class)->whereIn('format', ['csv', 'pdf'])->middleware('can:prescriptions.view')->name('prescriptions.export');

@@ -28,6 +28,7 @@ return [
     'shifts' => 'Cash shifts',
     'tills' => 'Tills',
     'prescriptions' => 'Prescriptions',
+    'prescribers' => 'Prescribers Register',
     'prescriptions_search' => 'Prescription search',
     'controlled_drug_register' => 'Controlled Drug Register',
     'backups' => 'Backups & Recovery',

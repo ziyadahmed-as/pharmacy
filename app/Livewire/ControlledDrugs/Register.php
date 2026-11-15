@@ -54,7 +54,7 @@ class Register extends Component
 
     public function render(): View
     {
-        $query = ControlledDrugRegister::with(['product', 'batch', 'user', 'secondPerson', 'sale'])
+        $query = ControlledDrugRegister::with(['product', 'batch', 'user', 'secondPerson', 'sale', 'prescriber'])
             ->orderBy('id', 'desc');
 
         if ($this->search !== '') {
@@ -63,7 +63,8 @@ class Register extends Component
                 $q->whereHas('product', fn ($pq) => $pq->where('brand', 'like', $s)->orWhere('generic_name', 'like', $s))
                     ->orWhereHas('batch', fn ($bq) => $bq->where('batch_no', 'like', $s))
                     ->orWhere('patient_name', 'like', $s)
-                    ->orWhere('prescriber_name', 'like', $s);
+                    ->orWhere('prescriber_name', 'like', $s)
+                    ->orWhereHas('prescriber', fn ($pr) => $pr->where('licence_number', 'like', $s));
             });
         }
 

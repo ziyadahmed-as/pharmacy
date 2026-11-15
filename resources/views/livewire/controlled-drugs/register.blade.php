@@ -98,7 +98,14 @@
                         <td class="px-4 py-3 text-right font-mono font-semibold">{{ $entry->quantity }}</td>
                         <td class="px-4 py-3 text-right font-mono font-bold text-gray-900">{{ $entry->running_balance }}</td>
                         <td class="px-4 py-3 text-gray-700">{{ $entry->patient_name ?? '—' }}</td>
-                        <td class="px-4 py-3 text-gray-700">{{ $entry->prescriber_name ?? '—' }}</td>
+                        <td class="px-4 py-3 text-gray-700">
+                            <div>{{ $entry->prescriber_name ?? '—' }}</div>
+                            @if($entry->prescriber?->licence_number)
+                                <div class="text-xs font-mono text-purple-700 dark:text-purple-400">
+                                    {{ $entry->prescriber->licence_number }}
+                                </div>
+                            @endif
+                        </td>
                         <td class="px-4 py-3 text-gray-600">{{ $entry->user->name }}</td>
                         <td class="px-4 py-3 text-gray-600">{{ $entry->secondPerson?->name ?? '—' }}</td>
                         <td class="px-4 py-3 text-gray-500 text-xs">

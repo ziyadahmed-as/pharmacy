@@ -19,9 +19,81 @@
 
         {{-- Prescriber Section --}}
         <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 space-y-4">
-            <h2 class="text-base font-semibold text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-700 pb-2">
-                Prescriber Information
-            </h2>
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                <h2 class="text-base font-semibold text-slate-900 dark:text-white">
+                    {{ __('prescribers.prescriber_information', ['default' => 'Prescriber Information']) }}
+                </h2>
+                <button
+                    type="button"
+                    wire:click="openQuickAddPrescriber"
+                    class="text-xs font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 flex items-center gap-1"
+                >
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    {{ __('prescribers.quick_add_prescriber', ['default' => '+ Quick Add Prescriber']) }}
+                </button>
+            </div>
+
+            {{-- Inactive Prescriber Warning Alert --}}
+            @if($prescriberWarning)
+                <div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-200 flex items-center gap-2">
+                    <svg class="h-4 w-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <span>{{ $prescriberWarning }}</span>
+                </div>
+            @endif
+
+            {{-- Prescriber Search Autocomplete --}}
+            <div class="relative">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                    {{ __('prescribers.search_prescriber', ['default' => 'Search Registered Prescriber (Name or Licence #)']) }}
+                </label>
+                <div class="relative">
+                    <input
+                        type="text"
+                        wire:model.live.debounce.250ms="prescriberSearch"
+                        placeholder="{{ __('prescribers.search_placeholder', ['default' => 'Type prescriber name or licence number...']) }}"
+                        class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-600 rounded-lg text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                    />
+                    @if($prescriberId)
+                        <button
+                            type="button"
+                            wire:click="clearPrescriber"
+                            class="absolute right-2.5 top-2.5 text-xs text-slate-400 hover:text-slate-600"
+                            title="Clear selected prescriber"
+                        >
+                            &times; Clear
+                        </button>
+                    @endif
+                </div>
+
+                @if(!empty($prescriberSearchResults))
+                    <div class="absolute z-20 left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 max-h-56 overflow-y-auto">
+                        @foreach($prescriberSearchResults as $p)
+                            <button
+                                type="button"
+                                wire:click="selectPrescriber({{ $p['id'] }})"
+                                class="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm flex items-center justify-between border-b last:border-0 border-slate-100 dark:border-slate-700"
+                            >
+                                <div>
+                                    <div class="font-medium text-slate-900 dark:text-white">{{ $p['name'] }}</div>
+                                    <div class="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                        {{ $p['licence_number'] ?? 'No licence #' }} {{ $p['facility'] ? '· ' . $p['facility'] : '' }}
+                                    </div>
+                                </div>
+                                @if(!$p['is_active'])
+                                    <span class="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                                        Inactive
+                                    </span>
+                                @endif
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
@@ -240,4 +312,86 @@
             </button>
         </div>
     </form>
+
+    {{-- Quick Add Prescriber Modal --}}
+    @if($showQuickAddModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <div class="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full p-6 space-y-4 border border-slate-200 dark:border-slate-700">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-3">
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">
+                        {{ __('prescribers.quick_add_prescriber', ['default' => 'Quick Add Prescriber']) }}
+                    </h3>
+                    <button type="button" wire:click="$set('showQuickAddModal', false)" class="text-slate-400 hover:text-slate-600 text-lg">&times;</button>
+                </div>
+
+                <form wire:submit="saveQuickAddPrescriber" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                            {{ __('prescribers.name', ['default' => 'Full Name']) }} <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            wire:model="quickAddName"
+                            placeholder="Dr. Meron Tadesse"
+                            class="mt-1 w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-teal-500 focus:border-teal-500"
+                        />
+                        @error('quickAddName') <span class="text-xs text-rose-500 mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                            {{ __('prescribers.licence_number', ['default' => 'Licence Number']) }}
+                        </label>
+                        <input
+                            type="text"
+                            wire:model="quickAddLicence"
+                            placeholder="MED-77889"
+                            class="mt-1 w-full px-3 py-2 font-mono border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-teal-500 focus:border-teal-500"
+                        />
+                        @error('quickAddLicence') <span class="text-xs text-rose-500 mt-1 block">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                            {{ __('prescribers.facility', ['default' => 'Facility']) }}
+                        </label>
+                        <input
+                            type="text"
+                            wire:model="quickAddFacility"
+                            placeholder="St. Paul Hospital"
+                            class="mt-1 w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-teal-500 focus:border-teal-500"
+                        />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                            {{ __('prescribers.phone', ['default' => 'Phone']) }}
+                        </label>
+                        <input
+                            type="text"
+                            wire:model="quickAddPhone"
+                            placeholder="0911002233"
+                            class="mt-1 w-full px-3 py-2 font-mono border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-teal-500 focus:border-teal-500"
+                        />
+                    </div>
+
+                    <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                        <button
+                            type="button"
+                            wire:click="$set('showQuickAddModal', false)"
+                            class="px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+                        >
+                            {{ __('common.cancel', ['default' => 'Cancel']) }}
+                        </button>
+                        <button
+                            type="submit"
+                            class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-semibold transition"
+                        >
+                            {{ __('common.save', ['default' => 'Save & Select']) }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 </div>
