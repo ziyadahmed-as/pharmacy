@@ -42,30 +42,41 @@ class ProfitLossTile extends Component
 
         $netRevenue = max(0, $grossSales - $refunds);
 
-        // 2. Cost of Goods Sold (at batch unit cost)
-        $cogs = (int) SaleLine::query()
-            ->join('sales', 'sale_lines.sale_id', '=', 'sales.id')
-            ->join('batches', 'sale_lines.batch_id', '=', 'batches.id')
-            ->where('sales.status', 'completed')
-            ->whereDate('sales.completed_at', $today)
-            ->select(DB::raw('SUM(sale_lines.quantity * batches.unit_cost) as total_cogs'))
-            ->value('total_cogs');
-
-        // 3. Gross Profit
-        $grossProfit = $netRevenue - $cogs;
-
         // 4. Operating Expenses
         $expenses = (int) Expense::query()
             ->where('status', Expense::STATUS_POSTED)
             ->whereDate('date', $today)
             ->sum('amount');
 
-        // 5. Net Profit
-        $netProfit = $grossProfit - $expenses;
+        // BRD v2.0: show COGS/gross-profit only when the owner explicitly enables the setting.
+        $showCostProfit = (bool) setting('reports.show_cost_profit', false);
 
-        $marginPercent = $netRevenue > 0 ? round(($grossProfit / $netRevenue) * 100, 1) : 0.0;
+        if ($showCostProfit) {
+            // 2. Cost of Goods Sold (at batch unit cost)
+            $cogs = (int) SaleLine::query()
+                ->join('sales', 'sale_lines.sale_id', '=', 'sales.id')
+                ->join('batches', 'sale_lines.batch_id', '=', 'batches.id')
+                ->where('sales.status', 'completed')
+                ->whereDate('sales.completed_at', $today)
+                ->select(DB::raw('SUM(sale_lines.quantity * COALESCE(batches.unit_cost, 0)) as total_cogs'))
+                ->value('total_cogs');
+
+            // 3. Gross Profit
+            $grossProfit = $netRevenue - $cogs;
+
+            // 5. Net Profit (after COGS and expenses)
+            $netProfit = $grossProfit - $expenses;
+            $marginPercent = $netRevenue > 0 ? round(($grossProfit / $netRevenue) * 100, 1) : 0.0;
+        } else {
+            // BRD v2.0 default: Operating Surplus = Net Sales − Operating Expenses (no COGS)
+            $cogs = 0;
+            $grossProfit = $netRevenue; // kept for backward-compat with existing tests
+            $netProfit = $netRevenue - $expenses;
+            $marginPercent = $netRevenue > 0 ? round(($netProfit / $netRevenue) * 100, 1) : 0.0;
+        }
 
         return view('livewire.owner.tiles.profit-loss-tile', [
+            'showCostProfit' => $showCostProfit,
             'netRevenue' => $netRevenue,
             'cogs' => $cogs,
             'grossProfit' => $grossProfit,

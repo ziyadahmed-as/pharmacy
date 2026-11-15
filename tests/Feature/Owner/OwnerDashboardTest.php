@@ -155,9 +155,9 @@ it('allows owner to access executive owner dashboard and renders mobile-responsi
     $response->assertSee(__('dashboard.owner.title'));
     $response->assertSee(__('dashboard.owner.subtitle'));
 
-    // Check responsive grid structure
-    $response->assertSee('grid-cols-1');
-    $response->assertSee('lg:grid-cols-3');
+    // Check responsive grid structure (v2 command centre)
+    $response->assertSee('grid-cols-2');
+    $response->assertSee('sm:grid-cols-3');
 
     // Livewire component test
     Livewire::actingAs($owner)
@@ -311,6 +311,9 @@ it('calculates cash and digital tender with 7-day revenue on CashTrendsTile', fu
 });
 
 it('restricts ProfitLossTile to Owner only and calculates gross profit, expenses, and net profit', function () {
+    // Enable full cost/profit mode so COGS, gross profit and net profit figures are computed.
+    app(SettingsRepository::class)->put('reports.show_cost_profit', true);
+
     $owner = createOwnerUser();
     $staff = ps();
 
