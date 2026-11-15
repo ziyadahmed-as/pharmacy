@@ -69,6 +69,7 @@ class SalesByPaymentMethodReport extends BaseReportDefinition
 
         // Payments from completed sales
         $paymentsQuery = Payment::query()
+            ->with('paymentMethod')
             ->whereHas('sale', function ($q) use ($start, $end, $isStaff, $user) {
                 $q->where('status', 'completed')
                     ->whereDate('completed_at', '>=', $start)
@@ -80,6 +81,7 @@ class SalesByPaymentMethodReport extends BaseReportDefinition
             });
 
         $refundsQuery = SaleReturn::query()
+            ->with('paymentMethod')
             ->where('status', SaleReturn::STATUS_COMPLETED)
             ->whereDate('completed_at', '>=', $start)
             ->whereDate('completed_at', '<=', $end);
@@ -109,10 +111,10 @@ class SalesByPaymentMethodReport extends BaseReportDefinition
         }
 
         foreach ($refunds as $r) {
-            $m = $r->payment_method;
+            $m = $r->paymentMethod?->code ?? $r->payment_method;
             if (! isset($methods[$m])) {
                 $methods[$m] = [
-                    'label' => ucfirst(str_replace('_', ' ', $m)),
+                    'label' => $r->paymentMethod?->name ?? ucfirst(str_replace('_', ' ', $m)),
                     'count' => 0,
                     'received' => 0,
                     'refunded' => 0,

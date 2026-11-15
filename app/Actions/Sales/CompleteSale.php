@@ -10,6 +10,7 @@ use App\Exceptions\SellabilityException;
 use App\Models\CreditAccount;
 use App\Models\DailyClosing;
 use App\Models\Payment;
+use App\Models\PaymentMethod;
 use App\Models\Prescription;
 use App\Models\Product;
 use App\Models\ProductUnit;
@@ -306,9 +307,13 @@ class CompleteSale
 
                 // 9. Record Payments
                 foreach ($payments as $paymentData) {
+                    $methodCode = $paymentData['method'];
+                    $pmModel = PaymentMethod::where('code', $methodCode)->first();
+
                     Payment::create([
                         'sale_id' => $sale->id,
-                        'method' => $paymentData['method'],
+                        'payment_method_id' => $pmModel?->id,
+                        'method' => $methodCode,
                         'amount' => (int) $paymentData['amount'],
                         'reference' => ! empty($paymentData['reference']) ? trim($paymentData['reference']) : null,
                     ]);

@@ -45,6 +45,7 @@ class SaleReturn extends Model
         'shift_id',
         'status',
         'total_refund',
+        'payment_method_id',
         'payment_method',
         'reason',
         'requires_approval',
@@ -73,6 +74,11 @@ class SaleReturn extends Model
     public function shift(): BelongsTo
     {
         return $this->belongsTo(Shift::class);
+    }
+
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class);
     }
 
     public function lines(): HasMany

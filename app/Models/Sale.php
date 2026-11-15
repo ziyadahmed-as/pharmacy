@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -85,6 +86,23 @@ class Sale extends Model
         return $this->hasMany(SaleReturn::class);
     }
 
+    public function voidRecord(): HasOne
+    {
+        return $this->hasOne(SaleVoid::class);
+    }
+
+    public function receiptPrintLogs(): HasMany
+    {
+        return $this->hasMany(ReceiptPrintLog::class);
+    }
+
+    public function reprintCount(): int
+    {
+        $logCount = $this->receiptPrintLogs()->where('is_reprint', true)->count();
+
+        return max($logCount, (int) $this->reprint_count);
+    }
+
     public function isCompleted(): bool
     {
         return $this->status === 'completed';
@@ -97,7 +115,7 @@ class Sale extends Model
 
     public function isReprint(): bool
     {
-        return $this->reprint_count > 0;
+        return $this->reprintCount() > 0;
     }
 
     public function totalEtb(): string

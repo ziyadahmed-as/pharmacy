@@ -36,4 +36,14 @@ return [
         'locale' => 'የሚደገፍ ቋንቋ ይምረጡ።',
         'pending_exists' => 'ለዚህ ቅንብር ለውጥ አስቀድሞ ማጽደቅ እየጠበቀ ነው።',
     ],
+
+    // Payment methods master (UC-30)
+    'payment_method_created' => 'የክፍያ ዘዴ በተሳካ ሁኔታ ተፈጥሯል።',
+    'payment_method_updated' => 'የክፍያ ዘዴ በተሳካ ሁኔታ ተዘምኗል።',
+    'payment_method_status_updated' => 'የክፍያ ዘዴ ሁኔታ ተዘምኗል።',
+
+    // Expense categories master (UC-28)
+    'expense_category_created' => 'የወጪ ምድብ በተሳካ ሁኔታ ተፈጥሯል።',
+    'expense_category_updated' => 'የወጪ ምድብ በተሳካ ሁኔታ ተዘምኗል።',
+    'expense_category_status_updated' => 'የወጪ ምድብ ሁኔታ ተዘምኗል።',
 ];

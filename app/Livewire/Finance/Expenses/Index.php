@@ -5,6 +5,7 @@ namespace App\Livewire\Finance\Expenses;
 use App\Actions\Finance\RecordExpense;
 use App\Enums\Role;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -130,8 +131,13 @@ class Index extends Component
         abort_if(! $user || $user->hasRole(Role::SystemAdmin), 403);
         abort_unless($user->hasPermission('finance.expense.record'), 403);
 
+        $allowedCategoryCodes = ExpenseCategory::pluck('code')->all();
+        if (empty($allowedCategoryCodes)) {
+            $allowedCategoryCodes = Expense::CATEGORIES;
+        }
+
         $this->validate([
-            'category' => ['required', 'string', 'in:'.implode(',', Expense::CATEGORIES)],
+            'category' => ['required', 'string', 'in:'.implode(',', $allowedCategoryCodes)],
             'amount' => ['required', 'numeric', 'min:0.01'],
             'date' => ['required', 'date'],
             'description' => ['required', 'string', 'min:2', 'max:1000'],
@@ -213,10 +219,13 @@ class Index extends Component
 
     public function render(): View
     {
-        $query = Expense::with(['creator', 'approver', 'reversals', 'reversedExpense']);
+        $query = Expense::with(['creator', 'approver', 'reversals', 'reversedExpense', 'expenseCategory']);
 
         if ($this->categoryFilter !== '') {
-            $query->where('category', $this->categoryFilter);
+            $query->where(function ($q) {
+                $q->where('category', $this->categoryFilter)
+                    ->orWhereHas('expenseCategory', fn ($cQ) => $cQ->where('code', $this->categoryFilter));
+            });
         }
 
         if ($this->statusFilter !== '') {
@@ -246,9 +255,12 @@ class Index extends Component
             ->orderByDesc('id')
             ->paginate(15);
 
+        $dbCategories = ExpenseCategory::where('is_active', true)->pluck('code')->all();
+        $categories = ! empty($dbCategories) ? $dbCategories : Expense::CATEGORIES;
+
         return view('livewire.finance.expenses.index', [
             'expenses' => $expenses,
-            'categories' => Expense::CATEGORIES,
+            'categories' => $categories,
             'statuses' => Expense::STATUSES,
         ]);
     }

@@ -75,6 +75,7 @@ class Expense extends Model
     ];
 
     protected $fillable = [
+        'expense_category_id',
         'category',
         'amount',
         'date',
@@ -111,6 +112,11 @@ class Expense extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function expenseCategory(): BelongsTo
+    {
+        return $this->belongsTo(ExpenseCategory::class);
     }
 
     public function approvalRequest(): BelongsTo
@@ -157,6 +163,10 @@ class Expense extends Model
 
     public function categoryLabel(): string
     {
+        if ($this->expenseCategory) {
+            return $this->expenseCategory->name;
+        }
+
         return match ($this->category) {
             self::CATEGORY_RENT => __('expense.category_rent'),
             self::CATEGORY_SALARIES => __('expense.category_salaries'),

@@ -3,6 +3,7 @@
 namespace App\Queries;
 
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\Sale;
 use App\Models\SaleReturn;
 use Illuminate\Support\Carbon;
@@ -84,12 +85,27 @@ class RevenueSummaryQuery
 
         // Expenses breakdown by category
         $expensesByCategory = [];
-        foreach (Expense::CATEGORIES as $category) {
-            $catTotal = (int) Expense::posted()
-                ->forPeriod($this->startDate, $this->endDate)
-                ->where('category', $category)
-                ->sum('amount');
-            $expensesByCategory[$category] = $catTotal;
+        $activeCategories = ExpenseCategory::all();
+
+        if ($activeCategories->isNotEmpty()) {
+            foreach ($activeCategories as $cat) {
+                $catTotal = (int) Expense::posted()
+                    ->forPeriod($this->startDate, $this->endDate)
+                    ->where(function ($q) use ($cat) {
+                        $q->where('expense_category_id', $cat->id)
+                            ->orWhere('category', $cat->code);
+                    })
+                    ->sum('amount');
+                $expensesByCategory[$cat->code] = $catTotal;
+            }
+        } else {
+            foreach (Expense::CATEGORIES as $category) {
+                $catTotal = (int) Expense::posted()
+                    ->forPeriod($this->startDate, $this->endDate)
+                    ->where('category', $category)
+                    ->sum('amount');
+                $expensesByCategory[$category] = $catTotal;
+            }
         }
 
         // 6. Net Operating Surplus (Net sales - operating expenses)

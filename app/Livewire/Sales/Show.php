@@ -40,7 +40,7 @@ class Show extends Component
     {
         Gate::authorize('shifts.open');
         $this->saleId = $sale->id;
-        $this->sale = $sale->load(['lines.product', 'lines.batch', 'payments', 'shift.till', 'user']);
+        $this->sale = $sale->load(['lines.product', 'lines.batch', 'payments', 'shift.till', 'user', 'voidRecord.approver', 'voidRecord.requester']);
     }
 
     // ─── Void Request ─────────────────────────────────────────────────────────

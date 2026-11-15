@@ -70,7 +70,7 @@ class AuditVoidsReport extends BaseReportDefinition
             ->where('status', 'voided')
             ->whereDate('completed_at', '>=', $start)
             ->whereDate('completed_at', '<=', $end)
-            ->with(['user', 'lines'])
+            ->with(['user', 'lines', 'voidRecord.approver', 'voidRecord.requester'])
             ->orderByDesc('completed_at')
             ->get();
 
@@ -80,13 +80,15 @@ class AuditVoidsReport extends BaseReportDefinition
         foreach ($sales as $sale) {
             $totVoided += $sale->total;
 
+            $voidReason = $sale->voidRecord?->reason ?? $sale->void_reason ?? '-';
+
             $rows[] = [
                 $sale->receipt_no,
                 $this->formatDate($sale->completed_at),
                 $sale->user?->name ?? 'User #'.$sale->user_id,
                 $this->formatMoney($sale->total),
                 (string) $sale->lines->count(),
-                $sale->void_reason ?? '-',
+                $voidReason,
             ];
         }
 
