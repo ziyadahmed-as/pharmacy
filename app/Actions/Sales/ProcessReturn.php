@@ -6,6 +6,7 @@ use App\Models\ApprovalRequest;
 use App\Models\CreditAccount;
 use App\Models\CreditPayment;
 use App\Models\DailyClosing;
+use App\Models\PaymentMethod;
 use App\Models\QuarantineRecord;
 use App\Models\Sale;
 use App\Models\SaleReturn;
@@ -177,6 +178,7 @@ class ProcessReturn
             $refundNo = DocumentSequence::next('refund', 'RFD');
 
             $status = $requiresApproval ? SaleReturn::STATUS_PENDING_APPROVAL : SaleReturn::STATUS_COMPLETED;
+            $pmModel = PaymentMethod::where('code', $primaryPaymentMethod)->first();
 
             $saleReturn = SaleReturn::create([
                 'refund_no' => $refundNo,
@@ -185,6 +187,7 @@ class ProcessReturn
                 'shift_id' => $activeShift->id,
                 'status' => $status,
                 'total_refund' => $totalRefund,
+                'payment_method_id' => $pmModel?->id,
                 'payment_method' => $primaryPaymentMethod,
                 'reason' => $generalReason,
                 'requires_approval' => $requiresApproval,

@@ -5,6 +5,7 @@ namespace App\Actions\Finance;
 use App\Enums\Role;
 use App\Models\DailyClosing;
 use App\Models\Expense;
+use App\Models\ExpenseCategory;
 use App\Models\User;
 use App\Services\ApprovalService;
 use App\Services\AuditLogger;
@@ -48,7 +49,15 @@ class RecordExpense
         }
 
         $category = $data['category'] ?? null;
-        if (! $category || ! in_array($category, Expense::CATEGORIES, true)) {
+        $categoryModel = null;
+        if (is_numeric($category)) {
+            $categoryModel = ExpenseCategory::find((int) $category);
+            $category = $categoryModel?->code;
+        } elseif (is_string($category)) {
+            $categoryModel = ExpenseCategory::where('code', $category)->first();
+        }
+
+        if (! $category || (! in_array($category, Expense::CATEGORIES, true) && ! $categoryModel)) {
             throw ValidationException::withMessages([
                 'category' => __('expense.category_required'),
             ]);
@@ -95,13 +104,15 @@ class RecordExpense
 
         $status = $needsApproval ? Expense::STATUS_PENDING_APPROVAL : Expense::STATUS_POSTED;
         $approvedBy = $needsApproval ? null : $user->id;
+        $categoryId = $categoryModel?->id;
 
-        return DB::transaction(function () use ($user, $category, $amount, $date, $description, $proofPath, $status, $approvedBy, $needsApproval) {
+        return DB::transaction(function () use ($user, $category, $categoryId, $amount, $date, $description, $proofPath, $status, $approvedBy, $needsApproval) {
             if (DailyClosing::isLockedForDate($date)) {
                 throw new RuntimeException(__('closing.day_is_locked_error'));
             }
             /** @var Expense $expense */
             $expense = Expense::create([
+                'expense_category_id' => $categoryId,
                 'category' => $category,
                 'amount' => $amount,
                 'date' => $date,
@@ -182,6 +193,7 @@ class RecordExpense
         return DB::transaction(function () use ($user, $expense, $trimmedReason) {
             /** @var Expense $reversal */
             $reversal = Expense::create([
+                'expense_category_id' => $expense->expense_category_id,
                 'category' => $expense->category,
                 'amount' => -$expense->amount,
                 'date' => now()->toDateString(),

@@ -263,6 +263,8 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-38: settings
             Route::get('/settings', SettingsUi\Index::class)->middleware('can:settings.view')->name('settings.index');
             Route::get('/settings/locations', SettingsUi\Locations::class)->middleware('can:settings.view')->name('settings.locations');
+            Route::get('/settings/payment-methods', SettingsUi\PaymentMethods::class)->middleware('can:access-business-data')->name('settings.payment-methods');
+            Route::get('/settings/expense-categories', SettingsUi\ExpenseCategories::class)->middleware('can:access-business-data')->name('settings.expense-categories');
 
             // Route list used by the "SA never reaches business data" test; it grows with each stage.
             Route::get('/pharmacy/business-data', fn () => response()->json(['section' => 'business_data']))

@@ -36,4 +36,14 @@ return [
         'locale' => 'Choose a supported language.',
         'pending_exists' => 'A change for this setting is already waiting for approval.',
     ],
+
+    // Payment methods master (UC-30)
+    'payment_method_created' => 'Payment method created successfully.',
+    'payment_method_updated' => 'Payment method updated successfully.',
+    'payment_method_status_updated' => 'Payment method status updated.',
+
+    // Expense categories master (UC-28)
+    'expense_category_created' => 'Expense category created successfully.',
+    'expense_category_updated' => 'Expense category updated successfully.',
+    'expense_category_status_updated' => 'Expense category status updated.',
 ];

@@ -156,6 +156,16 @@
                             @endif
                         </dd>
                     </div>
+                    @if ($sale->isVoided() && $sale->voidRecord)
+                        <div class="flex flex-col px-5 py-3 bg-red-50/50">
+                            <dt class="text-xs font-semibold text-red-700 uppercase tracking-wider mb-1">{{ __('sales.void_reason_label') }}</dt>
+                            <dd class="text-sm text-slate-800">{{ $sale->voidRecord->reason }}</dd>
+                            <dd class="text-xs text-slate-500 mt-1">
+                                Voided on {{ $sale->voidRecord->voided_at?->format('d M Y, H:i') }}
+                                by {{ $sale->voidRecord->approver?->name ?? '—' }}
+                            </dd>
+                        </div>
+                    @endif
                 </dl>
             </div>
 

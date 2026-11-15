@@ -24,6 +24,7 @@ class Payment extends Model
 
     protected $fillable = [
         'sale_id',
+        'payment_method_id',
         'method',
         'amount',
         'reference',
@@ -41,6 +42,11 @@ class Payment extends Model
         return $this->belongsTo(Sale::class);
     }
 
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
     public function amountEtb(): string
     {
         return number_format($this->amount / 100, 2);
@@ -48,6 +54,10 @@ class Payment extends Model
 
     public function methodLabel(): string
     {
+        if ($this->paymentMethod) {
+            return $this->paymentMethod->name;
+        }
+
         return match ($this->method) {
             'cash' => __('sales.payment_method_cash'),
             'mobile_money' => __('sales.payment_method_mobile_money'),

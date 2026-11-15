@@ -207,6 +207,7 @@ test('sale_lines and payments cannot be updated or deleted once sale is complete
         'sale_id' => $saleId,
         'method' => 'cash',
         'amount' => 2000,
+        'payment_method_id' => DB::table('payment_methods')->where('code', 'cash')->value('id'),
         'created_at' => now(),
         'updated_at' => now(),
     ]);
@@ -310,6 +311,7 @@ test('check constraint payments.amount > 0 rejects zero and negative values', fu
         'sale_id' => $sale->id,
         'method' => 'cash',
         'amount' => 0,
+        'payment_method_id' => DB::table('payment_methods')->where('code', 'cash')->value('id'),
         'created_at' => now(),
         'updated_at' => now(),
     ]))->toThrow(QueryException::class);
@@ -318,6 +320,7 @@ test('check constraint payments.amount > 0 rejects zero and negative values', fu
         'sale_id' => $sale->id,
         'method' => 'cash',
         'amount' => -100,
+        'payment_method_id' => DB::table('payment_methods')->where('code', 'cash')->value('id'),
         'created_at' => now(),
         'updated_at' => now(),
     ]))->toThrow(QueryException::class);

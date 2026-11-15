@@ -6,6 +6,7 @@ use App\Approvals\ApprovalHandler;
 use App\Enums\Role;
 use App\Models\ApprovalRequest;
 use App\Models\Sale;
+use App\Models\SaleVoid;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\StockMovementService;
@@ -88,7 +89,18 @@ class VoidSaleHandler implements ApprovalHandler
                 );
             }
 
-            // 3. Audit — record both initiator and approver IDs (AC-14).
+            // 3. Create sale_voids record (STEP 1)
+            $voidReason = $request->payload['reason'] ?? $request->initiator_comment ?? 'Voided';
+            SaleVoid::create([
+                'sale_id' => $sale->id,
+                'reason' => $voidReason,
+                'requested_by' => $request->initiator_id,
+                'approved_by' => $approver->id,
+                'approval_request_id' => $request->id,
+                'voided_at' => now(),
+            ]);
+
+            // 4. Audit — record both initiator and approver IDs (AC-14).
             $initiatorId = $request->initiator_id;
             AuditLogger::record(
                 'sale.voided',
@@ -97,7 +109,7 @@ class VoidSaleHandler implements ApprovalHandler
                 ['status' => 'voided'],
                 [
                     'receipt_no' => $sale->receipt_no,
-                    'reason' => $request->payload['reason'] ?? $request->initiator_comment,
+                    'reason' => $voidReason,
                     'initiator_id' => $initiatorId,
                     'approver_id' => $approver->id,
                     'total' => $sale->total,
