@@ -55,6 +55,10 @@ final class SettingsCatalogue
             'pharmacy.handles_controlled_drugs' => self::def('pharmacy', 'bool', true, true, 'Whether the pharmacy handles and records controlled drugs in a register (OQ-01)'),
             // finance
             'finance.expense_approval_limit' => self::def('finance', 'money', null, false, 'Expense amount above which approval is needed (OQ-06)'),
+            // shifts
+            'shifts.variance_alert_threshold' => self::def('shifts', 'money', 5000, false, 'Cash variance amount (in santim) that triggers an attention alert on the owner dashboard'),
+            // reports
+            'reports.show_cost_profit' => self::def('reports', 'bool', false, false, 'Show COGS and gross profit on the owner dashboard and profit/loss tile (BRD v2.0: off by default)'),
             // receipt and language
             'general.default_language' => self::def('general', 'locale', 'en', true, 'Default language (en or am)'),
             'general.receipt_language' => self::def('general', 'receipt_language', 'default', false, 'Receipt language: default, en or am'),
