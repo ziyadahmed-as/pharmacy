@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             TillSeeder::class,
             LeaveTypeSeeder::class,
+            DocumentSequenceSeeder::class,
         ]);
     }
 }

@@ -33,6 +33,8 @@ return [
     'dispense_refused_licence' => 'መድሃኒት ለማስተላለፍ ትክክለኛ የሙያ ፈቃድ ሊኖርዎ ይገባል።',
     'not_dispensable' => 'ይህ ቀመር አሁን ባለው ሁኔታ (":status") ሊሰጥ አይችልም።',
     'dispensing_expired' => 'ይህ ቀመር ጊዜው አልፏል፤ ማስተላለፍ አይቻልም።',
+    'prescription_not_found' => 'ቀመሩ አልተገኘም።',
+    'product_not_in_prescription' => 'ምርት ":product" በዚህ ቀመር ውስጥ የለም።',
     'line_fully_dispensed' => '":product" ቀድሞ ሙሉ በሙሉ ተሰጥቷል።',
     'controlled_drug_use_uc22' => 'ቁጥጥር ስር ያሉ መድሃኒቶች ልዩ አሰራርን መከተል አለባቸው።',
     'quantity_exceeds_prescribed' => 'የተጠየቀው ብዛት (:requested) ቀሪውን ታዘዘ ብዛት (:remaining) ያልፋል። የሚፈቀድበት ምክንያት ያስገቡ።',

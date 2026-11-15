@@ -80,7 +80,16 @@ class User extends Authenticatable
 
     public function isLocked(): bool
     {
-        return $this->locked_at !== null;
+        if ($this->locked_at === null) {
+            return false;
+        }
+
+        $lockoutMinutes = (int) setting('security.lockout_minutes', 15);
+        if ($lockoutMinutes > 0 && $this->locked_at->copy()->addMinutes($lockoutMinutes)->isPast()) {
+            return false;
+        }
+
+        return true;
     }
 
     /** Canonical state: deactivated, pending_approval, locked or active. */

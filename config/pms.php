@@ -12,6 +12,7 @@ return [
 
     'defaults' => [
         'security.max_failed_logins' => 5,
+        'security.lockout_minutes' => 15,
         'security.idle_timeout_minutes' => 15,
         'security.password_history' => 5,
         'security.password_min_length' => 8,

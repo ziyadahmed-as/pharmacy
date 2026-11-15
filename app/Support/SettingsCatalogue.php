@@ -29,6 +29,7 @@ final class SettingsCatalogue
             'profile.receipt_footer' => self::def('profile', 'string', null, false, 'Receipt footer text'),
             // security
             'security.max_failed_logins' => self::def('security', 'pos_int', 5, true, 'Failed logins before an account locks'),
+            'security.lockout_minutes' => self::def('security', 'pos_int', 15, true, 'Lockout duration in minutes for locked accounts (0 = manual unlock by SA only)'),
             'security.idle_timeout_minutes' => self::def('security', 'pos_int', 15, true, 'Idle minutes before automatic logout'),
             'security.password_history' => self::def('security', 'pos_int', 5, true, 'Previous passwords that cannot be reused'),
             // approvals
