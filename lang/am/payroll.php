@@ -50,4 +50,3 @@ return [
     'approval_submitted_success' => 'የደመወዝ ዝርዝር ለማጽደቅ ቀርቧል።',
     'all_runs' => 'ሁሉም የደመወዝ ክፍያዎች',
 ];
-

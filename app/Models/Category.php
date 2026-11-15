@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,8 +18,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $description
  * @property bool $is_active
  * @property-read Category|null $parent
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Category> $children
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
+ * @property-read Collection<int, Category> $children
+ * @property-read Collection<int, Product> $products
  *
  * @uc UC-01
  */

@@ -52,4 +52,3 @@ class PayslipDownloadController extends Controller
         ]);
     }
 }
-

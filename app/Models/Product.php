@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,11 +37,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property bool $is_active
  * @property-read Category|null $category
  * @property-read DrugInformation|null $drugInformation
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductUnit> $units
- * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductPrice> $prices
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Batch> $batches
- * @property-read \Illuminate\Database\Eloquent\Collection<int, BatchStock> $batchStocks
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $substitutes
+ * @property-read Collection<int, ProductUnit> $units
+ * @property-read Collection<int, ProductPrice> $prices
+ * @property-read Collection<int, Batch> $batches
+ * @property-read Collection<int, BatchStock> $batchStocks
+ * @property-read Collection<int, Product> $substitutes
  * @property-read ProductPrice|null $latestPrice
  *
  * @uc UC-01, UC-03

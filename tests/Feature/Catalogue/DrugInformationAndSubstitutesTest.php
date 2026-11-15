@@ -5,7 +5,6 @@ use App\Livewire\Catalogue\Form as CatalogueForm;
 use App\Livewire\Catalogue\Show as CatalogueShow;
 use App\Models\Category;
 use App\Models\DrugInformation;
-use App\Models\Product;
 use App\Models\ProductSubstitute;
 use Livewire\Livewire;
 

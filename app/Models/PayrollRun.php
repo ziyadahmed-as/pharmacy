@@ -88,4 +88,3 @@ class PayrollRun extends Model
         return $this->hasMany(SalaryAdvance::class);
     }
 }
-

@@ -86,4 +86,3 @@ class PayrollApprovalHandler implements ApprovalHandler
         );
     }
 }
-

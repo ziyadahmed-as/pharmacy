@@ -50,4 +50,3 @@ return [
     'approval_submitted_success' => 'Payroll run submitted for approval.',
     'all_runs' => 'All Payroll Runs',
 ];
-

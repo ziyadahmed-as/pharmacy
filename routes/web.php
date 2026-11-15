@@ -243,7 +243,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/finance/payroll', App\Livewire\Finance\Payroll\Index::class)
                 ->middleware('can:access-business-data')
                 ->name('payroll.index');
-            Route::get('/finance/payroll/payslip/{payrollLine}', App\Http\Controllers\PayslipDownloadController::class)
+            Route::get('/finance/payroll/payslip/{payrollLine}', PayslipDownloadController::class)
                 ->middleware('can:access-business-data')
                 ->name('payroll.payslip');
 
