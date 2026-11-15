@@ -131,12 +131,16 @@ class CompleteSale
 
                 // If split across batches, calculate proportional subtotals
                 $totalAllocatedQty = array_sum(array_column($allocations, 'quantity'));
+                $allocatedSubtotal = 0;
                 foreach ($allocations as $idx => $alloc) {
                     $allocQty = $alloc['quantity'];
                     // Proportion of total subtotal for this split
-                    $allocSubtotal = ($idx === count($allocations) - 1)
-                        ? ($lineSubtotal - array_sum(array_column(array_slice($plannedLines, -count($allocations) + 1), 'subtotal')))
-                        : (int) round(($lineSubtotal * $allocQty) / $totalAllocatedQty);
+                    if ($idx === count($allocations) - 1) {
+                        $allocSubtotal = $lineSubtotal - $allocatedSubtotal;
+                    } else {
+                        $allocSubtotal = (int) round(($lineSubtotal * $allocQty) / $totalAllocatedQty);
+                        $allocatedSubtotal += $allocSubtotal;
+                    }
 
                     $plannedLines[] = [
                         'product_id' => $product->id,
