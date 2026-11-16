@@ -1,4 +1,13 @@
 <div class="space-y-6">
+    <x-breadcrumbs
+        :items="[
+            ['label' => __('nav.catalogue'), 'url' => route('catalogue.index')],
+            ['label' => $product->brand]
+        ]"
+        :back="route('catalogue.index')"
+        :backLabel="__('common.back_to_list')"
+    />
+
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <div class="flex flex-wrap items-center gap-3">
