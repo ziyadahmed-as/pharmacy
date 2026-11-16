@@ -254,12 +254,14 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             Route::get('/reports', App\Livewire\Reports\Index::class)->middleware('can:access-business-data')->name('reports.index');
             Route::get('/reports/{type}', Run::class)->middleware('can:access-business-data')->name('reports.run');
             Route::get('/reports/{type}/export/{format}', [ReportExportController::class, 'export'])->whereIn('format', ['csv', 'excel', 'pdf'])->middleware('can:access-business-data')->name('reports.export');
+            Route::get('/reports/exports/download/{id}', [ReportExportController::class, 'downloadQueued'])->middleware('can:access-business-data')->name('reports.export.download');
             Route::get('/reports/{type}/print', [ReportExportController::class, 'print'])->middleware('can:access-business-data')->name('reports.print');
 
             // UC-30: Generate and export reports (Stage 6)
             Route::get('/reports', App\Livewire\Reports\Index::class)->middleware('can:access-business-data')->name('reports.index');
             Route::get('/reports/{type}', Run::class)->middleware('can:access-business-data')->name('reports.run');
             Route::get('/reports/{type}/export/{format}', [ReportExportController::class, 'export'])->whereIn('format', ['csv', 'excel', 'pdf'])->middleware('can:access-business-data')->name('reports.export');
+            Route::get('/reports/exports/download/{id}', [ReportExportController::class, 'downloadQueued'])->middleware('can:access-business-data')->name('reports.export.download');
             Route::get('/reports/{type}/print', [ReportExportController::class, 'print'])->middleware('can:access-business-data')->name('reports.print');
 
             // UC-38: settings

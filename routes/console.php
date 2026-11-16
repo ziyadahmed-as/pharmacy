@@ -13,3 +13,6 @@ Schedule::command('backup:run --type=full')->dailyAt('02:00')->timezone('Africa/
 Schedule::command('backup:run --type=db')->hourly()->when(fn () => app(BackupService::class)->isWithinOpeningHours());
 Schedule::command('backup:clean')->dailyAt('03:00')->timezone('Africa/Addis_Ababa');
 Schedule::command('backup:monitor')->hourly();
+
+// UC-30: Report Centre Scheduled Reports (STEP 5)
+Schedule::command('pms:send-scheduled-reports')->hourly();
