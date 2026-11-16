@@ -28,6 +28,11 @@
     $actingRole = $authUser ? \App\Services\ActingRole::for($authUser) : null;
     $idleMinutes = max(1, (int) setting('security.idle_timeout_minutes', 15));
     $unread = $authUser ? \Illuminate\Support\Facades\DB::table('notifications')->where('notifiable_type', $authUser->getMorphClass())->where('notifiable_id', $authUser->getKey())->whereNull('read_at')->count() : 0;
+    $pendingApprovals = ($authUser && $authUser->hasPermission('approvals.request'))
+        ? ($authUser->hasPermission('approvals.process')
+            ? \App\Models\ApprovalRequest::decidableBy($authUser)->count()
+            : \App\Models\ApprovalRequest::pending()->where('initiator_id', $authUser->id)->count())
+        : 0;
     $initials = $authUser ? collect(explode(' ', $authUser->name))->map(fn($w) => strtoupper(substr($w,0,1)))->take(2)->implode('') : '?';
     $currentShift = $authUser ? \App\Services\CurrentShift::forUser($authUser) : null;
 @endphp
@@ -66,37 +71,38 @@
             <a href="{{ route('dashboard') }}"
                @class([
                    'flex items-center gap-3 rounded-lg px-3 py-2 font-medium transition',
-                   'bg-teal-50 text-teal-700 border-l-2 border-teal-600' => request()->routeIs('dashboard'),
+                   'bg-teal-50 text-teal-700 border-l-2 border-teal-600 font-semibold' => request()->routeIs('dashboard'),
                    'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border-l-2 border-transparent' => ! request()->routeIs('dashboard'),
                ])>
                 <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                 </svg>
-                {{ __('nav.dashboard') }}
+                <span class="flex-1">{{ __('nav.dashboard') }}</span>
             </a>
 
             @foreach ($nav as $group)
-                <div class="pt-4">
-                    <p class="px-3 pb-1.5 text-xs font-semibold uppercase tracking-widest text-slate-400">
-                        {{ __('nav.group.'.$group['key']) }}
+                <div class="pt-3">
+                    <p class="px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        {{ __($group['label'] ?? 'nav.group.'.$group['key']) }}
                     </p>
-                    @foreach ($group['items'] as $item)
-                        <a href="{{ route($item['route']) }}"
-                           @class([
-                               'flex items-center gap-3 rounded-lg px-3 py-2 transition',
-                               'bg-teal-50 font-semibold text-teal-700 border-l-2 border-teal-600' => request()->routeIs($item['route'].'*'),
-                               'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border-l-2 border-transparent' => ! request()->routeIs($item['route'].'*'),
-                           ])>
-                            @if (!empty($item['icon']))
-                                <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    {!! $item['icon'] !!}
-                                </svg>
-                            @else
-                                <span class="h-4 w-4 shrink-0"></span>
-                            @endif
-                            {{ __($item['label']) }}
-                        </a>
-                    @endforeach
+                    <div class="space-y-0.5">
+                        @foreach ($group['items'] as $item)
+                            <a href="{{ route($item['route']) }}"
+                               @class([
+                                   'flex items-center justify-between rounded-lg px-3 py-1.5 transition text-sm',
+                                   'bg-teal-50 font-semibold text-teal-700 border-l-2 border-teal-600' => request()->routeIs($item['route'].'*'),
+                                   'text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium border-l-2 border-transparent' => ! request()->routeIs($item['route'].'*'),
+                               ])>
+                                <span class="truncate">{{ __($item['label']) }}</span>
+
+                                @if (!empty($item['badge']) && $item['badge'] === 'approvals' && $pendingApprovals > 0)
+                                    <span class="ml-2 inline-flex items-center justify-center rounded-full bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white leading-none">
+                                        {{ $pendingApprovals > 99 ? '99+' : $pendingApprovals }}
+                                    </span>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
                 </div>
             @endforeach
         </nav>
@@ -121,16 +127,20 @@
         {{-- ---- HEADER ---- --}}
         <header class="sticky top-0 z-30 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 shadow-sm">
 
-            {{-- Left: hamburger + page title --}}
+            {{-- Left: hamburger + page title + global search --}}
             <div class="flex items-center gap-3">
                 <button @click.stop="sidebarOpen = !sidebarOpen" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 md:hidden" aria-label="Menu">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <div class="hidden md:block text-sm font-semibold text-slate-900">
+                <div class="hidden lg:block text-sm font-semibold text-slate-900">
                     {{ setting('profile.name') ?: __('common.app_name') }}
                 </div>
+                {{-- Global Search Bar trigger --}}
+                @if ($authUser)
+                    <livewire:global-search />
+                @endif
             </div>
 
             {{-- Right: actions --}}

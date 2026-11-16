@@ -1,4 +1,13 @@
 <div class="space-y-6">
+    <x-breadcrumbs
+        :items="[
+            ['label' => __('nav.pos'), 'url' => route('pos.sale')],
+            ['label' => __('sales.sale_view_title', ['receipt' => $sale->receipt_no])]
+        ]"
+        :back="route('pos.sale')"
+        :backLabel="__('sales.back_to_pos')"
+    />
+
     {{-- ── Page Header ────────────────────────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4">
         <div>

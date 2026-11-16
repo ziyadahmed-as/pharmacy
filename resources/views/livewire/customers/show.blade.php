@@ -1,4 +1,13 @@
 <div class="max-w-4xl mx-auto space-y-6">
+    <x-breadcrumbs
+        :items="[
+            ['label' => __('nav.customers'), 'url' => route('customers.index')],
+            ['label' => $customer->name]
+        ]"
+        :back="route('customers.index')"
+        :backLabel="__('common.back_to_list')"
+    />
+
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
