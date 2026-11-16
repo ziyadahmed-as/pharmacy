@@ -51,4 +51,5 @@ return [
     'download' => 'አውርድ',
     'uploading' => 'በመጫን ላይ',
     'delete' => 'ሰርዝ',
+    'warning' => 'ማስጠንቀቂያ',
 ];

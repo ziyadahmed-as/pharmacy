@@ -48,6 +48,7 @@ return [
     'processing' => 'Processing...',
     'activate' => 'Activate',
     'deactivate' => 'Deactivate',
+    'warning' => 'Warning',
     'download' => 'Download',
     'uploading' => 'Uploading',
     'delete' => 'Delete',
