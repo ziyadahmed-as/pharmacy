@@ -4,6 +4,7 @@ namespace App\Reports;
 
 use App\Models\User;
 use App\Reports\Contracts\ReportDefinition;
+use App\Reports\Definitions\Audit\ApprovalsLogReport;
 use App\Reports\Definitions\Audit\AuditAdjustmentsReport;
 use App\Reports\Definitions\Audit\AuditDisposalsReport;
 use App\Reports\Definitions\Audit\AuditPriceChangesReport;
@@ -14,6 +15,11 @@ use App\Reports\Definitions\Compliance\ComplianceControlledDrugsReport;
 use App\Reports\Definitions\Compliance\ComplianceDisposalsReport;
 use App\Reports\Definitions\Compliance\CompliancePrescriptionsReport;
 use App\Reports\Definitions\Compliance\ComplianceRecallsReport;
+use App\Reports\Definitions\Compliance\DispensingByStaffReport;
+use App\Reports\Definitions\Finance\CashShiftSummaryReport;
+use App\Reports\Definitions\Finance\CreditAgeingReport;
+use App\Reports\Definitions\Finance\DailyClosingHistoryReport;
+use App\Reports\Definitions\Finance\ExpensesByCategoryReport;
 use App\Reports\Definitions\Inventory\InventoryBatchTrackingReport;
 use App\Reports\Definitions\Inventory\InventoryCurrentStockReport;
 use App\Reports\Definitions\Inventory\InventoryDisposalsReturnsReport;
@@ -21,13 +27,20 @@ use App\Reports\Definitions\Inventory\InventoryExpiredReport;
 use App\Reports\Definitions\Inventory\InventoryLedgerReport;
 use App\Reports\Definitions\Inventory\InventoryLowStockReport;
 use App\Reports\Definitions\Inventory\InventoryNearExpiryReport;
+use App\Reports\Definitions\Inventory\ProductMovementReport;
+use App\Reports\Definitions\Inventory\StocktakeVarianceReport;
+use App\Reports\Definitions\Inventory\StockValuationReport;
+use App\Reports\Definitions\Sales\CustomerPurchaseHistoryReport;
 use App\Reports\Definitions\Sales\SalesByCategoryReport;
 use App\Reports\Definitions\Sales\SalesByPaymentMethodReport;
 use App\Reports\Definitions\Sales\SalesByProductReport;
 use App\Reports\Definitions\Sales\SalesByStaffReport;
 use App\Reports\Definitions\Sales\SalesReturnsRefundsReport;
 use App\Reports\Definitions\Sales\SalesSummaryReport;
+use App\Reports\Definitions\Staff\LeaveAttendanceSummaryReport;
 use App\Reports\Definitions\Staff\MonthlyAttendanceReport;
+use App\Reports\Definitions\Staff\PayrollSummaryReport;
+use App\Reports\Definitions\Staff\RosterVsAttendanceReport;
 
 /**
  * Registry of all available report definitions (UC-30).
@@ -53,6 +66,7 @@ class ReportRegistry
         $this->register(new SalesByStaffReport);
         $this->register(new SalesByPaymentMethodReport);
         $this->register(new SalesReturnsRefundsReport);
+        $this->register(new CustomerPurchaseHistoryReport);
 
         // Inventory
         $this->register(new InventoryCurrentStockReport);
@@ -62,12 +76,22 @@ class ReportRegistry
         $this->register(new InventoryBatchTrackingReport);
         $this->register(new InventoryLedgerReport);
         $this->register(new InventoryDisposalsReturnsReport);
+        $this->register(new ProductMovementReport);
+        $this->register(new StockValuationReport);
+        $this->register(new StocktakeVarianceReport);
+
+        // Finance
+        $this->register(new CashShiftSummaryReport);
+        $this->register(new DailyClosingHistoryReport);
+        $this->register(new ExpensesByCategoryReport);
+        $this->register(new CreditAgeingReport);
 
         // Compliance
         $this->register(new ComplianceControlledDrugsReport);
         $this->register(new CompliancePrescriptionsReport);
         $this->register(new ComplianceRecallsReport);
         $this->register(new ComplianceDisposalsReport);
+        $this->register(new DispensingByStaffReport);
 
         // Audit
         $this->register(new AuditUserActivityReport);
@@ -76,9 +100,13 @@ class ReportRegistry
         $this->register(new AuditAdjustmentsReport);
         $this->register(new AuditDisposalsReport);
         $this->register(new AuditPriceChangesReport);
+        $this->register(new ApprovalsLogReport);
 
         // Staff (UC-41)
         $this->register(new MonthlyAttendanceReport);
+        $this->register(new PayrollSummaryReport);
+        $this->register(new LeaveAttendanceSummaryReport);
+        $this->register(new RosterVsAttendanceReport);
     }
 
     public function register(ReportDefinition $report): void
@@ -112,6 +140,7 @@ class ReportRegistry
         $grouped = [
             'sales' => ['title' => __('reports.category_sales'), 'reports' => []],
             'inventory' => ['title' => __('reports.category_inventory'), 'reports' => []],
+            'finance' => ['title' => __('reports.category_finance', [], 'en') ?: 'Finance', 'reports' => []],
             'compliance' => ['title' => __('reports.category_compliance'), 'reports' => []],
             'audit' => ['title' => __('reports.category_audit'), 'reports' => []],
             'staff' => ['title' => __('reports.category_staff'), 'reports' => []],
