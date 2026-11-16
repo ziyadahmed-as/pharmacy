@@ -50,6 +50,7 @@ final class Navigation
         return [
             ['key' => 'catalogue', 'items' => [
                 ['label' => 'nav.catalogue', 'route' => 'catalogue.index', 'any' => ['catalogue.view']],
+                ['label' => 'nav.categories', 'route' => 'catalogue.categories', 'any' => ['catalogue.manage']],
             ]],
             ['key' => 'inventory', 'items' => [
                 ['label' => 'nav.stock_alerts', 'route' => 'inventory.alerts', 'any' => ['stock.view']],

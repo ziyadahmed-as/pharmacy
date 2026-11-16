@@ -26,6 +26,7 @@ use App\Livewire\Auth\Login;
 use App\Livewire\Auth\Security;
 use App\Livewire\Auth\TwoFactorChallenge;
 use App\Livewire\Backup\RestoreChecklist;
+use App\Livewire\Catalogue\Categories;
 use App\Livewire\Catalogue\Form;
 use App\Livewire\Catalogue\Import;
 use App\Livewire\Catalogue\Index;
@@ -129,6 +130,7 @@ Route::middleware(['auth', 'account.active'])->group(function () {
 
             // UC-01 / UC-03: Product Catalogue
             Route::get('/catalogue', Index::class)->middleware('can:catalogue.view')->name('catalogue.index');
+            Route::get('/catalogue/categories', Categories::class)->middleware('can:catalogue.manage')->name('catalogue.categories');
             Route::get('/catalogue/import', Import::class)->middleware('can:catalogue.manage')->name('catalogue.import');
             Route::get('/catalogue/create', Form::class)->middleware('can:catalogue.edit_basic')->name('catalogue.create');
             Route::get('/catalogue/{product}', Show::class)->middleware('can:catalogue.view')->name('catalogue.show');

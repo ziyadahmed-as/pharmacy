@@ -15,6 +15,7 @@ return [
     'audit' => 'Audit log',
     'settings' => 'Settings',
     'catalogue' => 'Product Catalogue',
+    'categories' => 'Product Categories',
     'stock_alerts' => 'Stock alerts & reorder',
     'stock_on_hand' => 'Stock on hand',
     'stock_ledger' => 'Stock ledger',
