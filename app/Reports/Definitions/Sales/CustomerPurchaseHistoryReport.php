@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Sale;
 use App\Models\User;
 use App\Reports\Definitions\BaseReportDefinition;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -67,7 +68,7 @@ class CustomerPurchaseHistoryReport extends BaseReportDefinition
 
         $customers = Customer::query()
             ->when(! empty($filters['search']), function ($q) use ($filters) {
-                $term = '%' . $filters['search'] . '%';
+                $term = '%'.$filters['search'].'%';
                 $q->where('name', 'like', $term)->orWhere('phone', 'like', $term);
             })
             ->get();
@@ -95,7 +96,7 @@ class CustomerPurchaseHistoryReport extends BaseReportDefinition
                 $c->phone ?? '—',
                 $sales->count(),
                 $this->formatMoney($spent),
-                $lastDate ? \Carbon\Carbon::parse($lastDate)->format('Y-m-d') : '—',
+                $lastDate ? Carbon::parse($lastDate)->format('Y-m-d') : '—',
             ];
         }
 

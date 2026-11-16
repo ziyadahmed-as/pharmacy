@@ -86,7 +86,7 @@ class CreditAgeingReport extends BaseReportDefinition
             $b90plus = $daysOverdue > 90 ? $bal : 0;
 
             $rows[] = [
-                $acc->customer?->name ?? 'Account #' . $acc->id,
+                $acc->customer?->name ?? 'Account #'.$acc->id,
                 $this->formatMoney($limit),
                 $this->formatMoney($bal),
                 $this->formatMoney($b0_30),

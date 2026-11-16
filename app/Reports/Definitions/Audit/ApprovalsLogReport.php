@@ -81,11 +81,11 @@ class ApprovalsLogReport extends BaseReportDefinition
             $turnaround = '—';
             if ($r->decided_at && $r->created_at) {
                 $hours = round($r->created_at->diffInMinutes($r->decided_at) / 60, 1);
-                $turnaround = $hours . ' hrs';
+                $turnaround = $hours.' hrs';
             }
 
             $rows[] = [
-                '#' . $r->id,
+                '#'.$r->id,
                 ucwords(str_replace('_', ' ', $r->type)),
                 $r->summary ?? '—',
                 $r->initiator?->name ?? '—',

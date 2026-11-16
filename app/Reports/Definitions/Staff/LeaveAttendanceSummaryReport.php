@@ -96,8 +96,8 @@ class LeaveAttendanceSummaryReport extends BaseReportDefinition
                 $st->name ?? $st->user?->name ?? '—',
                 $daysPresent,
                 $lateCount,
-                $hours . ' hrs',
-                $leaveDays . ' days',
+                $hours.' hrs',
+                $leaveDays.' days',
             ];
         }
 
@@ -106,7 +106,7 @@ class LeaveAttendanceSummaryReport extends BaseReportDefinition
             'rows' => $rows,
             'summary' => [
                 'staff_count' => count($staffList),
-                'total_hours' => $totalHoursAll . ' hrs',
+                'total_hours' => $totalHoursAll.' hrs',
             ],
             'row_count' => count($rows),
         ];

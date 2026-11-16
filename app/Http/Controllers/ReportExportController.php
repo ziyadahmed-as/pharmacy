@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessQueuedReportExport;
+use App\Models\ReportQueuedExport;
 use App\Models\User;
 use App\Reports\ReportRegistry;
 use App\Services\AuditLogger;
 use App\Services\SimplePdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -28,11 +31,31 @@ class ReportExportController extends Controller
         $filters = $request->only([
             'start_date', 'end_date', 'group_by', 'search',
             'category_id', 'user_id', 'status', 'method', 'reason', 'threshold_days',
+            'till_id', 'product_id',
         ]);
 
         $result = $definition->query($filters, $user);
         $headers = $result['headers'];
         $rows = $result['rows'];
+
+        // If dataset is large (> 500 rows) or explicitly requested as queued, dispatch background job
+        if ($request->boolean('queue') || count($rows) > 500) {
+            $queuedExport = ReportQueuedExport::create([
+                'user_id' => $user->id,
+                'report_key' => $type,
+                'format' => $format,
+                'filters' => $filters,
+                'status' => ReportQueuedExport::STATUS_PENDING,
+            ]);
+
+            ProcessQueuedReportExport::dispatch($queuedExport->id);
+
+            return response()->json([
+                'queued' => true,
+                'message' => 'Export job has been queued. You will receive a notification when ready.',
+                'export_id' => $queuedExport->id,
+            ], 202);
+        }
 
         // Audit log export (STEP 3)
         AuditLogger::record('report.exported', null, [], [], [
@@ -90,6 +113,7 @@ class ReportExportController extends Controller
         $filters = $request->only([
             'start_date', 'end_date', 'group_by', 'search',
             'category_id', 'user_id', 'status', 'method', 'reason', 'threshold_days',
+            'till_id', 'product_id',
         ]);
 
         $result = $definition->query($filters, $user);
@@ -104,5 +128,21 @@ class ReportExportController extends Controller
             'generatedAt' => now()->format('Y-m-d H:i:s'),
             'generatedBy' => $user->name,
         ]);
+    }
+
+    public function downloadQueued(Request $request, int $id)
+    {
+        /** @var User|null $user */
+        $user = $request->user();
+        abort_if(! $user || $user->isSystemAdmin() || ! $user->canAccessBusinessData(), 403);
+
+        $export = ReportQueuedExport::where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        abort_unless($export->status === ReportQueuedExport::STATUS_COMPLETED && $export->file_path, 404);
+        abort_unless(Storage::disk('local')->exists($export->file_path), 404);
+
+        return Storage::disk('local')->download($export->file_path, $export->filename);
     }
 }

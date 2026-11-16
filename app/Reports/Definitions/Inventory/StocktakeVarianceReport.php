@@ -85,8 +85,8 @@ class StocktakeVarianceReport extends BaseReportDefinition
                 $it->batch?->batch_no ?? '—',
                 $expected,
                 $counted,
-                ($diff > 0 ? '+' : '') . $diff,
-                $it->stocktake?->reference ?? ('#' . $it->stocktake_id),
+                ($diff > 0 ? '+' : '').$diff,
+                $it->stocktake?->reference ?? ('#'.$it->stocktake_id),
             ];
         }
 

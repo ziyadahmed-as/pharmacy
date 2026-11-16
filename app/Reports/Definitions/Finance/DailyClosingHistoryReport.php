@@ -69,24 +69,24 @@ class DailyClosingHistoryReport extends BaseReportDefinition
         $netTotal = 0;
 
         foreach ($closings as $c) {
-            $sales = (int) ($c->total_sales ?? 0);
-            $refunds = (int) ($c->total_refunds ?? 0);
-            $net = $sales - $refunds;
-            $cash = (int) ($c->total_cash_counted ?? 0);
-            $diff = (int) ($c->variance ?? 0);
+            $systemTotals = is_array($c->system_totals_by_method) ? (int) array_sum($c->system_totals_by_method) : 0;
+            $varianceTotals = is_array($c->variances_by_method) ? (int) array_sum($c->variances_by_method) : 0;
+            $cashCounted = (int) ($c->counted_totals_by_method['cash'] ?? (is_array($c->counted_totals_by_method) ? array_sum($c->counted_totals_by_method) : 0));
 
-            $netTotal += $net;
+            $netTotal += $systemTotals;
+
+            $dateDisplay = $c->date instanceof \DateTimeInterface ? $c->date->format('Y-m-d') : (string) $c->date;
 
             $rows[] = [
-                $c->date ? $c->date->format('Y-m-d') : '—',
+                $dateDisplay ?: '—',
                 ucfirst($c->status),
-                $this->formatMoney($sales),
-                $this->formatMoney($refunds),
-                $this->formatMoney($net),
-                $this->formatMoney($cash),
-                $this->formatMoney($diff),
+                $this->formatMoney($systemTotals),
+                $this->formatMoney(0),
+                $this->formatMoney($systemTotals),
+                $this->formatMoney($cashCounted),
+                $this->formatMoney($varianceTotals),
                 $c->closer?->name ?? '—',
-                $c->closed_at ? $c->closed_at->format('Y-m-d H:i') : 'Open',
+                $c->locked_at ? $c->locked_at->format('Y-m-d H:i') : ($c->status === 'locked' ? 'Locked' : 'Open'),
             ];
         }
 

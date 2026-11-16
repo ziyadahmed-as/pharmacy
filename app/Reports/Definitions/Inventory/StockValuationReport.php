@@ -2,7 +2,6 @@
 
 namespace App\Reports\Definitions\Inventory;
 
-use App\Models\BatchStock;
 use App\Models\Product;
 use App\Models\User;
 use App\Reports\Definitions\BaseReportDefinition;
@@ -79,7 +78,7 @@ class StockValuationReport extends BaseReportDefinition
                 $bQty = (int) $batch->batchStocks->sum('quantity');
                 $qty += $bQty;
                 $cost = (int) ($batch->unit_cost ?? 0);
-                $retail = (int) ($p->effectiveSellingPrice() ?? $p->selling_price ?? 0);
+                $retail = (int) ($p->latestPrice?->selling_price ?? $batch->unit_cost ?? 0);
 
                 $prodCost += $bQty * $cost;
                 $prodRetail += $bQty * $retail;

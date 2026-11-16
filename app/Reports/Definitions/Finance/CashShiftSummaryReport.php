@@ -101,7 +101,7 @@ class CashShiftSummaryReport extends BaseReportDefinition
             $totalVariance += $variance;
 
             $rows[] = [
-                '#' . $s->id,
+                '#'.$s->id,
                 $s->till?->name ?? '—',
                 $s->user?->name ?? $s->user?->username ?? '—',
                 $s->opened_at ? $s->opened_at->format('Y-m-d H:i') : '—',

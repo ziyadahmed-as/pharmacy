@@ -54,9 +54,9 @@ class ProcessQueuedReportExport implements ShouldQueue
             $rows = $result['rows'];
             $format = strtolower($export->format);
 
-            $filename = "report-{$export->report_key}-{$export->id}-" . now()->format('Ymd_His') . '.' . ($format === 'pdf' ? 'pdf' : 'csv');
-            $relativeDir = 'reports/exports/' . $user->id;
-            $relativePath = $relativeDir . '/' . $filename;
+            $filename = "report-{$export->report_key}-{$export->id}-".now()->format('Ymd_His').'.'.($format === 'pdf' ? 'pdf' : 'csv');
+            $relativeDir = 'reports/exports/'.$user->id;
+            $relativePath = $relativeDir.'/'.$filename;
 
             if ($format === 'pdf') {
                 $pdfContent = SimplePdf::table($definition->name(), array_merge([$headers], $rows));
@@ -70,7 +70,7 @@ class ProcessQueuedReportExport implements ShouldQueue
                     fputcsv($stream, array_map(function ($val) {
                         $str = (string) $val;
 
-                        return preg_match('/^[=+\-@\t\r]/', $str) ? "'" . $str : $str;
+                        return preg_match('/^[=+\-@\t\r]/', $str) ? "'".$str : $str;
                     }, $row));
                 }
                 rewind($stream);
@@ -95,11 +95,14 @@ class ProcessQueuedReportExport implements ShouldQueue
             ]);
 
             // Notify user
-            Notifier::notify(
+            Notifier::toUser(
                 $user,
-                "Report export for {$definition->name()} is ready for download.",
                 'report.exported',
-                ['export_id' => $export->id, 'filename' => $filename]
+                [
+                    'message' => "Report export for {$definition->name()} is ready for download.",
+                    'export_id' => $export->id,
+                    'filename' => $filename,
+                ]
             );
         } catch (Throwable $e) {
             $export->update([

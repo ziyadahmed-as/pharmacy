@@ -3,7 +3,6 @@
 namespace App\Reports\Definitions\Finance;
 
 use App\Models\Expense;
-use App\Models\ExpenseCategory;
 use App\Models\User;
 use App\Reports\Definitions\BaseReportDefinition;
 

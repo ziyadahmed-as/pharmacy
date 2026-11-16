@@ -5,9 +5,7 @@ namespace App\Console\Commands;
 use App\Models\ReportSchedule;
 use App\Reports\ReportRegistry;
 use App\Services\AuditLogger;
-use App\Services\SimplePdf;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
 
 class SendScheduledReportsCommand extends Command
 {
@@ -64,7 +62,7 @@ class SendScheduledReportsCommand extends Command
                 'next_run_at' => $nextRun,
             ]);
 
-            $this->info("Dispatched report [{$schedule->report_key}] to " . count($recipients) . " recipients.");
+            $this->info("Dispatched report [{$schedule->report_key}] to ".count($recipients).' recipients.');
         }
 
         return self::SUCCESS;

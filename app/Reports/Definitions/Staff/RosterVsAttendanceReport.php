@@ -4,9 +4,9 @@ namespace App\Reports\Definitions\Staff;
 
 use App\Models\AttendanceRecord;
 use App\Models\RosterEntry;
-use App\Models\Staff;
 use App\Models\User;
 use App\Reports\Definitions\BaseReportDefinition;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -85,12 +85,12 @@ class RosterVsAttendanceReport extends BaseReportDefinition
                 : null;
 
             $status = $att ? ucfirst($att->status) : 'No Record';
-            $actualHours = $att ? round(($att->minutes_worked ?? 0) / 60, 1) . ' hrs' : '0 hrs';
-            $schedHours = ($r->shift_hours ?? 8) . ' hrs';
-            $punctual = $att ? ($att->is_late ? 'Late (' . ($att->late_minutes ?? 0) . 'm)' : 'On Time') : '—';
+            $actualHours = $att ? round(($att->minutes_worked ?? 0) / 60, 1).' hrs' : '0 hrs';
+            $schedHours = ($r->shift_hours ?? 8).' hrs';
+            $punctual = $att ? ($att->is_late ? 'Late ('.($att->late_minutes ?? 0).'m)' : 'On Time') : '—';
 
             $rows[] = [
-                $r->date ? \Carbon\Carbon::parse($r->date)->format('Y-m-d') : '—',
+                $r->date ? Carbon::parse($r->date)->format('Y-m-d') : '—',
                 $staff?->name ?? '—',
                 $r->shift_name ?? 'Regular Shift',
                 $status,

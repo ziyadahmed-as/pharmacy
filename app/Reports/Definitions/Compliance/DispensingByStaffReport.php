@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\Prescription;
 use App\Models\User;
 use App\Reports\Definitions\BaseReportDefinition;
+use Carbon\Carbon;
 
 /**
  * Dispensing by staff report (UC-30/UC-20).
@@ -79,7 +80,7 @@ class DispensingByStaffReport extends BaseReportDefinition
 
         foreach ($byUser as $uId => $items) {
             $dispenser = $items->first()->dispenser;
-            $name = $dispenser?->name ?? $dispenser?->username ?? ('User #' . $uId);
+            $name = $dispenser?->name ?? $dispenser?->username ?? ('User #'.$uId);
             $count = $items->count();
             $controlledCount = $items->filter(fn ($p) => ($p->is_controlled ?? false) || ($p->items && $p->items->contains(fn ($it) => $it->product?->isControlled())))->count();
             $lastDate = $items->max('dispensed_at');
@@ -90,7 +91,7 @@ class DispensingByStaffReport extends BaseReportDefinition
                 $name,
                 $count,
                 $controlledCount,
-                $lastDate ? \Carbon\Carbon::parse($lastDate)->format('Y-m-d H:i') : '—',
+                $lastDate ? Carbon::parse($lastDate)->format('Y-m-d H:i') : '—',
             ];
         }
 
