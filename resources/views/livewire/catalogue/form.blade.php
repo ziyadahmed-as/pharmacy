@@ -249,6 +249,66 @@
             </div>
         </div>
 
+        {{-- Section 6: Product Image (FR-1.1, OW/PM only) --}}
+        @if ($canManage)
+        <div>
+            <div class="flex items-center gap-2 pb-3 border-b border-slate-100">
+                <svg class="h-4 w-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-800">{{ __('catalogue.image') }}</h3>
+                <span class="text-xs text-slate-400 font-normal">(JPG, PNG, WEBP · max 2 MB)</span>
+            </div>
+
+            <div class="mt-4 flex items-start gap-6">
+                {{-- Current / preview thumbnail --}}
+                <div class="shrink-0">
+                    @if ($imageFile)
+                        <img src="{{ $imageFile->temporaryUrl() }}"
+                             alt="{{ __('catalogue.image') }}"
+                             class="h-20 w-20 rounded-xl object-cover border-2 border-teal-400 shadow">
+                        <p class="mt-1 text-[10px] text-teal-600 font-medium text-center">{{ __('common.preview') }}</p>
+                    @elseif ($currentThumbnailPath)
+                        <img src="{{ \App\Services\ProductImageService::thumbnailUrl($currentThumbnailPath) }}"
+                             alt="{{ __('catalogue.image') }}"
+                             class="h-20 w-20 rounded-xl object-cover border border-slate-200 shadow-sm">
+                        <p class="mt-1 text-[10px] text-slate-400 text-center">{{ __('catalogue.current_image') }}</p>
+                    @else
+                        <div class="h-20 w-20 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50">
+                            <svg class="h-7 w-7 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        <p class="mt-1 text-[10px] text-slate-400 text-center">{{ __('catalogue.no_image') }}</p>
+                    @endif
+                </div>
+
+                {{-- Upload control --}}
+                <div class="flex-1 space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1">
+                            {{ $currentThumbnailPath || $imageFile ? __('catalogue.replace_image') : __('catalogue.upload_image') }}
+                        </label>
+                        <input type="file"
+                               wire:model="imageFile"
+                               accept="image/jpeg,image/png,image/webp"
+                               class="block w-full text-sm text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-teal-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-teal-700 hover:file:bg-teal-100 transition">
+                        <div wire:loading wire:target="imageFile" class="mt-1 text-xs text-teal-600 animate-pulse">{{ __('common.uploading') }}…</div>
+                        @error('imageFile')
+                            <span class="text-xs text-rose-600 mt-1 block font-medium">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    @if ($currentThumbnailPath && !$imageFile)
+                        <button type="button"
+                                wire:click="removeImage"
+                                wire:confirm="{{ __('catalogue.confirm_remove_image') }}"
+                                class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-800 transition">
+                            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            {{ __('catalogue.remove_image') }}
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @endif
+
         {{-- Form Actions --}}
         <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
             <a href="{{ route('catalogue.index') }}" class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition">

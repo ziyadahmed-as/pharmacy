@@ -154,7 +154,7 @@
                         <!-- Expanded Batches Sub-table -->
                         @if ($isExpanded)
                             <tr class="bg-slate-50/75">
-                                <td colspan="{{ $canViewCost ? 8 : 7 }}" class="px-6 py-4">
+                                <td colspan="{{ $canViewCost ? 9 : 8 }}" class="px-6 py-4">
                                     <div class="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs">
                                         <div class="px-4 py-2.5 bg-slate-100/70 border-b border-slate-200 text-xs font-semibold text-slate-600 flex items-center justify-between">
                                             <span>{{ __('catalogue.batches_for_product', ['brand' => $p->brand]) }}</span>
@@ -167,6 +167,7 @@
                                                     <th class="px-4 py-2 text-left">{{ __('catalogue.expiry_date') }}</th>
                                                     <th class="px-4 py-2 text-left">{{ __('catalogue.location') }}</th>
                                                     <th class="px-4 py-2 text-left">{{ __('common.status') }}</th>
+                                                    <th class="px-4 py-2 text-left">{{ __('catalogue.batch_status') }}</th>
                                                     <th class="px-4 py-2 text-right">{{ __('catalogue.quantity') }}</th>
                                                     @if ($canViewCost)
                                                         <th class="px-4 py-2 text-right">{{ __('catalogue.unit_cost') }}</th>
@@ -189,6 +190,9 @@
                                                         <tr class="hover:bg-slate-50/70 transition">
                                                             <td class="px-4 py-2 font-mono font-semibold text-slate-900">
                                                                 {{ $batch->batch_no }}
+                                                                @if ($batch->delivery_note_no)
+                                                                    <div class="text-[10px] text-slate-400 font-normal">DN: {{ $batch->delivery_note_no }}</div>
+                                                                @endif
                                                             </td>
                                                             <td class="px-4 py-2 whitespace-nowrap">
                                                                 <span class="font-medium text-slate-700">{{ $bExp ?? '-' }}</span>
@@ -199,12 +203,24 @@
                                                                 @endif
                                                             </td>
                                                             <td class="px-4 py-2 text-slate-700 font-medium">{{ $stock->location?->name ?? ($stock->location?->code ?? '-') }}</td>
+                                                            {{-- BatchStock status (sellable / quarantine) --}}
                                                             <td class="px-4 py-2">
                                                                 @if ($stock->status === 'sellable')
                                                                     <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">Sellable</span>
                                                                 @else
                                                                     <span class="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800">Quarantine</span>
                                                                 @endif
+                                                            </td>
+                                                            {{-- Batch lifecycle status (SELLABLE / QUARANTINED / RECALLED / DEPLETED) --}}
+                                                            <td class="px-4 py-2">
+                                                                @php $bs = $batch->status ?? 'SELLABLE'; @endphp
+                                                                <span @class([
+                                                                    'inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold',
+                                                                    'bg-emerald-50 text-emerald-800'  => $bs === 'SELLABLE',
+                                                                    'bg-amber-100 text-amber-800'     => $bs === 'QUARANTINED',
+                                                                    'bg-rose-100 text-rose-800'       => $bs === 'RECALLED',
+                                                                    'bg-slate-100 text-slate-500'     => $bs === 'DEPLETED',
+                                                                ])>{{ $bs }}</span>
                                                             </td>
                                                             <td class="px-4 py-2 text-right font-bold text-slate-900">
                                                                 {{ number_format($stock->quantity) }}
@@ -229,6 +245,16 @@
                                                             <td class="px-4 py-2">{{ $bExp ?? '-' }}</td>
                                                             <td class="px-4 py-2">-</td>
                                                             <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600">No stock</span></td>
+                                                            <td class="px-4 py-2">
+                                                                @php $bs = $batch->status ?? 'SELLABLE'; @endphp
+                                                                <span @class([
+                                                                    'inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold',
+                                                                    'bg-slate-100 text-slate-500' => $bs === 'DEPLETED',
+                                                                    'bg-amber-100 text-amber-800' => $bs === 'QUARANTINED',
+                                                                    'bg-rose-100 text-rose-800'   => $bs === 'RECALLED',
+                                                                    'bg-emerald-50 text-emerald-800' => $bs === 'SELLABLE',
+                                                                ])>{{ $bs }}</span>
+                                                            </td>
                                                             <td class="px-4 py-2 text-right">0</td>
                                                             @if ($canViewCost)
                                                                 <td class="px-4 py-2 text-right font-mono">{{ $batch->unit_cost !== null ? number_format($batch->unit_cost / 100, 2) . ' ETB' : '-' }}</td>

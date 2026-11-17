@@ -81,10 +81,17 @@ class Index extends Component
         $products = $query->orderBy('brand')->paginate(20);
         $categories = Category::orderBy('name')->get();
 
+        // Pre-compute available quantities to avoid N+1 in blade (one sub-query per product).
+        $availableQty = [];
+        foreach ($products as $p) {
+            $availableQty[$p->id] = $p->totalAvailableQuantity();
+        }
+
         return view('livewire.catalogue.index', [
-            'products' => $products,
-            'categories' => $categories,
-            'canManage' => $user->hasPermission('catalogue.manage'),
+            'products'     => $products,
+            'categories'   => $categories,
+            'availableQty' => $availableQty,
+            'canManage'    => $user->hasPermission('catalogue.manage'),
             'canEditBasic' => $user->hasPermission('catalogue.edit_basic'),
         ])->layout('layouts.app', ['title' => __('catalogue.title')]);
     }

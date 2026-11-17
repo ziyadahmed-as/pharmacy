@@ -17,8 +17,11 @@
         @if ($lowStockProducts->isNotEmpty())
             <div class="mt-3 space-y-1.5">
                 @foreach ($lowStockProducts as $prod)
-                    <div class="flex items-center justify-between text-xs py-1 border-b border-slate-50 dark:border-slate-700/40 last:border-0">
-                        <span class="truncate font-medium text-slate-800 dark:text-slate-200">{{ $prod->brand }}</span>
+                    <div class="flex items-center justify-between text-xs py-1 border-b border-slate-50 dark:border-slate-700/40 last:border-0 gap-2">
+                        <img src="{{ \App\Services\ProductImageService::thumbnailUrl($prod->thumbnail_path ?? null) }}"
+                             alt="{{ $prod->brand }}"
+                             class="h-6 w-6 rounded object-cover border border-slate-200 bg-slate-50 shrink-0">
+                        <span class="truncate font-medium text-slate-800 dark:text-slate-200 flex-1">{{ $prod->brand }}</span>
                         <span class="text-right shrink-0 font-mono text-[11px] font-bold text-amber-600">
                             {{ (int) $prod->sellable_stock }} / {{ $prod->reorder_level }}
                         </span>

@@ -258,16 +258,17 @@ class Sale extends Component
             $basePrice = PriceResolver::at($product, null);
 
             return [
-                'id' => $product->id,
-                'brand' => $product->brand,
-                'generic_name' => $product->generic_name,
-                'dosage_form' => $product->dosage_form,
-                'strength' => $product->strength,
-                'classification' => $product->classification,
-                'total_stock' => $totalStock,
-                'price_etb' => $basePrice ? number_format($basePrice->price / 100, 2) : '0.00',
+                'id'              => $product->id,
+                'brand'           => $product->brand,
+                'generic_name'    => $product->generic_name,
+                'dosage_form'     => $product->dosage_form,
+                'strength'        => $product->strength,
+                'classification'  => $product->classification,
+                'total_stock'     => $totalStock,
+                'price_etb'       => $basePrice ? number_format($basePrice->price / 100, 2) : '0.00',
                 'earliest_expiry' => $earliest?->expiry_date?->format('Y-m-d') ?? '-',
-                'barcode' => $product->barcode,
+                'barcode'         => $product->barcode,
+                'thumbnail_url'   => \App\Services\ProductImageService::thumbnailUrl($product->thumbnail_path ?? null),
             ];
         })->all();
     }
@@ -373,23 +374,24 @@ class Sale extends Component
         }
 
         $this->cart[] = [
-            'temp_id' => (string) Str::uuid(),
-            'product_id' => $product->id,
-            'brand' => $product->brand,
-            'generic_name' => $product->generic_name,
-            'classification' => $product->classification,
-            'unit_id' => null,
-            'unit_name' => $product->unit ?: 'piece',
-            'available_units' => $unitsData,
-            'quantity' => 1,
-            'unit_price' => (int) $priceRecord->price,
-            'subtotal' => (int) $priceRecord->price,
-            'batch_id' => $earliestBatch->id,
-            'batch_no' => $earliestBatch->batch_no,
-            'expiry_date' => $earliestBatch->expiry_date?->format('Y-m-d') ?? '-',
+            'temp_id'          => (string) Str::uuid(),
+            'product_id'       => $product->id,
+            'brand'            => $product->brand,
+            'generic_name'     => $product->generic_name,
+            'classification'   => $product->classification,
+            'unit_id'          => null,
+            'unit_name'        => $product->unit ?: 'piece',
+            'available_units'  => $unitsData,
+            'quantity'         => 1,
+            'unit_price'       => (int) $priceRecord->price,
+            'subtotal'         => (int) $priceRecord->price,
+            'batch_id'         => $earliestBatch->id,
+            'batch_no'         => $earliestBatch->batch_no,
+            'expiry_date'      => $earliestBatch->expiry_date?->format('Y-m-d') ?? '-',
             'is_fefo_override' => false,
-            'override_reason' => null,
+            'override_reason'  => null,
             'available_batches' => $availableBatchesData,
+            'thumbnail_url'    => \App\Services\ProductImageService::thumbnailUrl($product->thumbnail_path ?? null),
         ];
 
         $this->search = '';

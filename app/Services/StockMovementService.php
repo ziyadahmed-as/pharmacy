@@ -146,17 +146,18 @@ class StockMovementService
             $stock->save();
 
             $movement = StockMovement::create([
-                'batch_id' => $batch->id,
-                'location_id' => $resolvedLocationId,
-                'type' => $type,
-                'quantity' => $signedQuantity,
+                'batch_id'      => $batch->id,
+                'product_id'    => $batch->product_id,   // denormalised for direct ledger queries (FR-2.10)
+                'location_id'   => $resolvedLocationId,
+                'type'          => $type,
+                'quantity'      => $signedQuantity,
                 'balance_after' => $newBalance,
-                'stock_status' => $status,
-                'source_type' => get_class($source),
-                'source_id' => $source->getKey(),
-                'user_id' => $user->id,
-                'description' => $description,
-                'created_at' => now(),
+                'stock_status'  => $status,
+                'source_type'   => get_class($source),
+                'source_id'     => $source->getKey(),
+                'user_id'       => $user->id,
+                'description'   => $description,
+                'created_at'    => now(),
             ]);
 
             // Controlled drug register integration (BR-11, FR-4.4)

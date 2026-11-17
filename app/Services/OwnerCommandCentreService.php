@@ -995,8 +995,8 @@ class OwnerCommandCentreService
 
         return Product::query()
             ->where('is_active', true)
-            ->whereHas('batches.batchStocks', fn ($q) => $q->where('status', 'sellable'))
-            ->withSum(['batchStocks as sellable_qty' => fn ($q) => $q->where('status', 'sellable')], 'quantity')
+            ->whereHas('batches.batchStocks', fn ($q) => $q->where('batch_stocks.status', 'sellable'))
+            ->withSum(['batchStocks as sellable_qty' => fn ($q) => $q->where('batch_stocks.status', 'sellable')], 'quantity')
             ->get()
             ->filter(fn ($p) => ($p->sellable_qty ?? 0) <= $p->reorder_level)
             ->count();

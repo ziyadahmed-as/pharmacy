@@ -52,4 +52,5 @@ return [
     'uploading' => 'በመጫን ላይ',
     'delete' => 'ሰርዝ',
     'warning' => 'ማስጠንቀቂያ',
+    'preview' => 'ቅድመ ዕይታ',
 ];

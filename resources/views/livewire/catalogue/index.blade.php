@@ -80,10 +80,12 @@
             <table class="min-w-full divide-y divide-slate-200 text-sm">
                 <thead class="bg-slate-50/75 text-xs font-semibold uppercase tracking-wider text-slate-500">
                     <tr>
+                        <th scope="col" class="px-3 py-3.5 text-left w-12">{{ __('catalogue.image') }}</th>
                         <th scope="col" class="px-5 py-3.5 text-left">{{ __('catalogue.product_name') }}</th>
                         <th scope="col" class="px-5 py-3.5 text-left">{{ __('catalogue.generic_name') }}</th>
                         <th scope="col" class="px-5 py-3.5 text-left">{{ __('catalogue.classification') }}</th>
                         <th scope="col" class="px-5 py-3.5 text-left">{{ __('catalogue.barcode') }}</th>
+                        <th scope="col" class="px-5 py-3.5 text-right">{{ __('catalogue.stock') }}</th>
                         <th scope="col" class="px-5 py-3.5 text-left">{{ __('catalogue.selling_price') }}</th>
                         <th scope="col" class="px-5 py-3.5 text-left">{{ __('common.status') }}</th>
                         <th scope="col" class="px-5 py-3.5 text-right">{{ __('common.actions') }}</th>
@@ -92,6 +94,12 @@
                 <tbody class="divide-y divide-slate-200 bg-white">
                     @forelse ($products as $p)
                         <tr class="hover:bg-slate-50/70 transition {{ ! $p->is_active ? 'bg-slate-50/40 opacity-75' : '' }}">
+                            {{-- Thumbnail --}}
+                            <td class="px-3 py-3.5">
+                                <img src="{{ \App\Services\ProductImageService::thumbnailUrl($p->thumbnail_path ?? null) }}"
+                                     alt="{{ $p->brand }}"
+                                     class="h-9 w-9 rounded-lg object-cover border border-slate-200 bg-slate-50">
+                            </td>
                             <td class="px-5 py-3.5 font-semibold text-slate-900">
                                 <a href="{{ route('catalogue.show', $p) }}" class="text-teal-700 hover:text-teal-900 transition">
                                     {{ $p->brand }}
@@ -109,6 +117,11 @@
                                 </span>
                             </td>
                             <td class="px-5 py-3.5 text-slate-500 font-mono text-xs">{{ $p->barcode ?? '—' }}</td>
+                            {{-- Available stock (computed, never stored) --}}
+                            <td class="px-5 py-3.5 text-right font-semibold font-mono text-sm
+                                {{ ($availableQty[$p->id] ?? 0) === 0 ? 'text-rose-600' : 'text-slate-800' }}">
+                                {{ number_format($availableQty[$p->id] ?? 0) }}
+                            </td>
                             <td class="px-5 py-3.5 font-semibold text-slate-900">
                                 @if ($p->latestPrice)
                                     {{ number_format($p->latestPrice->price / 100, 2) }} <span class="text-xs font-normal text-slate-500">ETB</span>
@@ -143,7 +156,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-12 text-center">
+                            <td colspan="9" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <svg class="h-10 w-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
                                     <p class="mt-2 text-sm font-medium text-slate-500">{{ __('catalogue.no_products_found') }}</p>

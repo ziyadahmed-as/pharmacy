@@ -344,6 +344,21 @@ return [
     'product_code' => 'የምርት ኮድ',
     'min_shelf_life_days' => 'አነስተኛ የመቆያ ጊዜ (ቀናት)',
 
+    // Product Image (FR-1.1)
+    'image' => 'ምስል',
+    'stock' => 'ያለ ክምችት',
+    'image_too_large' => 'የምርት ምስል ከ:max መብለጥ አይፈቀድም።',
+    'image_invalid_type' => 'የምርት ምስል JPG፣ PNG ወይም WEBP ፋይል መሆን አለበት (የተለየው፡ :detected)።',
+    'image_processing_failed' => 'ምስሉ ሊሠራ አልቻለም። ትክክለኛ JPG፣ PNG ወይም WEBP ፋይል ያስገቡ።',
+    'image_upload_success' => 'የምርት ምስል በተሳካ ሁኔታ ተጭኗል።',
+    'image_removed_success' => 'የምርት ምስል ተወግዷል።',
+    'upload_image' => 'ምስል ጫን',
+    'replace_image' => 'ምስል ቀይር',
+    'remove_image' => 'ምስል አስወግድ',
+    'confirm_remove_image' => 'የምርት ምስሉን ማስወገድ ይፈልጋሉ? ይህ ቀይር አይቻልም።',
+    'current_image' => 'አሁን ያለ',
+    'no_image' => 'ምስል የለም',
+
     // Category Management (UC-01)
     'manage_categories' => 'ምድቦችን አስተዳድር',
     'categories_title' => 'የምርት ምድቦች',
@@ -373,4 +388,5 @@ return [
     'cannot_be_own_parent' => 'ምድብ የራሱ ዋና ምድብ መሆን አይችልም።',
     'category_name_required' => 'የምድብ ስም ማስገባት ግዴታ ነው።',
     'category_name_unique' => 'በዚህ ስም የተመዘገበ ምድብ አስቀድሞ አለ።',
+    'batch_status' => 'የባች ሁኔታ',
 ];

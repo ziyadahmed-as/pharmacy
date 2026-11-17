@@ -9,9 +9,16 @@
     />
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <div class="flex flex-wrap items-center gap-3">
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ $product->brand }}</h1>
+        <div class="flex items-start gap-4">
+            {{-- Product image --}}
+            <div class="shrink-0">
+                <img src="{{ \App\Services\ProductImageService::thumbnailUrl($product->thumbnail_path ?? null) }}"
+                     alt="{{ $product->brand }}"
+                     class="h-16 w-16 rounded-2xl object-cover border border-slate-200 bg-slate-50 shadow-sm">
+            </div>
+            <div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <h1 class="text-2xl font-bold tracking-tight text-slate-900">{{ $product->brand }}</h1>
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold
                     @if($product->classification === 'rx') bg-blue-50 text-blue-700 ring-1 ring-blue-600/20
                     @elseif($product->classification === 'controlled') bg-rose-50 text-rose-700 ring-1 ring-rose-600/20
@@ -34,7 +41,16 @@
             <p class="mt-1 text-sm text-slate-500 font-medium">
                 {{ $product->generic_name }} &bull; {{ $product->strength }} {{ $product->dosage_form }} ({{ $product->pack_size }})
             </p>
-        </div>
+            {{-- Live available stock badge --}}
+            <div class="mt-2 flex items-center gap-2">
+                <span class="text-xs text-slate-500">{{ __('catalogue.stock') }}:</span>
+                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold
+                    {{ $availableQty > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700' }}">
+                    {{ number_format($availableQty) }} {{ $product->unit }}
+                </span>
+            </div>
+            </div>{{-- end text block --}}
+        </div>{{-- end flex items-start --}}
         <div class="flex items-center gap-3">
             <a href="{{ route('catalogue.index') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900 transition">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>

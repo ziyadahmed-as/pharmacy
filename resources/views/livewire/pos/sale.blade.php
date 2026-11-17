@@ -124,25 +124,30 @@
                                 type="button"
                                 wire:click="addProduct({{ $res['id'] }})"
                                 class="w-full text-left p-3 hover:bg-teal-50/70 transition flex items-center justify-between group">
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-sm text-slate-900 group-hover:text-teal-700">{{ $res['brand'] }}</span>
-                                        @if ($res['strength'])
-                                            <span class="text-xs text-slate-500 font-medium">({{ $res['strength'] }})</span>
-                                        @endif
-                                        <span @class([
-                                            'text-xs px-2 py-0.5 rounded-full font-semibold',
-                                            'bg-emerald-50 text-emerald-700' => in_array($res['classification'], ['otc', 'non_drug']),
-                                            'bg-amber-100 text-amber-800' => in_array($res['classification'], ['rx', 'controlled']),
-                                        ])>
-                                            {{ strtoupper($res['classification']) }}
-                                        </span>
-                                    </div>
-                                    <div class="text-xs text-slate-500 truncate">
-                                        {{ $res['generic_name'] }} • {{ $res['dosage_form'] }}
-                                        @if ($res['barcode'])
-                                            • <span class="font-mono text-slate-400">{{ $res['barcode'] }}</span>
-                                        @endif
+                                <div class="min-w-0 flex-1 flex items-center gap-2.5">
+                                    <img src="{{ $res['thumbnail_url'] }}"
+                                         alt="{{ $res['brand'] }}"
+                                         class="h-9 w-9 rounded-lg object-cover border border-slate-200 bg-slate-50 shrink-0">
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <span class="font-bold text-sm text-slate-900 group-hover:text-teal-700">{{ $res['brand'] }}</span>
+                                            @if ($res['strength'])
+                                                <span class="text-xs text-slate-500 font-medium">({{ $res['strength'] }})</span>
+                                            @endif
+                                            <span @class([
+                                                'text-xs px-2 py-0.5 rounded-full font-semibold',
+                                                'bg-emerald-50 text-emerald-700' => in_array($res['classification'], ['otc', 'non_drug']),
+                                                'bg-amber-100 text-amber-800' => in_array($res['classification'], ['rx', 'controlled']),
+                                            ])>
+                                                {{ strtoupper($res['classification']) }}
+                                            </span>
+                                        </div>
+                                        <div class="text-xs text-slate-500 truncate">
+                                            {{ $res['generic_name'] }} • {{ $res['dosage_form'] }}
+                                            @if ($res['barcode'])
+                                                • <span class="font-mono text-slate-400">{{ $res['barcode'] }}</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="text-right ml-4 shrink-0">
@@ -214,21 +219,28 @@
                                     <tr wire:key="cart-line-{{ $line['temp_id'] }}" class="hover:bg-slate-50/50">
                                         {{-- Product --}}
                                         <td class="px-4 py-3">
-                                            <div class="flex items-center gap-1.5 flex-wrap">
-                                                <span class="font-bold text-slate-900">{{ $line['brand'] }}</span>
-                                                @if (!empty($line['sold_out']))
-                                                    <span class="bg-rose-100 text-rose-800 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ __('sales.sold_out_badge') }}</span>
-                                                @elseif (!empty($line['insufficient_stock']))
-                                                    <span class="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ __('sales.insufficient_badge') }}</span>
-                                                @endif
-                                                @if (!empty($line['price_changed']))
-                                                    <span class="bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ __('sales.price_changed_badge') }}</span>
-                                                @endif
+                                            <div class="flex items-center gap-2.5">
+                                                <img src="{{ $line['thumbnail_url'] ?? asset('images/product-placeholder.png') }}"
+                                                     alt="{{ $line['brand'] }}"
+                                                     class="h-8 w-8 rounded-lg object-cover border border-slate-200 bg-slate-50 shrink-0">
+                                                <div>
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <span class="font-bold text-slate-900">{{ $line['brand'] }}</span>
+                                                        @if (!empty($line['sold_out']))
+                                                            <span class="bg-rose-100 text-rose-800 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ __('sales.sold_out_badge') }}</span>
+                                                        @elseif (!empty($line['insufficient_stock']))
+                                                            <span class="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ __('sales.insufficient_badge') }}</span>
+                                                        @endif
+                                                        @if (!empty($line['price_changed']))
+                                                            <span class="bg-blue-100 text-blue-800 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ __('sales.price_changed_badge') }}</span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="text-xs text-slate-500">{{ $line['generic_name'] }}</div>
+                                                    @if (!empty($line['stock_warning']))
+                                                        <div class="text-[11px] text-rose-600 font-medium">{{ $line['stock_warning'] }}</div>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            <div class="text-xs text-slate-500">{{ $line['generic_name'] }}</div>
-                                            @if (!empty($line['stock_warning']))
-                                                <div class="text-[11px] text-rose-600 font-medium">{{ $line['stock_warning'] }}</div>
-                                            @endif
                                         </td>
 
                                         {{-- Batch & FEFO --}}

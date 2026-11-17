@@ -52,4 +52,5 @@ return [
     'download' => 'Download',
     'uploading' => 'Uploading',
     'delete' => 'Delete',
+    'preview' => 'Preview',
 ];

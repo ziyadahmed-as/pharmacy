@@ -29,8 +29,9 @@ class Show extends Component
         }
 
         return view('livewire.catalogue.show', [
-            'canManage' => $user->hasPermission('catalogue.manage'),
+            'canManage'    => $user->hasPermission('catalogue.manage'),
             'canEditBasic' => $user->hasPermission('catalogue.edit_basic'),
+            'availableQty' => $this->product->totalAvailableQuantity(),
         ])->layout('layouts.app', ['title' => $this->product->brand]);
     }
 }

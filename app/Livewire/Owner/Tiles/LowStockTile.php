@@ -28,7 +28,7 @@ class LowStockTile extends Component
             ->where('is_active', true)
             ->where('reorder_level', '>', 0)
             ->withSum(['batchStocks as sellable_stock' => function ($q) {
-                $q->where('status', 'sellable');
+                $q->where('batch_stocks.status', 'sellable');
             }], 'quantity')
             ->get()
             ->filter(fn ($prod) => ((int) $prod->sellable_stock) <= (int) $prod->reorder_level)

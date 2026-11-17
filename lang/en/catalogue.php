@@ -344,6 +344,21 @@ return [
     'product_code' => 'Product Code',
     'min_shelf_life_days' => 'Min Shelf Life (days)',
 
+    // Product Image (FR-1.1)
+    'image' => 'Image',
+    'stock' => 'In Stock',
+    'image_too_large' => 'Product image must not exceed :max.',
+    'image_invalid_type' => 'Product image must be a JPG, PNG, or WEBP file (detected: :detected).',
+    'image_processing_failed' => 'Image could not be processed. Please upload a valid JPG, PNG, or WEBP file.',
+    'image_upload_success' => 'Product image uploaded successfully.',
+    'image_removed_success' => 'Product image removed.',
+    'upload_image' => 'Upload Image',
+    'replace_image' => 'Replace Image',
+    'remove_image' => 'Remove Image',
+    'confirm_remove_image' => 'Are you sure you want to remove the product image? This cannot be undone.',
+    'current_image' => 'Current',
+    'no_image' => 'No image',
+
     // Category Management (UC-01)
     'manage_categories' => 'Manage Categories',
     'categories_title' => 'Product Categories',
@@ -373,4 +388,5 @@ return [
     'cannot_be_own_parent' => 'A category cannot be its own parent.',
     'category_name_required' => 'Category name is required.',
     'category_name_unique' => 'A category with this name already exists.',
+    'batch_status' => 'Batch Status',
 ];

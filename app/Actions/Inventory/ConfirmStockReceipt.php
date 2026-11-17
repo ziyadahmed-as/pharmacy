@@ -57,13 +57,17 @@ class ConfirmStockReceipt
                 $batch = Batch::firstOrCreate(
                     [
                         'product_id' => $line->product_id,
-                        'batch_no' => $line->batch_no,
+                        'batch_no'   => $line->batch_no,
                     ],
                     [
                         'manufacturing_date' => $line->manufacturing_date,
-                        'expiry_date' => $line->expiry_date,
-                        'unit_cost' => $line->unit_cost,
-                        'supplier_name' => $receipt->supplier_name,
+                        'expiry_date'        => $line->expiry_date,
+                        'unit_cost'          => $line->unit_cost,
+                        'supplier_name'      => $receipt->supplier_name,
+                        'delivery_note_no'   => $receipt->delivery_note_no,
+                        'registered_by'      => $actor->id,
+                        'registered_at'      => now(),
+                        'status'             => \App\Models\Batch::STATUS_SELLABLE,
                     ]
                 );
 
