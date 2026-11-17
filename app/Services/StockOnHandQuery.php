@@ -34,7 +34,8 @@ class StockOnHandQuery
             ? ['id', 'product_id', 'batch_no', 'manufacturing_date', 'expiry_date', 'unit_cost', 'supplier_name', 'created_at']
             : ['id', 'product_id', 'batch_no', 'manufacturing_date', 'expiry_date', 'supplier_name', 'created_at'];
 
-        $nearExpiryDays = (int) (setting('stock.near_expiry_days') ?? 90);
+        $nearExpiryWindows = setting('inventory.near_expiry_alert_days', [90, 60, 30]);
+        $nearExpiryDays = (int) max(is_array($nearExpiryWindows) ? $nearExpiryWindows : [90]);
         $today = Carbon::today()->format('Y-m-d');
         $nearExpiryThreshold = Carbon::today()->addDays($nearExpiryDays)->format('Y-m-d');
 
@@ -132,7 +133,8 @@ class StockOnHandQuery
         $totalQuarantine = 0;
         $totalValuation = $canViewCost ? 0 : null;
 
-        $nearExpiryDays = (int) (setting('stock.near_expiry_days') ?? 90);
+        $nearExpiryWindows = setting('inventory.near_expiry_alert_days', [90, 60, 30]);
+        $nearExpiryDays = (int) max(is_array($nearExpiryWindows) ? $nearExpiryWindows : [90]);
         $today = Carbon::today()->format('Y-m-d');
         $nearExpiryThreshold = Carbon::today()->addDays($nearExpiryDays)->format('Y-m-d');
 

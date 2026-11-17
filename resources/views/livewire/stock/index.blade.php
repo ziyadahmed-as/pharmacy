@@ -179,7 +179,8 @@
                                                 @foreach ($p->batches as $batch)
                                                     @php
                                                         $today = now()->format('Y-m-d');
-                                                        $nearThreshold = now()->addDays((int)(setting('stock.near_expiry_days') ?? 90))->format('Y-m-d');
+                                                        $nearExpiryWindows = setting('inventory.near_expiry_alert_days', [90, 60, 30]);
+                                                        $nearThreshold = now()->addDays((int) max(is_array($nearExpiryWindows) ? $nearExpiryWindows : [90]))->format('Y-m-d');
                                                         $bExp = $batch->expiry_date?->format('Y-m-d');
                                                         $isExpired = $bExp && $bExp <= $today;
                                                         $isNear = $bExp && $bExp > $today && $bExp <= $nearThreshold;

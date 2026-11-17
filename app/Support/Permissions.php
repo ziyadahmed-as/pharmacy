@@ -62,7 +62,7 @@ final class Permissions
             'shifts.open' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS, $OW]],
             'shifts.view' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS, $OW]],
             'tills.manage' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $OW]],
-            'sales.sell' => ['module' => 'sales', 'active' => false, 'roles' => [$PM, $PS]],
+            'sales.sell' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS]],
             'sales.void.request' => ['module' => 'sales', 'active' => true, 'roles' => [$PM, $PS]],
             // --- Customers & Prescriptions (Stage 4) ---
             'customers.manage' => ['module' => 'customers', 'active' => true, 'roles' => [$PS, $PM, $OW]],
