@@ -76,6 +76,7 @@
                         <th scope="col" class="px-4 py-3.5 text-left">{{ __('catalogue.barcode') }}</th>
                         <th scope="col" class="px-4 py-3.5 text-right">{{ __('catalogue.sellable_stock') }}</th>
                         <th scope="col" class="px-4 py-3.5 text-right">{{ __('catalogue.quarantine_stock') }}</th>
+                        <th scope="col" class="px-4 py-3.5 text-left">{{ __('catalogue.nearest_expiry') }}</th>
                         <th scope="col" class="px-4 py-3.5 text-right">{{ __('catalogue.reorder_level') }}</th>
                         @if ($canViewCost)
                             <th scope="col" class="px-4 py-3.5 text-right">{{ __('catalogue.valuation') }}</th>
@@ -93,10 +94,23 @@
                                 'has_near_expiry' => false,
                                 'has_expired' => false,
                             ];
-                            $isExpanded = isset($expanded[$p->id]);
-                            $isLow = $p->reorder_level > 0 && $m['total_sellable'] <= $p->reorder_level;
+                            $isExpanded   = isset($expanded[$p->id]);
+                            $isLow        = $p->reorder_level > 0 && $m['total_sellable'] <= $p->reorder_level;
+                            $hasStock     = $m['total_sellable'] > 0;
+                            $minExpiry    = $p->min_expiry ?? null;   // computed column from NearestExpiryQuery sort
+                            // Calculate days_left in blade from the min_expiry string (already in context).
+                            $daysLeft     = $minExpiry ? (int) now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($minExpiry)->startOfDay(), false) : null;
+                            $expiryColour = \App\Services\NearestExpiryQuery::expiryColour($daysLeft);
+                            $colourMap    = [
+                                'green'  => 'bg-emerald-100 text-emerald-800',
+                                'yellow' => 'bg-yellow-100 text-yellow-800',
+                                'orange' => 'bg-orange-100 text-orange-800',
+                                'red'    => 'bg-rose-100 text-rose-700',
+                                'slate'  => 'bg-slate-100 text-slate-500',
+                            ];
+                            $expiryClass = $colourMap[$expiryColour] ?? $colourMap['slate'];
                         @endphp
-                        <tr class="hover:bg-slate-50/70 transition {{ $isLow ? 'bg-amber-50/40' : '' }}">
+                        <tr class="hover:bg-slate-50/70 transition {{ ! $hasStock ? 'opacity-50' : ($isLow ? 'bg-amber-50/40' : '') }}">
                             <td class="px-3 py-3.5 text-center">
                                 @if ($p->batches->isNotEmpty())
                                     <button wire:click="toggleExpand({{ $p->id }})" class="p-1 rounded-md text-slate-400 hover:text-teal-700 hover:bg-slate-100 focus:outline-none transition">
@@ -106,10 +120,12 @@
                                     </button>
                                 @endif
                             </td>
-                            <td class="px-4 py-3.5 font-semibold text-slate-900">
+                            <td class="px-4 py-3.5 font-semibold {{ $hasStock ? 'text-slate-900' : 'text-slate-400' }}">
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ route('catalogue.show', $p) }}" class="text-teal-700 hover:text-teal-900 transition font-bold">{{ $p->brand }}</a>
-                                    @if ($m['has_expired'])
+                                    <a href="{{ route('catalogue.show', $p) }}" class="{{ $hasStock ? 'text-teal-700 hover:text-teal-900' : 'text-slate-400' }} transition font-bold">{{ $p->brand }}</a>
+                                    @if (! $hasStock)
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500">{{ __('catalogue.out_of_stock') }}</span>
+                                    @elseif ($m['has_expired'])
                                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700" title="{{ __('catalogue.filter_expired') }}">🛑 Exp</span>
                                     @elseif ($m['has_near_expiry'])
                                         <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700" title="{{ __('catalogue.filter_near_expiry') }}">⏳ Soon</span>
@@ -121,9 +137,9 @@
                                 <div class="font-mono">{{ $p->barcode ?? '-' }}</div>
                                 <div class="text-slate-400">{{ $p->category?->name ?? '-' }}</div>
                             </td>
-                            <td class="px-4 py-3.5 text-right font-semibold {{ $m['total_sellable'] > 0 ? 'text-slate-900' : 'text-slate-400' }}">
+                            <td class="px-4 py-3.5 text-right font-semibold {{ $hasStock ? 'text-slate-900' : 'text-slate-400' }}">
                                 {{ number_format($m['total_sellable']) }}
-                                @if ($isLow)
+                                @if ($isLow && $hasStock)
                                     <span class="ml-1 text-xs text-amber-600" title="{{ __('catalogue.low_stock_warning') }}">⚠️</span>
                                 @endif
                             </td>
@@ -134,6 +150,19 @@
                                     </span>
                                 @else
                                     <span class="text-slate-300">-</span>
+                                @endif
+                            </td>
+                            {{-- Nearest expiry + days-left badge --}}
+                            <td class="px-4 py-3.5">
+                                @if ($minExpiry && $hasStock)
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-xs font-mono text-slate-700">{{ $minExpiry }}</span>
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold {{ $expiryClass }}">
+                                            {{ $daysLeft !== null ? $daysLeft . 'd' : '-' }}
+                                        </span>
+                                    </div>
+                                @else
+                                    <span class="text-slate-300 text-xs">—</span>
                                 @endif
                             </td>
                             <td class="px-4 py-3.5 text-right text-xs text-slate-500">

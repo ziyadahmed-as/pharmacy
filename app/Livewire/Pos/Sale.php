@@ -17,19 +17,28 @@ use App\Models\Product;
 use App\Models\ProductUnit;
 use App\Services\CurrentShift;
 use App\Services\FefoBatchResolver;
+use App\Services\NearestExpiryQuery;
 use App\Services\PriceResolver;
 use App\Services\SellabilityGuard;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 #[Title('Point of Sale')]
 class Sale extends Component
 {
+    use WithPagination;
+
+    // Pagination for the browse panel uses a named paginator so it doesn't
+    // collide with any other paginated component on the page.
+    protected string $paginationTheme = 'tailwind';
+
     /**
      * Search input for product barcode or name.
      */
@@ -117,6 +126,22 @@ class Sale extends Component
 
     /** @var array<int, array<string, mixed>> */
     public array $customerSearchResults = [];
+
+    // -------------------------------------------------------------------------
+    // Product-browse panel state (UC-13 — nearest-expiry-first grid)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Whether the product-browse panel is open (toggled by the seller).
+     * Defaults to open so sellers see the grid immediately on shift start.
+     */
+    public bool $browseOpen = true;
+
+    /** Free-text filter for the browse panel (name / generic / barcode). */
+    public string $browseSearch = '';
+
+    /** Items per page in the browse panel. */
+    public int $browsePerPage = 20;
 
     /** @var array<int, string> */
     public array $resumeWarnings = [];
@@ -221,6 +246,33 @@ class Sale extends Component
         if ($this->selectedPaymentMethod === 'credit') {
             $this->selectedPaymentMethod = 'cash';
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Browse panel helpers
+    // -------------------------------------------------------------------------
+
+    public function toggleBrowse(): void
+    {
+        $this->browseOpen = ! $this->browseOpen;
+    }
+
+    public function updatedBrowseSearch(): void
+    {
+        $this->resetPage('browsePage');
+    }
+
+    /**
+     * Re-render after a sale completes so quantities in the browse panel
+     * reflect the deducted stock without a full page reload.
+     *
+     * Livewire calls this automatically when the 'browse-refresh' event fires
+     * (dispatched by submitSale after a successful CompleteSale).
+     */
+    #[On('browse-refresh')]
+    public function onBrowseRefresh(): void
+    {
+        // No body needed: the attribute causes Livewire to re-run render().
     }
 
     public function getSelectedCustomerProperty(): ?Customer
@@ -788,6 +840,9 @@ class Sale extends Component
             $this->selectedCustomerId = null;
             $this->idempotencyKey = (string) Str::uuid();
 
+            // Notify the browse panel to re-render so quantities are current.
+            $this->dispatch('browse-refresh');
+
             session()->flash('status', __('sales.sale_completed_successfully', ['receipt' => $sale->receipt_no]));
 
             $this->redirect(route('sales.receipt', ['sale' => $sale->id]), navigate: true);
@@ -798,18 +853,37 @@ class Sale extends Component
 
     public function render(): View
     {
-        $currentShift = CurrentShift::forUser(Auth::user());
-        $heldSales = Auth::user() ? HeldSale::held()->forUser(Auth::user())->latest('id')->get() : collect();
+        $user         = Auth::user();
+        $currentShift = CurrentShift::forUser($user);
+        $heldSales    = $user ? HeldSale::held()->forUser($user)->latest('id')->get() : collect();
+
+        // Browse panel: nearest-expiry-first paginated product list (UC-13).
+        // NearestExpiryQuery never exposes unit_cost or any cost field.
+        $browseQuery = new NearestExpiryQuery(
+            $this->browseSearch !== '' ? ['search' => $this->browseSearch] : []
+        );
+        $browseProducts = $this->browseOpen
+            ? $browseQuery->builder($user)
+                ->with(['latestPrice', 'units'])
+                ->paginate($this->browsePerPage, ['*'], 'browsePage')
+            : collect();
+
+        // Expiry-window thresholds from Settings for colour coding.
+        $rawWindows    = setting('inventory.near_expiry_alert_days', [90, 60, 30]);
+        $expiryWindows = is_array($rawWindows) ? $rawWindows : [90, 60, 30];
+        rsort($expiryWindows);
 
         return view('livewire.pos.sale', [
-            'currentShift' => $currentShift,
-            'activeMethods' => $this->getActivePaymentMethods(),
-            'cartTotalSantim' => $this->getCartTotalSantim(),
-            'totalPaidSantim' => $this->getTotalPaidSantim(),
-            'balanceSantim' => $this->getBalanceSantim(),
-            'heldSales' => $heldSales,
+            'currentShift'   => $currentShift,
+            'activeMethods'  => $this->getActivePaymentMethods(),
+            'cartTotalSantim'=> $this->getCartTotalSantim(),
+            'totalPaidSantim'=> $this->getTotalPaidSantim(),
+            'balanceSantim'  => $this->getBalanceSantim(),
+            'heldSales'      => $heldSales,
             'heldSalesCount' => $heldSales->count(),
-            'selectedCustomer' => $this->selectedCustomer,
+            'selectedCustomer'=> $this->selectedCustomer,
+            'browseProducts' => $browseProducts,
+            'expiryWindows'  => $expiryWindows,
         ]);
     }
 }

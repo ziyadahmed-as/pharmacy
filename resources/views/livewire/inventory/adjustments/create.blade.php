@@ -92,7 +92,7 @@
                         <option value="">-- Choose Batch --</option>
                         @foreach ($this->availableBatches as $b)
                             <option value="{{ $b->id }}">
-                                Batch #{{ $b->batch_no }} | Exp: {{ $b->expiry_date->format('Y-m-d') }} | Sellable: {{ $b->sellableStockQuantity() }} | Cost: {{ number_format($b->unit_cost / 100, 2) }} ETB
+                                Batch #{{ $b->batch_no }} | Exp: {{ $b->expiry_date->format('Y-m-d') }} | Sellable: {{ $b->sellableStockQuantity() }}{{ $canViewCost ? ' | Cost: ' . number_format($b->unit_cost / 100, 2) . ' ETB' : '' }}
                             </option>
                         @endforeach
                     </select>
@@ -110,10 +110,12 @@
                     <span class="text-slate-500 block uppercase font-semibold">Current Stock</span>
                     <span class="text-base font-bold text-slate-900">{{ $this->selectedBatch->sellableStockQuantity() }}</span>
                 </div>
+                @if ($canViewCost)
                 <div>
                     <span class="text-slate-500 block uppercase font-semibold">Unit Cost</span>
                     <span class="text-base font-bold text-slate-900">{{ number_format($this->selectedBatch->unit_cost / 100, 2) }} ETB</span>
                 </div>
+                @endif
                 <div>
                     <span class="text-slate-500 block uppercase font-semibold">Expiry Date</span>
                     <span class="text-base font-bold text-slate-900">{{ $this->selectedBatch->expiry_date->format('M d, Y') }}</span>

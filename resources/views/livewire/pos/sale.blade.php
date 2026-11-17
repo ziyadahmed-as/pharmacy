@@ -163,6 +163,136 @@
                 @endif
             </div>
 
+            {{-- ============================================================ --}}
+            {{-- Product-browse panel: nearest-expiry-first (UC-13)           --}}
+            {{-- ============================================================ --}}
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden" wire:key="browse-panel">
+
+                {{-- Panel header --}}
+                <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <button type="button" wire:click="toggleBrowse"
+                            class="p-1 rounded-md text-slate-400 hover:text-teal-700 hover:bg-slate-100 transition shrink-0">
+                            <svg class="h-4 w-4 transform transition-transform {{ $browseOpen ? 'rotate-90' : '' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-700">{{ __('sales.browse_products') }}</span>
+                        <span class="text-[10px] font-medium text-slate-400">{{ __('sales.sorted_nearest_expiry') }}</span>
+                    </div>
+
+                    @if ($browseOpen)
+                        {{-- Browse search --}}
+                        <div class="relative flex-1 max-w-xs">
+                            <input type="text"
+                                wire:model.live.debounce.300ms="browseSearch"
+                                placeholder="{{ __('sales.browse_search_placeholder') }}"
+                                class="w-full rounded-lg border border-slate-300 py-1.5 pl-7 pr-3 text-xs placeholder:text-slate-400 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 transition">
+                            <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2 text-slate-400">
+                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                @if ($browseOpen && $browseProducts->count() > 0)
+                    {{-- Product grid: 1-col on mobile, 2-col on sm, 3-col on lg --}}
+                    <div class="p-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"
+                         wire:loading.class="opacity-60"
+                         wire:target="browseSearch,browsePage">
+
+                        @foreach ($browseProducts as $bp)
+                            @php
+                                $totalSellable = (int) ($bp->total_sellable ?? 0);
+                                $hasStock      = $totalSellable > 0;
+                                $minExpiry     = $bp->min_expiry ?? null;
+                                $daysLeft      = $minExpiry
+                                    ? (int) now()->startOfDay()->diffInDays(\Carbon\Carbon::parse($minExpiry)->startOfDay(), false)
+                                    : null;
+                                $colour        = \App\Services\NearestExpiryQuery::expiryColour($daysLeft);
+                                $badgeClass    = match ($colour) {
+                                    'green'  => 'bg-emerald-100 text-emerald-800',
+                                    'yellow' => 'bg-yellow-100 text-yellow-800',
+                                    'orange' => 'bg-orange-100 text-orange-800',
+                                    'red'    => 'bg-rose-100 text-rose-700',
+                                    default  => 'bg-slate-100 text-slate-500',
+                                };
+                                $latestPrice = $bp->latestPrice;
+                                $priceEtb    = $latestPrice ? number_format($latestPrice->price / 100, 2) : null;
+                            @endphp
+
+                            <button type="button"
+                                wire:click="{{ $hasStock ? 'addProduct(' . $bp->id . ')' : '' }}"
+                                @disabled(!$hasStock)
+                                class="group relative flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition
+                                    {{ $hasStock
+                                        ? 'border-slate-200 bg-white hover:border-teal-400 hover:bg-teal-50/40 cursor-pointer'
+                                        : 'border-slate-100 bg-slate-50/60 cursor-not-allowed opacity-50' }}">
+
+                                {{-- Thumbnail --}}
+                                <img src="{{ \App\Services\ProductImageService::thumbnailUrl($bp->thumbnail_path ?? null) }}"
+                                     alt="{{ $bp->brand }}"
+                                     class="h-10 w-10 rounded-lg object-cover border border-slate-200 bg-slate-50 shrink-0">
+
+                                <div class="min-w-0 flex-1">
+                                    {{-- Name + classification --}}
+                                    <div class="flex items-center gap-1 flex-wrap">
+                                        <span class="text-xs font-bold text-slate-900 truncate group-hover:text-teal-800">{{ $bp->brand }}</span>
+                                        <span @class([
+                                            'text-[9px] px-1 rounded font-semibold',
+                                            'bg-blue-50 text-blue-700'   => $bp->classification === 'rx',
+                                            'bg-rose-50 text-rose-700'   => $bp->classification === 'controlled',
+                                            'bg-emerald-50 text-emerald-700' => $bp->classification === 'otc',
+                                            'bg-slate-100 text-slate-600' => $bp->classification === 'non_drug',
+                                        ])>{{ strtoupper($bp->classification) }}</span>
+                                    </div>
+
+                                    {{-- Strength --}}
+                                    @if ($bp->strength)
+                                        <div class="text-[10px] text-slate-400 truncate">{{ $bp->strength }} {{ $bp->dosage_form }}</div>
+                                    @endif
+
+                                    {{-- Qty + expiry row --}}
+                                    <div class="mt-1 flex items-center justify-between gap-1 flex-wrap">
+                                        <span class="text-[11px] font-semibold {{ $hasStock ? 'text-slate-700' : 'text-slate-400' }}">
+                                            @if ($hasStock)
+                                                {{ number_format($totalSellable) }} {{ $bp->unit }}
+                                            @else
+                                                {{ __('catalogue.out_of_stock') }}
+                                            @endif
+                                        </span>
+                                        @if ($minExpiry && $hasStock)
+                                            <span class="inline-flex items-center rounded px-1 py-0.5 text-[9px] font-bold {{ $badgeClass }}">
+                                                {{ $minExpiry }} &nbsp; {{ $daysLeft !== null ? $daysLeft . 'd' : '' }}
+                                            </span>
+                                        @endif
+                                    </div>
+
+                                    {{-- Price (selling price only — no cost field ever shown here) --}}
+                                    @if ($priceEtb)
+                                        <div class="mt-0.5 text-[11px] font-bold text-teal-700">{{ $priceEtb }} ETB</div>
+                                    @else
+                                        <div class="mt-0.5 text-[10px] text-slate-400 italic">{{ __('catalogue.no_price_set') }}</div>
+                                    @endif
+                                </div>
+                            </button>
+                        @endforeach
+                    </div>
+
+                    {{-- Pagination --}}
+                    @if ($browseProducts->hasPages())
+                        <div class="px-4 py-2.5 border-t border-slate-100 bg-slate-50/40 text-xs">
+                            {{ $browseProducts->links() }}
+                        </div>
+                    @endif
+
+                @elseif ($browseOpen)
+                    <div class="px-4 py-8 text-center text-xs text-slate-400">
+                        {{ __('sales.no_browse_products') }}
+                    </div>
+                @endif
+            </div>
+
             {{-- Cart Items Table --}}
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                 <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">

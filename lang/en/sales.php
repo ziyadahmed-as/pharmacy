@@ -169,6 +169,12 @@ return [
     'refund_footer_note' => 'Operational Customer Return Receipt · :app',
     'refund_error_locked_day' => 'The accounting day is locked. Use an approved adjustment instead.',
 
+    // Browse panel (UC-13 — nearest-expiry-first product grid)
+    'browse_products' => 'Product Browse',
+    'sorted_nearest_expiry' => '— sorted nearest expiry first',
+    'browse_search_placeholder' => 'Filter by name, generic or barcode…',
+    'no_browse_products' => 'No products match the filter, or no active stock.',
+
     // Sales targets (STEP 2)
     'targets' => [
         'unauthorized' => 'You are not authorized to set sales targets.',

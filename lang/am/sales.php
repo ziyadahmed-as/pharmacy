@@ -104,6 +104,12 @@ return [
     'user_single_shift_notice' => 'ለመቀጠል ወይም ለማስወገድ የተያዘ ሽያጭ ይምረጡ።',
     'payment_method_' => 'የክፍያ ዘዴ',
 
+    // Browse panel (UC-13 — nearest-expiry-first product grid)
+    'browse_products' => 'ምርቶችን ያስሱ',
+    'sorted_nearest_expiry' => '— ቅርብ ማብቂያ ቀን ያላቸው መጀመሪያ',
+    'browse_search_placeholder' => 'በስም፣ አጠቃላይ ወይም ባርኮድ ያጣሩ…',
+    'no_browse_products' => 'ከፍለተራው ጋር የሚስማማ ምርት ወይም ንቁ ክምችት የለም።',
+
     // --- UC-15: ሽያጭ መሰረዝ ---
     'void_sale_title' => 'የሽያጭ መሰረዝ ጥያቄ',
     'void_reason_label' => 'የመሰረዝ ምክንያት',

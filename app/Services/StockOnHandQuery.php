@@ -113,7 +113,44 @@ class StockOnHandQuery
             }
         }
 
-        return $query->orderBy('brand');
+        // Nearest-expiry sort (UC-13, UC-11):
+        //   1. Products with sellable stock first  (has_stock DESC)
+        //   2. Among in-stock: earliest expiry first  (min_expiry ASC, NULLs last)
+        //   3. Tiebreak by brand name  (brand ASC)
+        //
+        // The two correlated sub-queries are intentionally simple; they re-use the
+        // same indexes (idx_batches_expiry_product, idx_bstocks_batch_status_qty)
+        // that NearestExpiryQuery uses, so the planner produces an index-only scan.
+        $today = Carbon::today()->toDateString();
+
+        $minExpirySql = <<<'SQL'
+            SELECT MIN(bne.expiry_date)
+            FROM batches AS bne
+            INNER JOIN batch_stocks AS bsne
+                ON bsne.batch_id = bne.id
+               AND bsne.status   = 'sellable'
+               AND bsne.quantity > 0
+            WHERE bne.product_id  = products.id
+              AND bne.expiry_date > ?
+        SQL;
+
+        $totalSellableSql = <<<'SQL'
+            SELECT COALESCE(SUM(bsts.quantity), 0)
+            FROM batch_stocks AS bsts
+            INNER JOIN batches AS bnts
+                ON bnts.id = bsts.batch_id
+            WHERE bnts.product_id  = products.id
+              AND bnts.expiry_date > ?
+              AND bsts.status      = 'sellable'
+              AND bsts.quantity    > 0
+        SQL;
+
+        $driver = \Illuminate\Support\Facades\DB::connection()->getDriverName();
+        $hasSqlExpr   = "({$totalSellableSql}) > 0";
+        $orderRaw = "({$hasSqlExpr}) DESC, ({$minExpirySql}) ASC, products.brand ASC";
+
+        return $query
+            ->orderByRaw($orderRaw, [$today, $today]);
     }
 
     /**

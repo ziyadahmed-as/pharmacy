@@ -389,4 +389,6 @@ return [
     'category_name_required' => 'የምድብ ስም ማስገባት ግዴታ ነው።',
     'category_name_unique' => 'በዚህ ስም የተመዘገበ ምድብ አስቀድሞ አለ።',
     'batch_status' => 'የባች ሁኔታ',
+    'nearest_expiry' => 'ቅርብ ማብቂያ ቀን',
+    'out_of_stock' => 'ክምችት አልቋል',
 ];

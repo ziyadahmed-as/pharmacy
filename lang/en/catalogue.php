@@ -389,4 +389,6 @@ return [
     'category_name_required' => 'Category name is required.',
     'category_name_unique' => 'A category with this name already exists.',
     'batch_status' => 'Batch Status',
+    'nearest_expiry' => 'Nearest Expiry',
+    'out_of_stock' => 'Out of stock',
 ];

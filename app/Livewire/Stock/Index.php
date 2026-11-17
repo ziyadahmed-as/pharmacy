@@ -89,14 +89,20 @@ class Index extends Component
             $productMetrics[$product->id] = StockOnHandQuery::metrics($product, $canViewCost);
         }
 
+        // Expiry-window thresholds from Settings (default [90,60,30]) — used by blade for colour coding.
+        $rawWindows = setting('inventory.near_expiry_alert_days', [90, 60, 30]);
+        $expiryWindows = is_array($rawWindows) ? $rawWindows : [90, 60, 30];
+        rsort($expiryWindows); // ensure descending: [90, 60, 30]
+
         return view('livewire.stock.index', [
-            'products' => $products,
+            'products'       => $products,
             'productMetrics' => $productMetrics,
-            'categories' => Category::orderBy('name')->get(['id', 'name']),
-            'locations' => StorageLocation::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']),
-            'canViewCost' => $canViewCost,
-            'canExport' => $canViewCost,
-            'exportQuery' => http_build_query($this->filters()),
+            'categories'     => Category::orderBy('name')->get(['id', 'name']),
+            'locations'      => StorageLocation::where('is_active', true)->orderBy('name')->get(['id', 'name', 'code']),
+            'canViewCost'    => $canViewCost,
+            'canExport'      => $canViewCost,
+            'exportQuery'    => http_build_query($this->filters()),
+            'expiryWindows'  => $expiryWindows,   // [90, 60, 30] descending
         ])->layout('layouts.app', ['title' => __('nav.stock_on_hand')]);
     }
 }

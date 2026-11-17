@@ -210,6 +210,10 @@ class Create extends Component
 
     public function render(): View
     {
-        return view('livewire.inventory.adjustments.create');
+        $user = Auth::user();
+
+        return view('livewire.inventory.adjustments.create', [
+            'canViewCost' => $user?->hasPermission('cost.view') ?? false,
+        ]);
     }
 }
