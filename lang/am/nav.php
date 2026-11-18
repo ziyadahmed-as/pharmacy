@@ -18,6 +18,7 @@ return [
     'categories' => 'የምርት ምድቦች',
     'stock_alerts' => 'የክምችት ማስጠንቀቂያዎች እና ማዘዣ',
     'stock_on_hand' => 'በመጋዘን ያለ ክምችት',
+    'expiry_stock' => 'ማብቂያ እና ክምችት',
     'stock_ledger' => 'የክምችት እንቅስቃሴ መዝገብ',
     'quarantine' => 'የተለየ ክምችት',
     'stock_adjustments' => 'የክምችት ማስተካከያዎች',

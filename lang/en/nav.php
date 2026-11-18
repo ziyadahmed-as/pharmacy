@@ -18,6 +18,7 @@ return [
     'categories' => 'Product Categories',
     'stock_alerts' => 'Stock alerts & reorder',
     'stock_on_hand' => 'Stock on hand',
+    'expiry_stock' => 'Expiry & Stock',
     'stock_ledger' => 'Stock ledger',
     'quarantine' => 'Quarantine stock',
     'stock_adjustments' => 'Stock adjustments',
