@@ -35,6 +35,7 @@ class SaleLine extends Model
         'batch_id',
         'quantity',
         'unit_price',
+        'unit_cost',
         'subtotal',
         'is_fefo_override',
         'override_reason',
@@ -45,6 +46,7 @@ class SaleLine extends Model
         return [
             'quantity' => 'integer',
             'unit_price' => 'integer',
+            'unit_cost' => 'integer',
             'subtotal' => 'integer',
             'is_fefo_override' => 'boolean',
         ];

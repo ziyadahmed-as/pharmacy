@@ -228,7 +228,11 @@ class ProcessReturn
                 foreach ($validatedLines as $lineData) {
                     $batch = $lineData['sale_line']->batch;
 
-                    if ($lineData['assessment'] === SaleReturnLine::ASSESSMENT_RESALEABLE) {
+                    // Never add resaleable stock back to an expired batch.
+                    // If the batch has expired since the sale, send to quarantine instead.
+                    $isExpired = $batch->expiry_date && $batch->expiry_date->isPast();
+
+                    if ($lineData['assessment'] === SaleReturnLine::ASSESSMENT_RESALEABLE && ! $isExpired) {
                         StockMovementService::post(
                             batch: $batch,
                             signedQuantity: $lineData['quantity'],
@@ -239,13 +243,20 @@ class ProcessReturn
                             description: "Customer return (resaleable): {$refundNo}"
                         );
                     } else {
+                        // Not resaleable OR batch expired → quarantine
+                        $quarantineReason = $isExpired
+                            ? QuarantineRecord::REASON_EXPIRED
+                            : QuarantineRecord::REASON_DAMAGED;
+
                         $quarantine = QuarantineRecord::create([
                             'batch_id' => $batch->id,
                             'quantity' => $lineData['quantity'],
-                            'reason' => QuarantineRecord::REASON_DAMAGED,
+                            'reason' => $quarantineReason,
                             'status' => QuarantineRecord::STATUS_OPEN,
                             'created_by' => $user->id,
-                            'note' => "Customer return assessed damaged/not resaleable ({$refundNo}): ".($lineData['reason'] ?? 'Customer return'),
+                            'note' => $isExpired
+                                ? "Customer return to expired batch {$batch->batch_no} ({$refundNo}): redirected to quarantine"
+                                : "Customer return assessed damaged/not resaleable ({$refundNo}): ".($lineData['reason'] ?? 'Customer return'),
                         ]);
 
                         StockMovementService::post(
@@ -255,7 +266,9 @@ class ProcessReturn
                             source: $quarantine,
                             user: $user,
                             status: 'quarantine',
-                            description: "Customer return (quarantine): {$refundNo}"
+                            description: $isExpired
+                                ? "Customer return to expired batch (quarantine): {$refundNo}"
+                                : "Customer return (quarantine): {$refundNo}"
                         );
                     }
                 }

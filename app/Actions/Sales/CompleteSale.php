@@ -168,6 +168,14 @@ class CompleteSale
                     $quantityInUnit = max(1, (int) $item['quantity']);
                     $quantityInBaseUnits = $quantityInUnit * $factor;
 
+                    // FR-1.4: loose / split-pack sale only for products flagged loose_allowed.
+                    // Enforced server-side, not only hidden in the UI (BRD: permissions on server).
+                    if ($unit && ! $product->loose_allowed) {
+                        throw new InvalidArgumentException(__('sales.loose_not_allowed', [
+                            'product' => $product->brand,
+                        ]));
+                    }
+
                     // Price resolution
                     $priceRecord = PriceResolver::at($product, $unit);
                     if (! $priceRecord) {
@@ -284,6 +292,8 @@ class CompleteSale
                         'batch_id' => $lineData['batch_id'],
                         'quantity' => $lineData['quantity'],
                         'unit_price' => $lineData['unit_price'],
+                        // Snapshot the batch buying price at the moment of sale (BR-06: OW/PM only in reports).
+                        'unit_cost' => $lineData['batch']->unit_cost,
                         'subtotal' => $lineData['subtotal'],
                         'is_fefo_override' => $lineData['is_fefo_override'],
                         'override_reason' => $lineData['override_reason'],

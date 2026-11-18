@@ -56,6 +56,7 @@ return [
     'empty_cart_error' => 'Cart cannot be empty.',
     'empty_payments_error' => 'Payment tenders cannot be empty.',
     'prescription_required_error' => 'Product ":product" is classified as prescription/controlled and cannot be sold directly without a prescription.',
+    'loose_not_allowed' => 'Product ":product" does not allow loose/split-pack sales. Use the base unit only.',
     'payment_amount_invalid' => 'Payment amount must be greater than zero.',
     'payment_mismatch_error' => 'Payment amount (:paid ETB) does not match sale total (:total ETB).',
     'sale_completed_successfully' => 'Sale completed successfully (Receipt #: :receipt).',

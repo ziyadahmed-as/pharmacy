@@ -56,6 +56,7 @@ return [
     'empty_cart_error' => 'የሽያጭ ቅርጫት ባዶ መሆን አይችልም።',
     'empty_payments_error' => 'የክፍያ ዘዴዎች መመዝገብ አለባቸው።',
     'prescription_required_error' => 'ምርት ":product" የሐኪም ማዘዣ የሚያስፈልገው ስለሆነ ያለ ማዘዣ በቀጥታ መሸጥ አይቻልም።',
+    'loose_not_allowed' => 'ምርት ":product" በነጠላ/በተከፋፈለ ጥቅል መሸጥ አይፈቀድም። ዋናውን መለኪያ ብቻ ይጠቀሙ።',
     'payment_amount_invalid' => 'የክፍያ መጠን ከዜሮ በላይ መሆን አለበት።',
     'payment_mismatch_error' => 'የተከፈለው መጠን (:paid ብር) ከጠቅላላ የሽያጭ ዋጋ (:total ብር) ጋር እኩል አይደለም።',
     'sale_completed_successfully' => 'ሽያጩ በተሳካ ሁኔታ ተጠናቋል (ደረሰኝ ቁጥር: :receipt)።',
