@@ -5,6 +5,7 @@ use App\Http\Controllers\AuditExportController;
 use App\Http\Controllers\CashRevenueExportController;
 use App\Http\Controllers\ControlledDrugExportController;
 use App\Http\Controllers\DailyClosingReportController;
+use App\Http\Controllers\ExpiryStockExportController;
 use App\Http\Controllers\KeepAliveController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LogoutController;
@@ -162,6 +163,10 @@ Route::middleware(['auth', 'account.active'])->group(function () {
             // UC-05: Stock Alerts & Reorder List
             Route::get('/inventory/alerts', AlertsUi\Index::class)->middleware('can:stock.view')->name('inventory.alerts');
             Route::get('/inventory/reorder/export/{format}', [StockExportController::class, 'reorderList'])->whereIn('format', ['csv', 'pdf'])->name('inventory.reorder.export');
+
+            // UC-32 FR-7.7: Expiry & Stock Widget
+            Route::get('/inventory/expiry-stock', App\Livewire\Inventory\ExpiryStockWidget::class)->middleware('can:stock.view')->name('inventory.expiry-stock');
+            Route::get('/inventory/expiry-stock/export/{format}', ExpiryStockExportController::class)->whereIn('format', ['csv', 'pdf', 'excel'])->middleware('can:stock.view')->name('inventory.expiry-stock.export');
 
             // UC-08: Quarantine Stock
             Route::get('/inventory/quarantine', QuarantineUi\Index::class)->middleware('can:stock.view')->name('inventory.quarantine');

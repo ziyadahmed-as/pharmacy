@@ -104,11 +104,25 @@ class Product extends Model
      *
      * @fr FR-1.1
      */
+    /** Cached per-request flag: does batches.status column exist? */
+    private static ?bool $batchStatusColExists = null;
+
     public function totalAvailableQuantity(): int
     {
-        return (int) $this->batches()
-            ->where('expiry_date', '>', now())
-            ->whereIn('batches.status', ['SELLABLE'])
+        // batches.status was added in migration 2026_11_17_000001.
+        // If not yet present (pre-migration), omit the filter so the app never 500s.
+        if (self::$batchStatusColExists === null) {
+            self::$batchStatusColExists = \Illuminate\Support\Facades\Schema::hasColumn('batches', 'status');
+        }
+
+        $query = $this->batches()
+            ->where('expiry_date', '>', now());
+
+        if (self::$batchStatusColExists) {
+            $query->whereIn('batches.status', ['SELLABLE']);
+        }
+
+        return (int) $query
             ->withSum([
                 'stocks as sellable_qty' => fn ($q) => $q->where('batch_stocks.status', 'sellable'),
             ], 'quantity')

@@ -207,6 +207,18 @@ class NearestExpiryQuery
     // Sub-query factories (all return query builder instances; no bindings lost)
     // -------------------------------------------------------------------------
 
+    /** Cached per-request flag: does recall_batches table exist? */
+    private static ?bool $recallTablesExist = null;
+
+    private function recallTablesExist(): bool
+    {
+        if (self::$recallTablesExist === null) {
+            self::$recallTablesExist = \Illuminate\Support\Facades\Schema::hasTable('recall_batches')
+                && \Illuminate\Support\Facades\Schema::hasTable('recalls');
+        }
+        return self::$recallTablesExist;
+    }
+
     /**
      * Sub-query: set of batch IDs that are eligible to sell.
      * Excludes: expired, recalled (via open QuarantineRecord or open RecallBatch).
@@ -215,22 +227,25 @@ class NearestExpiryQuery
     {
         $today = now()->toDateString();
 
-        // Open recalled batch IDs (union of two sources).
         $recalledFromQr = DB::table('quarantine_records')
             ->select('batch_id')
             ->where('status', 'open')
             ->where('reason', 'recalled');
 
-        $recalledFromRb = DB::table('recall_batches')
-            ->select('recall_batches.batch_id')
-            ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
-            ->where('recalls.status', 'open');
-
-        return DB::table('batches')
+        $q = DB::table('batches')
             ->select('batches.id')
             ->where('batches.expiry_date', '>', $today)
-            ->whereNotIn('batches.id', $recalledFromQr)
-            ->whereNotIn('batches.id', $recalledFromRb);
+            ->whereNotIn('batches.id', $recalledFromQr);
+
+        if ($this->recallTablesExist()) {
+            $recalledFromRb = DB::table('recall_batches')
+                ->select('recall_batches.batch_id')
+                ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
+                ->where('recalls.status', 'open');
+            $q->whereNotIn('batches.id', $recalledFromRb);
+        }
+
+        return $q;
     }
 
     /**
@@ -246,17 +261,11 @@ class NearestExpiryQuery
             ->where('status', 'open')
             ->where('reason', 'recalled');
 
-        $recalledFromRb = DB::table('recall_batches')
-            ->select('recall_batches.batch_id')
-            ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
-            ->where('recalls.status', 'open');
-
-        return DB::table('batches as b_exp')
+        $q = DB::table('batches as b_exp')
             ->selectRaw('MIN(b_exp.expiry_date)')
             ->whereColumn('b_exp.product_id', 'products.id')
             ->where('b_exp.expiry_date', '>', $today)
             ->whereNotIn('b_exp.id', $recalledFromQr)
-            ->whereNotIn('b_exp.id', $recalledFromRb)
             ->whereExists(function ($inner) {
                 $inner->select(DB::raw(1))
                     ->from('batch_stocks as bs_exp')
@@ -264,6 +273,16 @@ class NearestExpiryQuery
                     ->where('bs_exp.status', 'sellable')
                     ->where('bs_exp.quantity', '>', 0);
             });
+
+        if ($this->recallTablesExist()) {
+            $recalledFromRb = DB::table('recall_batches')
+                ->select('recall_batches.batch_id')
+                ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
+                ->where('recalls.status', 'open');
+            $q->whereNotIn('b_exp.id', $recalledFromRb);
+        }
+
+        return $q;
     }
 
     /**
@@ -278,20 +297,24 @@ class NearestExpiryQuery
             ->where('status', 'open')
             ->where('reason', 'recalled');
 
-        $recalledFromRb = DB::table('recall_batches')
-            ->select('recall_batches.batch_id')
-            ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
-            ->where('recalls.status', 'open');
-
-        return DB::table('batch_stocks as bs_sum')
+        $q = DB::table('batch_stocks as bs_sum')
             ->selectRaw('COALESCE(SUM(bs_sum.quantity), 0)')
             ->join('batches as b_sum', 'b_sum.id', '=', 'bs_sum.batch_id')
             ->whereColumn('b_sum.product_id', 'products.id')
             ->where('b_sum.expiry_date', '>', $today)
             ->whereNotIn('b_sum.id', $recalledFromQr)
-            ->whereNotIn('b_sum.id', $recalledFromRb)
             ->where('bs_sum.status', 'sellable')
             ->where('bs_sum.quantity', '>', 0);
+
+        if ($this->recallTablesExist()) {
+            $recalledFromRb = DB::table('recall_batches')
+                ->select('recall_batches.batch_id')
+                ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
+                ->where('recalls.status', 'open');
+            $q->whereNotIn('b_sum.id', $recalledFromRb);
+        }
+
+        return $q;
     }
 
     /**

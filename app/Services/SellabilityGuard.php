@@ -71,10 +71,15 @@ class SellabilityGuard
         $isRecalled = QuarantineRecord::where('batch_id', $batch->id)
             ->where('status', QuarantineRecord::STATUS_OPEN)
             ->where('reason', QuarantineRecord::REASON_RECALLED)
-            ->exists()
-            || RecallBatch::where('batch_id', $batch->id)
+            ->exists();
+
+        if (! $isRecalled
+            && \Illuminate\Support\Facades\Schema::hasTable('recall_batches')
+            && \Illuminate\Support\Facades\Schema::hasTable('recalls')) {
+            $isRecalled = RecallBatch::where('batch_id', $batch->id)
                 ->whereHas('recall', fn ($q) => $q->where('status', Recall::STATUS_OPEN))
                 ->exists();
+        }
 
         if ($isRecalled) {
             self::block(

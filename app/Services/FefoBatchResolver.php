@@ -37,13 +37,18 @@ class FefoBatchResolver
         // 1. Recalled batches must not be eligible (via open QuarantineRecord or open RecallBatch)
         $recalledBatchIds = QuarantineRecord::where('status', QuarantineRecord::STATUS_OPEN)
             ->where('reason', QuarantineRecord::REASON_RECALLED)
-            ->pluck('batch_id')
-            ->merge(
+            ->pluck('batch_id');
+
+        // Guard: recall_batches may not exist on a partially-migrated schema.
+        if (\Illuminate\Support\Facades\Schema::hasTable('recall_batches')
+            && \Illuminate\Support\Facades\Schema::hasTable('recalls')) {
+            $recalledBatchIds = $recalledBatchIds->merge(
                 RecallBatch::whereHas('recall', fn ($q) => $q->where('status', Recall::STATUS_OPEN))
                     ->pluck('batch_id')
-            )
-            ->unique()
-            ->all();
+            );
+        }
+
+        $recalledBatchIds = $recalledBatchIds->unique()->all();
 
         return Batch::query()
             ->where('product_id', $product->id)
