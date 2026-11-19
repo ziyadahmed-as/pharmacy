@@ -39,29 +39,10 @@ class BatchStock extends Model
             }
         });
 
-        // After any sellable quantity change, check if the parent batch should
-        // transition to DEPLETED (or back to SELLABLE on a restock / void).
-        static::saved(function (BatchStock $batchStock) {
-            if ($batchStock->status !== 'sellable') {
-                return;  // quarantine rows do not drive the DEPLETED transition
-            }
-
-            $batch = $batchStock->batch;
-            if (! $batch) {
-                return;
-            }
-
-            $totalSellable = (int) BatchStock::where('batch_id', $batch->id)
-                ->where('status', 'sellable')
-                ->sum('quantity');
-
-            if ($totalSellable === 0 && $batch->status === Batch::STATUS_SELLABLE) {
-                Batch::withoutEvents(fn () => $batch->updateQuietly(['status' => Batch::STATUS_DEPLETED]));
-            } elseif ($totalSellable > 0 && $batch->status === Batch::STATUS_DEPLETED) {
-                // Restock / void brought units back — reopen the batch.
-                Batch::withoutEvents(fn () => $batch->updateQuietly(['status' => Batch::STATUS_SELLABLE]));
-            }
-        });
+        // NOTE: The DEPLETED / SELLABLE transition was previously driven here.
+        // It is now driven exclusively by StockService::applyMovement() which
+        // has access to the locked batch row and the new quantity_on_hand value.
+        // This observer is intentionally empty to avoid double-transitions.
     }
 
     public function batch(): BelongsTo

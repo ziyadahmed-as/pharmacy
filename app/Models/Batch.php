@@ -51,6 +51,8 @@ class Batch extends Model
         'registered_by',
         'registered_at',
         'status',
+        'quantity_on_hand',
+        'quarantine_qty',
     ];
 
     protected function casts(): array
@@ -60,6 +62,8 @@ class Batch extends Model
             'expiry_date'        => 'date',
             'unit_cost'          => 'integer',
             'registered_at'      => 'datetime',
+            'quantity_on_hand'   => 'integer',
+            'quarantine_qty'     => 'integer',
         ];
     }
 
@@ -103,17 +107,17 @@ class Batch extends Model
     }
 
     // -------------------------------------------------------------------------
-    // Helpers
+    // Helpers — quantity_on_hand is the SSOT; never sum batch_stocks directly.
     // -------------------------------------------------------------------------
 
     public function sellableStockQuantity(): int
     {
-        return (int) $this->batchStocks()->where('status', 'sellable')->sum('quantity');
+        return (int) $this->quantity_on_hand;
     }
 
     public function quarantineStockQuantity(): int
     {
-        return (int) $this->batchStocks()->where('status', 'quarantine')->sum('quantity');
+        return (int) $this->quarantine_qty;
     }
 
     public function isSellable(): bool

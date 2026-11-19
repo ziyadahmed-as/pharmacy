@@ -48,11 +48,11 @@ class EvaluateStockAlerts extends Command
                     continue;
                 }
 
-                $sellableStock = (int) DB::table('batch_stocks')
-                    ->join('batches', 'batches.id', '=', 'batch_stocks.batch_id')
-                    ->where('batches.product_id', $product->id)
-                    ->where('batch_stocks.status', 'sellable')
-                    ->sum('batch_stocks.quantity');
+                $sellableStock = (int) DB::table('batches')
+                    ->where('product_id', $product->id)
+                    ->where('expiry_date', '>', now()->toDateString())
+                    ->where('status', \App\Models\Batch::STATUS_SELLABLE)
+                    ->sum('quantity_on_hand');
 
                 $minLevel = $product->min_level;
                 $reorderLevel = $product->reorder_level;
@@ -144,7 +144,7 @@ class EvaluateStockAlerts extends Command
                 $expiry = Carbon::parse($batch->expiry_date)->startOfDay();
                 $diffDays = (int) $today->diffInDays($expiry, false);
 
-                $stockQty = (int) $batch->stocks()->sum('quantity');
+                $stockQty = (int) ($batch->quantity_on_hand + $batch->quarantine_qty);
                 if ($stockQty <= 0) {
                     continue;
                 }

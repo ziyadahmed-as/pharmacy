@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Batch;
 use App\Models\Product;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -41,11 +42,12 @@ class ReorderListQuery
         $results = collect();
 
         foreach ($products as $product) {
-            $sellableStock = (int) DB::table('batch_stocks')
-                ->join('batches', 'batches.id', '=', 'batch_stocks.batch_id')
-                ->where('batches.product_id', $product->id)
-                ->where('batch_stocks.status', 'sellable')
-                ->sum('batch_stocks.quantity');
+            // quantity_on_hand is the SSOT: sum across all non-expired SELLABLE batches.
+            $sellableStock = (int) DB::table('batches')
+                ->where('product_id', $product->id)
+                ->where('expiry_date', '>', now()->toDateString())
+                ->where('status', Batch::STATUS_SELLABLE)
+                ->sum('quantity_on_hand');
 
             $reorderLevel = (int) ($product->reorder_level ?? 0);
             $minLevel = $product->min_level > 0 ? (int) $product->min_level : null;
