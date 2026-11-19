@@ -111,13 +111,24 @@ final class StockService
             }
 
             // ----------------------------------------------------------------
-            // 2. Lock batch row for update (concurrency guard)
+            // 2a. Controlled-drug location enforcement
+            // ----------------------------------------------------------------
+            $resolvedLocationId = self::resolveLocation($batch, $stockStatus, $locationId);
+
+            if ($isControlled && $stockStatus === 'sellable') {
+                $location = StorageLocation::find($resolvedLocationId);
+                if (! $location || $location->type !== StorageLocation::TYPE_CONTROLLED_CABINET) {
+                    throw new RuntimeException(__('controlled_drugs.controlled_cabinet_location_required', [
+                        'default' => 'Controlled drug products must be stored in a controlled-cabinet location.',
+                    ]));
+                }
+            }
+
+            // ----------------------------------------------------------------
+            // 2b. Lock batch row for update (concurrency guard)
             // ----------------------------------------------------------------
             $lockedBatch = Batch::lockForUpdate()->findOrFail($batch->id);
 
-            // ----------------------------------------------------------------
-            // 3. Compute new quantity and refuse if it would go negative
-            // ----------------------------------------------------------------
             if ($stockStatus === 'sellable') {
                 $currentQty = (int) $lockedBatch->quantity_on_hand;
                 $newQty     = $currentQty + $signedQuantity;
@@ -140,7 +151,12 @@ final class StockService
             }
 
             // ----------------------------------------------------------------
-            // 4. Update batch quantity columns (the single source of truth)
+            // 2b. Lock batch row for update (concurrency guard)
+            // ----------------------------------------------------------------
+            $lockedBatch = Batch::lockForUpdate()->findOrFail($batch->id);
+
+            // ----------------------------------------------------------------
+            // 3. Compute new quantity and refuse if it would go negative
             // ----------------------------------------------------------------
             if ($stockStatus === 'sellable') {
                 $lockedBatch->quantity_on_hand = $newQty;
@@ -188,22 +204,36 @@ final class StockService
 
             if (! $stockRow) {
                 if ($signedQuantity < 0) {
-                    throw new RuntimeException(__('catalogue.negative_stock_refused'));
+                    // If batch_stocks row doesn't exist but quantity_on_hand > 0,
+                    // create a zero-qty row first (the batch-level qty is already correct).
+                    BatchStock::withoutEvents(fn () => BatchStock::create([
+                        'batch_id'    => $batch->id,
+                        'status'      => $stockStatus,
+                        'location_id' => $resolvedLocationId,
+                        'quantity'    => 0,
+                    ]));
+                    $stockRow = BatchStock::where('batch_id', $batch->id)
+                        ->where('status', $stockStatus)
+                        ->when($resolvedLocationId,
+                            fn ($q) => $q->where('location_id', $resolvedLocationId),
+                            fn ($q) => $q->whereNull('location_id')
+                        )
+                        ->first();
+                } else {
+                    BatchStock::withoutEvents(fn () => BatchStock::create([
+                        'batch_id'    => $batch->id,
+                        'status'      => $stockStatus,
+                        'location_id' => $resolvedLocationId,
+                        'quantity'    => 0,
+                    ]));
+                    $stockRow = BatchStock::where('batch_id', $batch->id)
+                        ->where('status', $stockStatus)
+                        ->when($resolvedLocationId,
+                            fn ($q) => $q->where('location_id', $resolvedLocationId),
+                            fn ($q) => $q->whereNull('location_id')
+                        )
+                        ->first();
                 }
-                // Suppress BatchStock.saved observer to avoid duplicate status transitions
-                BatchStock::withoutEvents(fn () => BatchStock::create([
-                    'batch_id'    => $batch->id,
-                    'status'      => $stockStatus,
-                    'location_id' => $resolvedLocationId,
-                    'quantity'    => 0,
-                ]));
-                $stockRow = BatchStock::where('batch_id', $batch->id)
-                    ->where('status', $stockStatus)
-                    ->when($resolvedLocationId,
-                        fn ($q) => $q->where('location_id', $resolvedLocationId),
-                        fn ($q) => $q->whereNull('location_id')
-                    )
-                    ->first();
             }
 
             $stockRow->quantity = max(0, $stockRow->quantity + $signedQuantity);

@@ -56,6 +56,7 @@ test('staff requests stock adjustment, PM approves, and ledger reflects adjustme
 
     // Initial stock receipt: 50 units
     StockMovementService::post($batch, 50, 'receipt', $product, $pm, 'sellable');
+    $batch->refresh();   // Refresh SSOT columns after stock movement
     expect($batch->sellableStockQuantity())->toBe(50);
 
     // Staff requests adjustment: 10 units damaged (-10 units, cost = 50 ETB, below 1000 ETB threshold)

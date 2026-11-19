@@ -36,6 +36,9 @@ class SellabilityGuard
     ): void {
         $user = $actor ?? Auth::user();
 
+        // Ensure we read the latest SSOT columns from the DB (not a stale model instance)
+        $batch->refresh();
+
         // 1. Inactive product
         if (! $product->is_active) {
             self::block(

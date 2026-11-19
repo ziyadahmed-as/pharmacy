@@ -43,7 +43,6 @@ class QuarantineExpiredBatches extends Command
             $count++;
             $this->info("Quarantined batch {$batch->batch_no} of {$batch->product->brand} ({$sellableQty} units, expired on {$batch->expiry_date->format('Y-m-d')}).");
         }
-        }
 
         $this->info("Successfully quarantined {$count} expired batch(es).");
 

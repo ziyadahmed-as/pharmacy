@@ -26,6 +26,9 @@ class ExpiredBatchQuarantinerService implements ExpiredBatchQuarantiner
         $user = $actor ?? User::systemUser();
         $quarantineReason = $reason ?? QuarantineRecord::REASON_EXPIRED;
 
+        // Refresh to read the latest SSOT value (may have been set by a prior StockService call)
+        $batch->refresh();
+
         // Use SSOT: quantity_on_hand on the batch row
         $sellableQuantity = (int) $batch->quantity_on_hand;
 

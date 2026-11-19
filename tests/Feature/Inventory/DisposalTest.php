@@ -86,6 +86,7 @@ test('PM approval removes stock, writes record and certificate (AC-10)', functio
     StockMovementService::post($batch, 40, 'receipt', $product, $pm, 'sellable');
     $qr = app(QuarantineStock::class)->execute($batch, 25, QuarantineRecord::REASON_EXPIRED, 'Expired batch', $pm);
 
+    $batch->refresh();   // Refresh SSOT columns after stock movements
     expect($batch->quarantineStockQuantity())->toBe(25);
 
     // Staff requests disposal of 20 units
