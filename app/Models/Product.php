@@ -109,25 +109,24 @@ class Product extends Model
 
     public function totalAvailableQuantity(): int
     {
-        // batches.status was added in migration 2026_11_17_000001.
-        // If not yet present (pre-migration), omit the filter so the app never 500s.
+        // Guard: quantity_on_hand added in migration 2026_11_17_000005.
         if (self::$batchStatusColExists === null) {
-            self::$batchStatusColExists = \Illuminate\Support\Facades\Schema::hasColumn('batches', 'status');
+            self::$batchStatusColExists = \Illuminate\Support\Facades\Schema::hasColumn('batches', 'quantity_on_hand');
         }
 
-        $query = $this->batches()
-            ->where('expiry_date', '>', now());
-
-        if (self::$batchStatusColExists) {
-            $query->whereIn('batches.status', ['SELLABLE']);
+        if (! self::$batchStatusColExists) {
+            // Pre-migration fallback: sum batch_stocks (should not happen in production)
+            return (int) $this->batches()
+                ->where('expiry_date', '>', now())
+                ->withSum(['stocks as sq' => fn ($q) => $q->where('status', 'sellable')], 'quantity')
+                ->get()->sum('sq');
         }
 
-        return (int) $query
-            ->withSum([
-                'stocks as sellable_qty' => fn ($q) => $q->where('batch_stocks.status', 'sellable'),
-            ], 'quantity')
-            ->get()
-            ->sum('sellable_qty');
+        // SSOT: sum quantity_on_hand across SELLABLE, non-expired batches only.
+        return (int) $this->batches()
+            ->where('expiry_date', '>', now())
+            ->whereIn('batches.status', ['SELLABLE'])
+            ->sum('quantity_on_hand');
     }
 
     // -------------------------------------------------------------------------

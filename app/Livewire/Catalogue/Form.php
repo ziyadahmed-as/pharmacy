@@ -498,10 +498,8 @@ class Form extends Component
         $existingBatches = collect();
         if ($isEdit) {
             $existingBatches = Batch::where('product_id', $this->productId)
-                ->withSum(['batchStocks as qty_sellable' => fn ($q) => $q->where('status', 'sellable')], 'quantity')
-                ->withSum(['batchStocks as qty_quarantine' => fn ($q) => $q->where('batch_stocks.status', 'quarantine')], 'quantity')
                 ->orderBy('expiry_date')
-                ->get();
+                ->get();   // quantity_on_hand / quarantine_qty are columns on the row
         }
 
         return view('livewire.catalogue.form', [

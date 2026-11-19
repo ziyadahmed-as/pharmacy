@@ -39,10 +39,34 @@ class BatchStock extends Model
             }
         });
 
-        // NOTE: The DEPLETED / SELLABLE transition was previously driven here.
-        // It is now driven exclusively by StockService::applyMovement() which
-        // has access to the locked batch row and the new quantity_on_hand value.
-        // This observer is intentionally empty to avoid double-transitions.
+        // Keep batches.quantity_on_hand / quarantine_qty in sync whenever
+        // batch_stocks rows are written outside StockService (e.g. in tests,
+        // legacy code, or seeding).  StockService suppresses this observer via
+        // Batch::withoutEvents / BatchStock::withoutEvents to avoid double-updates.
+        static::saved(function (BatchStock $batchStock) {
+            $batch = $batchStock->batch;
+            if (! $batch) {
+                return;
+            }
+
+            $sellable   = (int) BatchStock::where('batch_id', $batch->id)
+                ->where('status', 'sellable')->sum('quantity');
+            $quarantine = (int) BatchStock::where('batch_id', $batch->id)
+                ->where('status', 'quarantine')->sum('quantity');
+
+            $newStatus = $batch->status;
+            if ($sellable === 0 && $batch->status === Batch::STATUS_SELLABLE) {
+                $newStatus = Batch::STATUS_DEPLETED;
+            } elseif ($sellable > 0 && $batch->status === Batch::STATUS_DEPLETED) {
+                $newStatus = Batch::STATUS_SELLABLE;
+            }
+
+            Batch::withoutEvents(fn () => $batch->updateQuietly([
+                'quantity_on_hand' => $sellable,
+                'quarantine_qty'   => $quarantine,
+                'status'           => $newStatus,
+            ]));
+        });
     }
 
     public function batch(): BelongsTo

@@ -547,8 +547,8 @@
                                     <span class="{{ $isExp ? 'text-rose-600 font-semibold' : 'text-slate-700' }}">{{ $exp ?? '—' }}</span>
                                     @if ($isExp) <span class="ml-1 text-[10px] bg-rose-100 text-rose-700 px-1 rounded font-bold">EXPIRED</span> @endif
                                 </td>
-                                <td class="px-4 py-2 text-right font-semibold font-mono {{ ((int)$eb->qty_sellable) === 0 ? 'text-slate-400' : 'text-slate-900' }}">
-                                    {{ number_format((int) $eb->qty_sellable) }}
+                                <td class="px-4 py-2 text-right font-semibold font-mono {{ ((int)$eb->quantity_on_hand) === 0 ? 'text-slate-400' : 'text-slate-900' }}">
+                                    {{ number_format((int) $eb->quantity_on_hand) }}
                                 </td>
                                 <td class="px-4 py-2">
                                     @php $bs = $eb->status ?? 'SELLABLE'; @endphp

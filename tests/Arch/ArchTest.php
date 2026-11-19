@@ -101,8 +101,10 @@ it('refuses StockMovement updates and deletes (append-only ledger)', function ()
     expect(fn () => $movement->delete())->toThrow(RuntimeException::class);
 });
 
-it('only allows StockMovementService to write BatchStock across the application', function () {
-    // Scan all PHP files in app/ for direct creation/updating of BatchStock outside of StockMovementService
+it('only allows StockService (and its shim) to write BatchStock across the application', function () {
+    // Scan all PHP files in app/ for direct BatchStock creation/updating
+    // outside of StockService.php, StockMovementService.php (shim),
+    // BatchStock.php (model/observer), and Batch.php.
     $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(app_path()));
     $violators = [];
 
@@ -112,7 +114,10 @@ it('only allows StockMovementService to write BatchStock across the application'
         }
 
         $path = $file->getRealPath();
-        if (str_contains($path, 'StockMovementService.php') || str_contains($path, 'BatchStock.php') || str_contains($path, 'Batch.php')) {
+        if (str_contains($path, 'StockService.php')
+            || str_contains($path, 'StockMovementService.php')
+            || str_contains($path, 'BatchStock.php')
+            || str_contains($path, 'Batch.php')) {
             continue;
         }
 

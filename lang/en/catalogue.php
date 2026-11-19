@@ -434,6 +434,7 @@ return [
     'batch_status' => 'Batch Status',
     'nearest_expiry' => 'Nearest Expiry',
     'out_of_stock' => 'Out of stock',
+    'integrity_mismatch_notification' => ':count batch(es) have quantity_on_hand that does not match the ledger. Run `stock:integrity-check` for details.',
     // Expiry & Stock widget (UC-32, FR-7.7)
     'expiry_stock_widget_title'    => 'Expiry & Stock',
     'expiry_stock_widget_subtitle' => 'All batches sorted by expiry date, quantity remaining, cost and turnover — live after every sale.',

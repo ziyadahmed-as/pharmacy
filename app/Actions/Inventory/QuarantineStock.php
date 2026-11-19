@@ -50,7 +50,9 @@ class QuarantineStock
             ]);
         }
 
-        // Use SSOT: quantity_on_hand on the batch row (never sum batch_stocks directly)
+        // Use SSOT: quantity_on_hand on the batch row (never sum batch_stocks directly).
+        // Refresh the model to ensure we read the latest value (e.g. after a receipt was posted).
+        $batch->refresh();
         $sellableStock = (int) $batch->quantity_on_hand;
 
         if ($sellableStock < $quantity) {

@@ -119,11 +119,10 @@ class SubmitStockReceipt
                 foreach ($data['lines'] as $line) {
                     $prod = Product::find($line['product_id']);
                     if ($prod && $prod->max_level !== null && $prod->max_level > 0) {
-                        $currentSellable = (int) DB::table('batch_stocks')
-                            ->join('batches', 'batches.id', '=', 'batch_stocks.batch_id')
-                            ->where('batches.product_id', $prod->id)
-                            ->where('batch_stocks.status', 'sellable')
-                            ->sum('batch_stocks.quantity');
+                        $currentSellable = (int) \Illuminate\Support\Facades\DB::table('batches')
+                            ->where('product_id', $prod->id)
+                            ->where('status', \App\Models\Batch::STATUS_SELLABLE)
+                            ->sum('quantity_on_hand');   // SSOT
 
                         $resulting = $currentSellable + (int) $line['quantity'];
                         if ($resulting > $prod->max_level) {
