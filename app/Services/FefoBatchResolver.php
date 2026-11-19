@@ -53,14 +53,9 @@ class FefoBatchResolver
         return Batch::query()
             ->where('product_id', $product->id)
             ->where('expiry_date', '>', now())
+            ->where('quantity_on_hand', '>', 0)        // SSOT: sellable qty
+            ->where('status', Batch::STATUS_SELLABLE)
             ->whereNotIn('id', $recalledBatchIds)
-            ->whereHas('batchStocks', function ($q) {
-                $q->where('status', 'sellable')
-                    ->where('quantity', '>', 0);
-            })
-            ->with(['batchStocks' => function ($q) {
-                $q->where('status', 'sellable');
-            }])
             ->orderBy('expiry_date', 'asc')
             ->orderBy('id', 'asc')
             ->get();
@@ -106,7 +101,7 @@ class FefoBatchResolver
             // Guard check
             SellabilityGuard::check($product, $batch, $requestedQuantity, $user, 'sell');
 
-            $availableSellable = (int) $batch->batchStocks->sum('quantity');
+            $availableSellable = (int) $batch->quantity_on_hand;   // SSOT
             if ($availableSellable < $requestedQuantity) {
                 throw new InsufficientStockException(__('sales.insufficient_batch_stock', [
                     'batch' => $batch->batch_no,
@@ -146,7 +141,7 @@ class FefoBatchResolver
         $eligibleBatches = self::getEligibleBatches($product);
         $totalAvailable = 0;
         foreach ($eligibleBatches as $b) {
-            $totalAvailable += (int) $b->batchStocks->sum('quantity');
+            $totalAvailable += (int) $b->quantity_on_hand;   // SSOT
         }
 
         if ($totalAvailable < $requestedQuantity) {
@@ -161,7 +156,7 @@ class FefoBatchResolver
         $remainingNeeded = $requestedQuantity;
 
         foreach ($eligibleBatches as $batch) {
-            $batchSellable = (int) $batch->batchStocks->sum('quantity');
+            $batchSellable = (int) $batch->quantity_on_hand;   // SSOT
             if ($batchSellable <= 0) {
                 continue;
             }

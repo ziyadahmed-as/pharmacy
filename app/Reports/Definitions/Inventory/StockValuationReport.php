@@ -75,7 +75,7 @@ class StockValuationReport extends BaseReportDefinition
             $prodRetail = 0;
 
             foreach ($p->batches as $batch) {
-                $bQty = (int) $batch->batchStocks->sum('quantity');
+                $bQty = (int) $batch->quantity_on_hand;   // SSOT
                 $qty += $bQty;
                 $cost = (int) ($batch->unit_cost ?? 0);
                 $retail = (int) ($p->latestPrice?->selling_price ?? $batch->unit_cost ?? 0);

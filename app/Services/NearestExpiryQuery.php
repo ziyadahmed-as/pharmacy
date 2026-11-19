@@ -251,67 +251,57 @@ class NearestExpiryQuery
     /**
      * Sub-query: MIN(expiry_date) of eligible batches for the outer product.
      * Correlated on batches.product_id = products.id.
+     * Reads quantity_on_hand (SSOT) instead of batch_stocks.
      */
     private function minExpirySub(): QueryBuilder
     {
         $today = now()->toDateString();
 
         $recalledFromQr = DB::table('quarantine_records')
-            ->select('batch_id')
-            ->where('status', 'open')
-            ->where('reason', 'recalled');
+            ->select('batch_id')->where('status', 'open')->where('reason', 'recalled');
 
         $q = DB::table('batches as b_exp')
             ->selectRaw('MIN(b_exp.expiry_date)')
             ->whereColumn('b_exp.product_id', 'products.id')
             ->where('b_exp.expiry_date', '>', $today)
-            ->whereNotIn('b_exp.id', $recalledFromQr)
-            ->whereExists(function ($inner) {
-                $inner->select(DB::raw(1))
-                    ->from('batch_stocks as bs_exp')
-                    ->whereColumn('bs_exp.batch_id', 'b_exp.id')
-                    ->where('bs_exp.status', 'sellable')
-                    ->where('bs_exp.quantity', '>', 0);
-            });
+            ->where('b_exp.status', 'SELLABLE')
+            ->where('b_exp.quantity_on_hand', '>', 0)
+            ->whereNotIn('b_exp.id', $recalledFromQr);
 
         if ($this->recallTablesExist()) {
-            $recalledFromRb = DB::table('recall_batches')
-                ->select('recall_batches.batch_id')
-                ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
-                ->where('recalls.status', 'open');
-            $q->whereNotIn('b_exp.id', $recalledFromRb);
+            $q->whereNotIn('b_exp.id',
+                DB::table('recall_batches')->select('recall_batches.batch_id')
+                    ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
+                    ->where('recalls.status', 'open'));
         }
 
         return $q;
     }
 
     /**
-     * Sub-query: SUM(sellable quantity) across eligible batches for the outer product.
+     * Sub-query: SUM(quantity_on_hand) across eligible batches for the outer product.
+     * Reads quantity_on_hand (SSOT) instead of batch_stocks.
      */
     private function totalSellableSub(): QueryBuilder
     {
         $today = now()->toDateString();
 
         $recalledFromQr = DB::table('quarantine_records')
-            ->select('batch_id')
-            ->where('status', 'open')
-            ->where('reason', 'recalled');
+            ->select('batch_id')->where('status', 'open')->where('reason', 'recalled');
 
-        $q = DB::table('batch_stocks as bs_sum')
-            ->selectRaw('COALESCE(SUM(bs_sum.quantity), 0)')
-            ->join('batches as b_sum', 'b_sum.id', '=', 'bs_sum.batch_id')
+        $q = DB::table('batches as b_sum')
+            ->selectRaw('COALESCE(SUM(b_sum.quantity_on_hand), 0)')
             ->whereColumn('b_sum.product_id', 'products.id')
             ->where('b_sum.expiry_date', '>', $today)
-            ->whereNotIn('b_sum.id', $recalledFromQr)
-            ->where('bs_sum.status', 'sellable')
-            ->where('bs_sum.quantity', '>', 0);
+            ->where('b_sum.status', 'SELLABLE')
+            ->where('b_sum.quantity_on_hand', '>', 0)
+            ->whereNotIn('b_sum.id', $recalledFromQr);
 
         if ($this->recallTablesExist()) {
-            $recalledFromRb = DB::table('recall_batches')
-                ->select('recall_batches.batch_id')
-                ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
-                ->where('recalls.status', 'open');
-            $q->whereNotIn('b_sum.id', $recalledFromRb);
+            $q->whereNotIn('b_sum.id',
+                DB::table('recall_batches')->select('recall_batches.batch_id')
+                    ->join('recalls', 'recalls.id', '=', 'recall_batches.recall_id')
+                    ->where('recalls.status', 'open'));
         }
 
         return $q;

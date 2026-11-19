@@ -205,8 +205,8 @@ class Index extends Component
 
         $records = $query->paginate(15);
 
-        // Aggregate stats
-        $totalQuarantinedQty = (int) BatchStock::where('status', 'quarantine')->sum('quantity');
+        // Aggregate stats — read from SSOT columns on batches
+        $totalQuarantinedQty = (int) \App\Models\Batch::sum('quarantine_qty');
         $openRecordsCount = QuarantineRecord::where('status', QuarantineRecord::STATUS_OPEN)->count();
         $recalledCount = QuarantineRecord::where('status', QuarantineRecord::STATUS_OPEN)
             ->where('reason', QuarantineRecord::REASON_RECALLED)

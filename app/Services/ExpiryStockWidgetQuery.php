@@ -126,74 +126,65 @@ class ExpiryStockWidgetQuery
         $today       = now()->toDateString();
         $windows     = $this->nearExpiryWindows();
 
-        // Sellable batch_stock totals by expiry window
-        $expiring30 = (int) DB::table('batch_stocks as bs')
-            ->join('batches as b', 'b.id', '=', 'bs.batch_id')
-            ->where('bs.status', 'sellable')
-            ->where('bs.quantity', '>', 0)
+        // Sellable batch counts by expiry window — read from SSOT columns on batches
+        $expiring30 = (int) DB::table('batches as b')
+            ->where('b.status', 'SELLABLE')
+            ->where('b.quantity_on_hand', '>', 0)
             ->where('b.expiry_date', '>', $today)
             ->where('b.expiry_date', '<=', now()->addDays(30)->toDateString())
             ->count();
 
-        $expiring60 = (int) DB::table('batch_stocks as bs')
-            ->join('batches as b', 'b.id', '=', 'bs.batch_id')
-            ->where('bs.status', 'sellable')
-            ->where('bs.quantity', '>', 0)
+        $expiring60 = (int) DB::table('batches as b')
+            ->where('b.status', 'SELLABLE')
+            ->where('b.quantity_on_hand', '>', 0)
             ->where('b.expiry_date', '>', $today)
             ->where('b.expiry_date', '<=', now()->addDays(60)->toDateString())
             ->count();
 
-        $expiring90 = (int) DB::table('batch_stocks as bs')
-            ->join('batches as b', 'b.id', '=', 'bs.batch_id')
-            ->where('bs.status', 'sellable')
-            ->where('bs.quantity', '>', 0)
+        $expiring90 = (int) DB::table('batches as b')
+            ->where('b.status', 'SELLABLE')
+            ->where('b.quantity_on_hand', '>', 0)
             ->where('b.expiry_date', '>', $today)
             ->where('b.expiry_date', '<=', now()->addDays(max($windows))->toDateString())
             ->count();
 
-        // Expired + quarantine batches with stock > 0
         $expiredAndQuarantine = (int) DB::table('batches as b')
-            ->join('batch_stocks as bs', 'bs.batch_id', '=', 'b.id')
             ->where(function ($q) use ($today) {
                 $q->where('b.expiry_date', '<=', $today)
-                  ->orWhere('bs.status', 'quarantine');
+                  ->orWhere('b.quarantine_qty', '>', 0);
             })
-            ->where('bs.quantity', '>', 0)
-            ->distinct('b.id')
-            ->count('b.id');
+            ->where(function ($q) {
+                $q->where('b.quantity_on_hand', '>', 0)
+                  ->orWhere('b.quarantine_qty', '>', 0);
+            })
+            ->count();
 
-        // Low stock: products where total sellable qty <= reorder_level
         $lowStock = (int) DB::table('products')
             ->where('is_active', true)
             ->where('reorder_level', '>', 0)
             ->whereRaw('(
-                SELECT COALESCE(SUM(bs2.quantity), 0)
-                FROM batch_stocks bs2
-                INNER JOIN batches b2 ON b2.id = bs2.batch_id
-                WHERE b2.product_id = products.id
-                  AND bs2.status = "sellable"
-                  AND b2.expiry_date > ?
-                  AND bs2.quantity > 0
+                SELECT COALESCE(SUM(blo.quantity_on_hand), 0)
+                FROM batches blo
+                WHERE blo.product_id  = products.id
+                  AND blo.expiry_date > ?
+                  AND blo.status      = "SELLABLE"
             ) <= products.reorder_level', [$today])
             ->count();
 
-        // Sold today (count of sale_line base units)
         $soldToday = (int) DB::table('stock_movements')
             ->where('type', 'sale')
             ->whereDate('created_at', $today)
             ->sum(DB::raw('ABS(quantity)'));
 
-        // Total stock value (OW/PM only)
         $totalStockValue = null;
         if ($canViewCost) {
-            $totalStockValue = (int) DB::table('batch_stocks as bs')
-                ->join('batches as b', 'b.id', '=', 'bs.batch_id')
-                ->where('bs.status', 'sellable')
-                ->where('bs.quantity', '>', 0)
+            $totalStockValue = (int) DB::table('batches as b')
+                ->where('b.status', 'SELLABLE')
+                ->where('b.quantity_on_hand', '>', 0)
                 ->where('b.expiry_date', '>', $today)
                 ->whereNotNull('b.unit_cost')
-                ->selectRaw('COALESCE(SUM(bs.quantity * b.unit_cost), 0)')
-                ->value(DB::raw('COALESCE(SUM(bs.quantity * b.unit_cost), 0)'));
+                ->selectRaw('COALESCE(SUM(b.quantity_on_hand * b.unit_cost), 0)')
+                ->value(DB::raw('COALESCE(SUM(b.quantity_on_hand * b.unit_cost), 0)'));
         }
 
         return [
@@ -264,15 +255,14 @@ class ExpiryStockWidgetQuery
             'p.thumbnail_path',
             'p.reorder_level',
             'cat.name as category_name',
-            DB::raw('COALESCE(SUM(CASE WHEN bs.status = "sellable" THEN bs.quantity ELSE 0 END), 0) as qty_remaining'),
-            DB::raw('COALESCE(SUM(CASE WHEN bs.status = "quarantine" THEN bs.quantity ELSE 0 END), 0) as qty_quarantine'),
+            DB::raw('b.quantity_on_hand as qty_remaining'),       // SSOT
+            DB::raw('b.quarantine_qty   as qty_quarantine'),       // SSOT
         ];
 
         if ($canViewCost) {
             $select[] = 'b.unit_cost';
-            $select[] = DB::raw('COALESCE(SUM(CASE WHEN bs.status = "sellable" THEN bs.quantity ELSE 0 END), 0) * b.unit_cost as stock_value_at_cost');
+            $select[] = DB::raw('b.quantity_on_hand * COALESCE(b.unit_cost, 0) as stock_value_at_cost');   // SSOT
         } else {
-            // Never expose buying price to PP (BR-06).
             $select[] = DB::raw('NULL as unit_cost');
             $select[] = DB::raw('NULL as stock_value_at_cost');
         }
@@ -280,7 +270,6 @@ class ExpiryStockWidgetQuery
         $query = DB::table('batches as b')
             ->join('products as p', 'p.id', '=', 'b.product_id')
             ->leftJoin('categories as cat', 'cat.id', '=', 'p.category_id')
-            ->leftJoin('batch_stocks as bs', 'bs.batch_id', '=', 'b.id')
             ->where('p.is_active', true)
             ->select($select)
             ->selectSub($qtySoldSub, 'qty_sold')
@@ -288,7 +277,8 @@ class ExpiryStockWidgetQuery
             ->groupBy(
                 'b.id', 'b.product_id', 'b.batch_no', 'b.manufacturing_date',
                 'b.expiry_date', 'b.status', 'b.unit_cost', 'b.registered_at',
-                'b.supplier_name', 'p.brand', 'p.generic_name', 'p.strength',
+                'b.supplier_name', 'b.quantity_on_hand', 'b.quarantine_qty',
+                'p.brand', 'p.generic_name', 'p.strength',
                 'p.dosage_form', 'p.unit', 'p.classification', 'p.barcode',
                 'p.thumbnail_path', 'p.reorder_level', 'cat.name'
             );
@@ -378,16 +368,12 @@ class ExpiryStockWidgetQuery
                 break;
 
             case self::SORT_LOWEST_QTY:
-                $query->orderByRaw(
-                    'COALESCE(SUM(CASE WHEN bs.status = "sellable" THEN bs.quantity ELSE 0 END), 0) ASC, p.brand ASC'
-                );
+                $query->orderByRaw('b.quantity_on_hand ASC, p.brand ASC');   // SSOT
                 break;
 
             case self::SORT_HIGHEST_STOCK_VALUE:
                 if ($canViewCost) {
-                    $query->orderByRaw(
-                        'COALESCE(SUM(CASE WHEN bs.status = "sellable" THEN bs.quantity ELSE 0 END), 0) * COALESCE(b.unit_cost, 0) DESC, p.brand ASC'
-                    );
+                    $query->orderByRaw('b.quantity_on_hand * COALESCE(b.unit_cost, 0) DESC, p.brand ASC');
                 } else {
                     $query->orderBy('p.brand');
                 }
@@ -397,11 +383,8 @@ class ExpiryStockWidgetQuery
                 if ($canViewCost) {
                     $alertWindow = max($windows);
                     $windowDate  = now()->addDays($alertWindow)->toDateString();
-                    // potential loss = qty_remaining × unit_cost for batches expiring within the alert window
                     $query->orderByRaw(
-                        'CASE WHEN b.expiry_date <= ? THEN
-                            COALESCE(SUM(CASE WHEN bs.status = "sellable" THEN bs.quantity ELSE 0 END), 0) * COALESCE(b.unit_cost, 0)
-                         ELSE 0 END DESC, p.brand ASC',
+                        'CASE WHEN b.expiry_date <= ? THEN b.quantity_on_hand * COALESCE(b.unit_cost, 0) ELSE 0 END DESC, p.brand ASC',
                         [$windowDate]
                     );
                 } else {

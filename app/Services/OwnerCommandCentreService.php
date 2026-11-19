@@ -975,13 +975,11 @@ class OwnerCommandCentreService
             return 0;
         }
 
-        // Multiply sellable batch stocks by product prices
-        $result = DB::table('batch_stocks')
-            ->join('batches', 'batch_stocks.batch_id', '=', 'batches.id')
-            ->join('products', 'batches.product_id', '=', 'products.id')
-            ->where('batch_stocks.status', 'sellable')
-            ->where('batch_stocks.quantity', '>', 0)
-            ->select(DB::raw('SUM(batch_stocks.quantity * COALESCE(batches.unit_cost, 0)) as total_val'))
+        // Read from SSOT: quantity_on_hand on batches rows
+        $result = DB::table('batches')
+            ->where('status', 'SELLABLE')
+            ->where('quantity_on_hand', '>', 0)
+            ->select(DB::raw('SUM(quantity_on_hand * COALESCE(unit_cost, 0)) as total_val'))
             ->value('total_val');
 
         return (int) ($result ?? 0);
@@ -995,10 +993,11 @@ class OwnerCommandCentreService
 
         return Product::query()
             ->where('is_active', true)
-            ->whereHas('batches.batchStocks', fn ($q) => $q->where('batch_stocks.status', 'sellable'))
-            ->withSum(['batchStocks as sellable_qty' => fn ($q) => $q->where('batch_stocks.status', 'sellable')], 'quantity')
+            ->where('reorder_level', '>', 0)
+            ->withSum(['batches as sellable_qty' => fn ($q) => $q->where('batches.status', 'SELLABLE')
+                ->where('batches.quantity_on_hand', '>', 0)], 'quantity_on_hand')
             ->get()
-            ->filter(fn ($p) => ($p->sellable_qty ?? 0) <= $p->reorder_level)
+            ->filter(fn ($p) => ((int) $p->sellable_qty ?? 0) <= $p->reorder_level)
             ->count();
     }
 

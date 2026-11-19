@@ -129,7 +129,10 @@ class EvaluateStockAlerts extends Command
         // 2. Evaluate Batches (Near Expiry and Expired)
         $batchQuery = Batch::query()
             ->with(['product'])
-            ->whereHas('stocks', fn ($q) => $q->where('quantity', '>', 0));
+            ->where(function ($q) {
+                $q->where('quantity_on_hand', '>', 0)
+                  ->orWhere('quarantine_qty', '>', 0);
+            });
 
         if ($productId) {
             $batchQuery->where('product_id', $productId);

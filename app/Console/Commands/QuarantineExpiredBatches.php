@@ -27,25 +27,22 @@ class QuarantineExpiredBatches extends Command
 
         $batches = Batch::query()
             ->where('expiry_date', '<=', $today)
-            ->whereHas('stocks', function ($q) {
-                $q->where('status', 'sellable')->where('quantity', '>', 0);
-            })
-            ->with(['product', 'stocks' => fn ($q) => $q->where('status', 'sellable')])
+            ->where('quantity_on_hand', '>', 0)   // SSOT: sellable qty on the batch row
+            ->with(['product'])
             ->get();
 
         if ($batches->isEmpty()) {
             $this->info('No expired batches with sellable stock found.');
-
             return Command::SUCCESS;
         }
 
         $count = 0;
         foreach ($batches as $batch) {
-            $sellableQty = (int) $batch->stocks->sum('quantity');
+            $sellableQty = (int) $batch->quantity_on_hand;   // read from SSOT
             $quarantiner->quarantine($batch, $systemUser, 'expired');
             $count++;
-
             $this->info("Quarantined batch {$batch->batch_no} of {$batch->product->brand} ({$sellableQty} units, expired on {$batch->expiry_date->format('Y-m-d')}).");
+        }
         }
 
         $this->info("Successfully quarantined {$count} expired batch(es).");

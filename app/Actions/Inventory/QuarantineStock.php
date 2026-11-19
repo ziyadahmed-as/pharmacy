@@ -50,9 +50,8 @@ class QuarantineStock
             ]);
         }
 
-        $sellableStock = (int) BatchStock::where('batch_id', $batch->id)
-            ->where('status', 'sellable')
-            ->sum('quantity');
+        // Use SSOT: quantity_on_hand on the batch row (never sum batch_stocks directly)
+        $sellableStock = (int) $batch->quantity_on_hand;
 
         if ($sellableStock < $quantity) {
             throw ValidationException::withMessages([

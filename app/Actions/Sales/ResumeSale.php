@@ -113,7 +113,7 @@ class ResumeSale
 
             // 3. Stock, Expiry & Quarantine Re-validation (A1, E1)
             $eligibleBatches = FefoBatchResolver::getEligibleBatches($product);
-            $totalAvailableStock = (int) $eligibleBatches->sum(fn ($b) => $b->batchStocks->sum('quantity'));
+            $totalAvailableStock = (int) $eligibleBatches->sum(fn ($b) => (int) $b->quantity_on_hand);  // SSOT
 
             if ($totalAvailableStock <= 0) {
                 $line['sold_out'] = true;

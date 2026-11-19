@@ -220,11 +220,13 @@ class Form extends Component
             return false;
         }
 
-        // Has any sellable or quarantine BatchStock rows?
-        $hasStock = DB::table('batch_stocks')
-            ->join('batches', 'batches.id', '=', 'batch_stocks.batch_id')
-            ->where('batches.product_id', $this->productId)
-            ->where('batch_stocks.quantity', '>', 0)
+        // Has any sellable stock? Read from SSOT column on batches.
+        $hasStock = DB::table('batches')
+            ->where('product_id', $this->productId)
+            ->where(function ($q) {
+                $q->where('quantity_on_hand', '>', 0)
+                  ->orWhere('quarantine_qty', '>', 0);
+            })
             ->exists();
 
         if ($hasStock) {

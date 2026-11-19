@@ -72,7 +72,7 @@ class ProductMovementReport extends BaseReportDefinition
                 ->whereHas('sale', fn ($q) => $q->where('status', 'completed')->whereDate('completed_at', '>=', $start)->whereDate('completed_at', '<=', $end))
                 ->sum('subtotal');
 
-            $stockOnHand = (int) $p->batches->flatMap->batchStocks->sum('quantity');
+            $stockOnHand = (int) $p->batches->sum('quantity_on_hand');   // SSOT
             $totalUnits += $qtySold;
 
             $velocity = 'Slow / Dormant';

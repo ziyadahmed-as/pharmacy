@@ -26,9 +26,8 @@ class ExpiredBatchQuarantinerService implements ExpiredBatchQuarantiner
         $user = $actor ?? User::systemUser();
         $quarantineReason = $reason ?? QuarantineRecord::REASON_EXPIRED;
 
-        $sellableQuantity = (int) BatchStock::where('batch_id', $batch->id)
-            ->where('status', 'sellable')
-            ->sum('quantity');
+        // Use SSOT: quantity_on_hand on the batch row
+        $sellableQuantity = (int) $batch->quantity_on_hand;
 
         if ($sellableQuantity <= 0) {
             return;

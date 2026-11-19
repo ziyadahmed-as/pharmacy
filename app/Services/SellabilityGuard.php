@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\SellabilityException;
 use App\Models\Batch;
-use App\Models\BatchStock;
 use App\Models\Product;
 use App\Models\QuarantineRecord;
 use App\Models\Recall;
@@ -96,16 +95,11 @@ class SellabilityGuard
             );
         }
 
-        // 4. Quarantined stock or insufficient sellable stock
-        $sellableQty = (int) BatchStock::where('batch_id', $batch->id)
-            ->where('status', 'sellable')
-            ->sum('quantity');
+        // 4. Quarantined stock or insufficient sellable stock — read from SSOT
+        $sellableQty   = (int) $batch->quantity_on_hand;
+        $quarantineQty = (int) $batch->quarantine_qty;
 
         if ($sellableQty < $quantity) {
-            $quarantineQty = (int) BatchStock::where('batch_id', $batch->id)
-                ->where('status', 'quarantine')
-                ->sum('quantity');
-
             $reason = ($quarantineQty > 0 && $sellableQty <= 0) ? 'quarantined_stock' : 'insufficient_sellable_stock';
             $message = ($reason === 'quarantined_stock')
                 ? __('catalogue.sellability_blocked_quarantined', [

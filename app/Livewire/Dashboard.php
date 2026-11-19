@@ -58,7 +58,9 @@ class Dashboard extends Component
             $stats['active_alerts_count'] = Schema::hasTable('stock_alerts') ? StockAlert::where('status', 'active')->count() : 0;
             $stats['critical_alerts_count'] = Schema::hasTable('stock_alerts') ? StockAlert::where('status', 'active')
                 ->whereIn('type', ['critical_stock', 'expired'])->count() : 0;
-            $stats['quarantine_quantity'] = Schema::hasTable('batch_stocks') ? (int) BatchStock::where('status', 'quarantine')->sum('quantity') : 0;
+            $stats['quarantine_quantity'] = Schema::hasTable('batches')
+                ? (int) \App\Models\Batch::sum('quarantine_qty')    // SSOT
+                : 0;
             $stats['pending_receipts_count'] = Schema::hasTable('stock_receipts') ? StockReceipt::where('status', 'pending_confirmation')->count() : 0;
 
             // 2. Active Cash Shift for current user

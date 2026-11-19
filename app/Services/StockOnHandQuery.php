@@ -43,7 +43,7 @@ class StockOnHandQuery
             ->with([
                 'category',
                 'batches' => function ($bQ) use ($batchColumns, $f) {
-                    $bQ->select($batchColumns)
+                    $bQ->select(array_merge($batchColumns, ['quantity_on_hand', 'quarantine_qty', 'status']))
                         ->when(! empty($f['location_id']), fn ($q) => $q->whereHas('stocks', fn ($s) => $s->where('location_id', $f['location_id'])))
                         ->with(['stocks' => function ($sQ) use ($f) {
                             $sQ->select(['id', 'batch_id', 'location_id', 'status', 'quantity'])
@@ -78,36 +78,38 @@ class StockOnHandQuery
         if (! empty($f['filter'])) {
             switch ($f['filter']) {
                 case 'low_stock':
-                    // Products with sellable stock <= reorder_level
-                    $query->where(function (Builder $q) {
-                        $q->whereHas('batches.stocks', function ($sQ) {
-                            $sQ->where('status', 'sellable');
-                        }, '<=', 0)
-                            ->orWhereRaw('(SELECT COALESCE(SUM(bs.quantity), 0) FROM batch_stocks bs INNER JOIN batches b ON b.id = bs.batch_id WHERE b.product_id = products.id AND bs.status = "sellable") <= products.reorder_level');
+                    $query->where(function (Builder $q) use ($today) {
+                        $q->whereRaw('(
+                            SELECT COALESCE(SUM(blo.quantity_on_hand), 0)
+                            FROM batches blo
+                            WHERE blo.product_id  = products.id
+                              AND blo.expiry_date > ?
+                              AND blo.status       = "SELLABLE"
+                        ) <= products.reorder_level', [$today]);
                     });
                     break;
 
                 case 'near_expiry':
-                    // Batches expiring within the threshold but not yet expired
                     $query->whereHas('batches', function ($bQ) use ($today, $nearExpiryThreshold) {
                         $bQ->where('expiry_date', '>', $today)
                             ->where('expiry_date', '<=', $nearExpiryThreshold)
-                            ->whereHas('stocks', fn ($sQ) => $sQ->where('quantity', '>', 0));
+                            ->where('quantity_on_hand', '>', 0);    // SSOT
                     });
                     break;
 
                 case 'expired':
-                    // Batches that have reached or passed expiry
                     $query->whereHas('batches', function ($bQ) use ($today) {
                         $bQ->where('expiry_date', '<=', $today)
-                            ->whereHas('stocks', fn ($sQ) => $sQ->where('quantity', '>', 0));
+                            ->where(function ($q) {
+                                $q->where('quantity_on_hand', '>', 0)
+                                  ->orWhere('quarantine_qty', '>', 0);
+                            });
                     });
                     break;
 
                 case 'quarantine':
-                    // Has stock in quarantine
-                    $query->whereHas('batches.stocks', function ($sQ) {
-                        $sQ->where('status', 'quarantine')->where('quantity', '>', 0);
+                    $query->whereHas('batches', function ($bQ) {
+                        $bQ->where('quarantine_qty', '>', 0);    // SSOT
                     });
                     break;
             }
@@ -126,23 +128,19 @@ class StockOnHandQuery
         $minExpirySql = <<<'SQL'
             SELECT MIN(bne.expiry_date)
             FROM batches AS bne
-            INNER JOIN batch_stocks AS bsne
-                ON bsne.batch_id = bne.id
-               AND bsne.status   = 'sellable'
-               AND bsne.quantity > 0
             WHERE bne.product_id  = products.id
               AND bne.expiry_date > ?
+              AND bne.status      = 'SELLABLE'
+              AND bne.quantity_on_hand > 0
         SQL;
 
         $totalSellableSql = <<<'SQL'
-            SELECT COALESCE(SUM(bsts.quantity), 0)
-            FROM batch_stocks AS bsts
-            INNER JOIN batches AS bnts
-                ON bnts.id = bsts.batch_id
+            SELECT COALESCE(SUM(bnts.quantity_on_hand), 0)
+            FROM batches AS bnts
             WHERE bnts.product_id  = products.id
               AND bnts.expiry_date > ?
-              AND bsts.status      = 'sellable'
-              AND bsts.quantity    > 0
+              AND bnts.status      = 'SELLABLE'
+              AND bnts.quantity_on_hand > 0
         SQL;
 
         $driver = \Illuminate\Support\Facades\DB::connection()->getDriverName();
@@ -179,18 +177,14 @@ class StockOnHandQuery
         $hasExpired = false;
 
         foreach ($product->batches as $batch) {
-            $batchQty = 0;
             $exp = $batch->expiry_date?->format('Y-m-d');
 
-            foreach ($batch->stocks as $stock) {
-                if ($stock->status === 'sellable') {
-                    $totalSellable += $stock->quantity;
-                    $batchQty += $stock->quantity;
-                } elseif ($stock->status === 'quarantine') {
-                    $totalQuarantine += $stock->quantity;
-                    $batchQty += $stock->quantity;
-                }
-            }
+            $batchSellable   = (int) $batch->quantity_on_hand;   // SSOT
+            $batchQuarantine = (int) $batch->quarantine_qty;     // SSOT
+            $batchQty        = $batchSellable + $batchQuarantine;
+
+            $totalSellable   += $batchSellable;
+            $totalQuarantine += $batchQuarantine;
 
             if ($batchQty > 0 && $exp) {
                 if ($exp <= $today) {
@@ -201,8 +195,7 @@ class StockOnHandQuery
             }
 
             if ($canViewCost && $batch->unit_cost !== null) {
-                $batchSellableQty = $batch->stocks->where('status', 'sellable')->sum('quantity');
-                $totalValuation += (int) ($batchSellableQty * $batch->unit_cost);
+                $totalValuation += (int) ($batchSellable * $batch->unit_cost);
             }
         }
 

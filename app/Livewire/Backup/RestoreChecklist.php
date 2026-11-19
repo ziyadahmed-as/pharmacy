@@ -30,8 +30,8 @@ class RestoreChecklist extends Component
     {
         $productCount = Product::count();
         $batchCount = Batch::count();
-        $totalStockValue = Batch::with('batchStocks')->get()->sum(function ($batch) {
-            return $batch->sellableStockQuantity() * ($batch->unit_cost ?? 0);
+        $totalStockValue = Batch::get()->sum(function ($batch) {
+            return $batch->sellableStockQuantity() * ($batch->unit_cost ?? 0);   // SSOT via model method
         });
 
         $pendingPrescriptions = Prescription::where('status', 'pending_verification')->count();

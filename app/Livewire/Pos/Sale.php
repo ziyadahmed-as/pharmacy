@@ -305,7 +305,7 @@ class Sale extends Component
 
         $this->searchResults = $products->map(function (Product $product) {
             $eligibleBatches = FefoBatchResolver::getEligibleBatches($product);
-            $totalStock = $eligibleBatches->sum(fn ($b) => $b->batchStocks->sum('quantity'));
+            $totalStock = $eligibleBatches->sum(fn ($b) => (int) $b->quantity_on_hand);   // SSOT
             $earliest = $eligibleBatches->first();
             $basePrice = PriceResolver::at($product, null);
 
@@ -397,7 +397,7 @@ class Sale extends Component
                 'id' => $b->id,
                 'batch_no' => $b->batch_no,
                 'expiry' => $b->expiry_date?->format('Y-m-d') ?? '-',
-                'stock' => (int) $b->batchStocks->sum('quantity'),
+                'stock' => (int) $b->quantity_on_hand,   // SSOT
             ];
         })->all();
 
