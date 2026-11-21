@@ -62,15 +62,18 @@ final class Navigation
                 ['label' => 'nav.open_shift', 'route' => 'shifts.open', 'any' => ['shifts.open']],
                 ['label' => 'nav.tills', 'route' => 'tills.index', 'any' => ['tills.manage']],
             ]],
-            // Job Group 2: Stock
-            ['key' => 'stock', 'label' => 'nav.job.stock', 'items' => [
+            // Job Group 2a: Product Management
+            ['key' => 'products', 'label' => 'nav.job.products', 'items' => [
                 ['label' => 'nav.catalogue', 'route' => 'catalogue.index', 'any' => ['catalogue.view']],
                 ['label' => 'nav.categories', 'route' => 'catalogue.categories', 'any' => ['catalogue.manage']],
-                ['label' => 'nav.stock_alerts', 'route' => 'inventory.alerts', 'any' => ['stock.view']],
+            ]],
+            // Job Group 2b: Stock Management
+            ['key' => 'stock', 'label' => 'nav.job.stock', 'items' => [
+                ['label' => 'nav.receive_stock', 'route' => 'inventory.receive', 'any' => ['stock.receive']],
                 ['label' => 'nav.stock_on_hand', 'route' => 'inventory.stock', 'any' => ['stock.view']],
                 ['label' => 'nav.expiry_stock', 'route' => 'inventory.expiry-stock', 'any' => ['stock.view']],
+                ['label' => 'nav.stock_alerts', 'route' => 'inventory.alerts', 'any' => ['stock.view']],
                 ['label' => 'nav.stock_ledger', 'route' => 'inventory.ledger', 'any' => ['stock.view']],
-                ['label' => 'nav.receive_stock', 'route' => 'inventory.receive', 'any' => ['stock.receive']],
                 ['label' => 'nav.quarantine', 'route' => 'inventory.quarantine', 'any' => ['stock.view']],
                 ['label' => 'nav.stock_adjustments', 'route' => 'inventory.adjustments.index', 'any' => ['stock.adjust.request']],
                 ['label' => 'nav.stocktakes', 'route' => 'inventory.stocktakes.index', 'any' => ['stock.stocktake']],

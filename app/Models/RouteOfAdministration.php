@@ -21,6 +21,8 @@ class RouteOfAdministration extends Model
 {
     use HasFactory;
 
+    protected $table = 'routes_of_administration';
+
     protected $fillable = [
         'name',
         'abbreviation',

@@ -49,15 +49,15 @@ it('displays Categories link in navigation for Owner and PM, but not Staff', fun
     $staff = ps();
 
     actAs($ownerUser, RoleEnum::Owner);
-    $ownerNav = collect(Navigation::forUser($ownerUser))->firstWhere('key', 'stock');
+    $ownerNav = collect(Navigation::forUser($ownerUser))->firstWhere('key', 'products');
     expect(collect($ownerNav['items'])->pluck('route'))->toContain('catalogue.categories');
 
     actAs($pmUser, RoleEnum::PharmacyManager);
-    $pmNav = collect(Navigation::forUser($pmUser))->firstWhere('key', 'stock');
+    $pmNav = collect(Navigation::forUser($pmUser))->firstWhere('key', 'products');
     expect(collect($pmNav['items'])->pluck('route'))->toContain('catalogue.categories');
 
     actAs($staff, RoleEnum::PharmacyStaff);
-    $staffNav = collect(Navigation::forUser($staff))->firstWhere('key', 'stock');
+    $staffNav = collect(Navigation::forUser($staff))->firstWhere('key', 'products');
     expect(collect($staffNav['items'])->pluck('route'))->not->toContain('catalogue.categories');
 });
 

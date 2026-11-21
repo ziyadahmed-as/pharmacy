@@ -43,7 +43,8 @@ return [
     'credits' => 'Credit Accounts',
     'job' => [
         'sell' => 'Sell',
-        'stock' => 'Stock',
+        'stock' => 'Stock Management',
+        'products' => 'Product Management',
         'customers_prescriptions' => 'Customers & Prescriptions',
         'money' => 'Money',
         'staff' => 'Staff',
@@ -52,7 +53,8 @@ return [
     ],
     'group' => [
         'sell' => 'Sell',
-        'stock' => 'Stock',
+        'stock' => 'Stock Management',
+        'products' => 'Product Management',
         'customers_prescriptions' => 'Customers & Prescriptions',
         'money' => 'Money',
         'staff' => 'Staff',

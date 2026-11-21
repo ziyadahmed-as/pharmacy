@@ -43,7 +43,8 @@ return [
     'credits' => 'የብድር ሂሳቦች',
     'job' => [
         'sell' => 'ሽያጭ',
-        'stock' => 'ክምችት',
+        'stock' => 'የክምችት አስተዳደር',
+        'products' => 'የምርት አስተዳደር',
         'customers_prescriptions' => 'ደንበኞች እና ማዘዣዎች',
         'money' => 'ፋይናንስ (ገንዘብ)',
         'staff' => 'ሠራተኞች',
@@ -52,7 +53,8 @@ return [
     ],
     'group' => [
         'sell' => 'ሽያጭ',
-        'stock' => 'ክምችት',
+        'stock' => 'የክምችት አስተዳደር',
+        'products' => 'የምርት አስተዳደር',
         'customers_prescriptions' => 'ደንበኞች እና ማዘዣዎች',
         'money' => 'ፋይናንስ (ገንዘብ)',
         'staff' => 'ሠራተኞች',
