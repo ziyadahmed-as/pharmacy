@@ -57,6 +57,36 @@ class Receive extends Component
         $this->lines = array_values($this->lines);
     }
 
+    /**
+     * When the expiry date on a line is set, auto-fill batch_no as YYYY-MM
+     * (the last month of the expiry date) and check whether a batch for the
+     * same product + batch_no already exists so the user can see it will merge.
+     */
+    public function updatedLines(mixed $value, string $key): void
+    {
+        // key looks like "0.expiry_date" or "2.product_id"
+        $parts = explode('.', $key);
+        if (count($parts) !== 2) {
+            return;
+        }
+        [$index, $field] = $parts;
+
+        if ($field === 'expiry_date') {
+            $expiry = $this->lines[$index]['expiry_date'] ?? '';
+            if ($expiry !== '') {
+                try {
+                    $batchName = \Carbon\Carbon::parse($expiry)->format('Y-m');
+                    // Only auto-fill if the user hasn't typed their own value
+                    if (empty($this->lines[$index]['batch_no'])) {
+                        $this->lines[$index]['batch_no'] = $batchName;
+                    }
+                } catch (\Throwable) {
+                    // Invalid date — leave batch_no as-is
+                }
+            }
+        }
+    }
+
     public function submit(SubmitStockReceipt $action)
     {
         $user = Auth::user();

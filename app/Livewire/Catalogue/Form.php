@@ -275,7 +275,17 @@ class Form extends Component
 
     public function updatedBatchNo():          void { $this->batchStarted = $this->anyBatchFieldFilled(); }
     public function updatedBatchMfgDate():     void { $this->batchStarted = $this->anyBatchFieldFilled(); }
-    public function updatedBatchExpiryDate():  void { $this->batchStarted = $this->anyBatchFieldFilled(); }
+    public function updatedBatchExpiryDate():  void {
+        $this->batchStarted = $this->anyBatchFieldFilled();
+        // Auto-fill batch_no from YYYY-MM of expiry date if the user hasn't set one
+        if ($this->batchExpiryDate !== '' && $this->batchNo === '') {
+            try {
+                $this->batchNo = \Carbon\Carbon::parse($this->batchExpiryDate)->format('Y-m');
+            } catch (\Throwable) {
+                // Invalid date — leave as-is
+            }
+        }
+    }
     public function updatedBatchBuyingPrice(): void { $this->batchStarted = $this->anyBatchFieldFilled(); }
     public function updatedBatchQuantity():    void { $this->batchStarted = $this->anyBatchFieldFilled(); }
 
