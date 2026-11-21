@@ -609,7 +609,7 @@ test('add product form renders all 8 sections for PM', function () {
         ->assertSee(__('catalogue.stock_levels'))
         ->assertSee(__('catalogue.alternative_units'))
         ->assertSee(__('catalogue.image'))
-        ->assertSee(__('catalogue.first_batch_section_title'));
+        ->assertSee(__('catalogue.receive_stock_cta_title'));
 });
 
 test('edit product form shows batch table, not first-batch section', function () {

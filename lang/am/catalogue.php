@@ -568,4 +568,32 @@ return [
     'contraindications_placeholder'   => 'ይህ መድኃኒት ጥቅም ላይ ሊውል የማይችልበት ሁኔታ ወይም መድኃኒቶች።',
     'side_effects_placeholder'        => 'ተለምዶ እና ከባድ ምላሾች።',
     'interactions_placeholder'        => 'መድኃኒት-መድኃኒት፣ መድኃኒት-ምግብ ወይም መድኃኒት-ሕመም ውህደቶች።',
+
+    // ── Task 4: Receive Stock form & CTA ────────────────────────────────────
+    'receive_stock_cta_title'         => 'የመክፈቻ ክምችት ያስመዝግቡ',
+    'receive_stock_cta_body'          => 'ይህን መድኃኒት ቀደም ብለው ያስቀምጡ፣ ከዚያ ክምችት ተቀበል ቅጽን ተጠቅመው የመጀመሪያውን ባች፣ የመግዣ ዋጋ፣ አቅራቢ እና የመክፈቻ ብዛት ያስቀምጡ።',
+    'receive_stock_cta_button'        => 'ወደ ክምችት ተቀበል ሂድ',
+
+    'receipt_delivery_info'           => 'የልጥፍ እና የግዥ መረጃ',
+    'receipt_delivery_info_sub'       => 'አቅራቢ፣ ደረሰኝ ቁጥር፣ የማድረሻ ማስታወሻ፣ እና የመቀበያ ቀን።',
+    'receipt_items_sub'               => 'በባች አንድ ረድፍ። ተመሳሳይ ማብቂያ ወር ያላቸው ምርቶች አንድ ባች ሊጋሩ ይችላሉ።',
+    'receipt_errors_title'            => 'እባክዎ ከዚህ በታች ያሉ ስህተቶችን ያስተካክሉ:',
+    'receipt_line'                    => 'መስመር',
+    'receipt_date'                    => 'የመቀበያ ቀን',
+    'receipt_notes'                   => 'ማስታወሻዎች',
+    'receipt_notes_placeholder'       => 'አማራጭ — ልዩ መመሪያዎች፣ አስተያየቶች ወይም ማጣቀሻዎች።',
+
+    'purchase_invoice_no'             => 'የግዥ ደረሰኝ ቁጥር',
+    'invoice_placeholder'             => 'ለምሳሌ፦ INV-2026-0042',
+    'delivery_note_placeholder'       => 'ለምሳሌ፦ DN-2026-0042',
+    'supplier_placeholder'            => 'ለምሳሌ፦ EPSS፣ Medtech Ethiopia፣ አካባቢያዊ አከፋፋይ',
+
+    'total_cost'                      => 'ጠቅላላ ዋጋ',
+    'line_notes'                      => 'የመስመር ማስታወሻ',
+    'line_notes_placeholder'          => 'ለምሳሌ፦ ቀዝቃዛ ሰንሰለት ተረጋግጧል፣ ከፊል ልጥፍ',
+    'location_default'                => 'ነባሪ / ዋና መጋዘን',
+    'override_shelf_life_reason'      => 'የተሻር ምክንያት',
+
+    'total_purchase_cost'             => 'ጠቅላላ የግዥ ዋጋ',
+    'total_purchase_cost_note'        => 'የሁሉም ቁጥሮች × ዋጋ ድምር። ትክክለኛ የክምችት ሚዛን ከማረጋገጫ በኋላ ይዘምናል።',
 ];

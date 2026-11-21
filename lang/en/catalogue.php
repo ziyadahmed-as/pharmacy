@@ -684,4 +684,37 @@ return [
     'contraindications_placeholder'   => 'Conditions or drugs for which this medicine should not be used.',
     'side_effects_placeholder'        => 'Common and serious adverse effects.',
     'interactions_placeholder'        => 'Drug-drug, drug-food, or drug-disease interactions.',
+
+    // ── Task 4: Receive Stock form & CTA ────────────────────────────────────
+    // CTA on New Medicine form
+    'receive_stock_cta_title'         => 'Register Opening Stock',
+    'receive_stock_cta_body'          => 'Save this medicine first, then use the Receive Stock form to record the first batch, buying price, supplier, and opening quantity.',
+    'receive_stock_cta_button'        => 'Go to Receive Stock',
+
+    // Receive form sections
+    'receipt_delivery_info'           => 'Delivery & Purchase Information',
+    'receipt_delivery_info_sub'       => 'Supplier, invoice reference, delivery note, and receipt date.',
+    'receipt_items_sub'               => 'One line per batch. Products with the same expiry month share one batch automatically.',
+    'receipt_errors_title'            => 'Please correct the errors below:',
+    'receipt_line'                    => 'Line',
+    'receipt_date'                    => 'Receipt Date',
+    'receipt_notes'                   => 'Notes',
+    'receipt_notes_placeholder'       => 'Optional — special instructions, comments, or references.',
+
+    // Purchase fields
+    'purchase_invoice_no'             => 'Purchase Invoice No.',
+    'invoice_placeholder'             => 'e.g. INV-2026-0042',
+    'delivery_note_placeholder'       => 'e.g. DN-2026-0042',
+    'supplier_placeholder'            => 'e.g. EPSS, Medtech Ethiopia, local distributor',
+
+    // Line fields
+    'total_cost'                      => 'Total Cost',
+    'line_notes'                      => 'Line Notes',
+    'line_notes_placeholder'          => 'e.g. Cold-chain confirmed, partial delivery',
+    'location_default'                => 'Default / Main Store',
+    'override_shelf_life_reason'      => 'Override Reason',
+
+    // Purchase summary
+    'total_purchase_cost'             => 'Total Purchase Cost',
+    'total_purchase_cost_note'        => 'Sum of all line quantities × unit costs. Actual stock balance updates after confirmation.',
 ];

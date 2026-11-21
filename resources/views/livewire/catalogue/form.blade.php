@@ -816,89 +816,30 @@
         @endif
 
         {{-- ================================================================ --}}
-        {{-- SECTION 9a — First Batch  (Add screen only)                      --}}
+        {{-- POST-REGISTRATION — Receive Opening Stock CTA                    --}}
+        {{-- (shown on Add screen in place of the removed first-batch section) --}}
         {{-- ================================================================ --}}
         @if (! $isEdit)
-        <div class="rounded-2xl border {{ $batchStarted ? 'border-teal-300 ring-1 ring-teal-200' : 'border-slate-200' }} bg-white p-6 shadow-sm space-y-5 transition">
-            <div class="{{ $hdr }}">
-                <svg class="{{ $ico }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
-                <div>
-                    <h3 class="{{ $ttl }}">
-                        {{ __('catalogue.first_batch_section_title') }}
-                        @if ($batchStarted)
-                            <span class="ml-1 text-teal-600 font-normal text-xs">({{ __('catalogue.required_fields_active') }})</span>
-                        @endif
-                    </h3>
-                    <p class="text-xs text-slate-400 font-normal mt-0.5">{{ __('catalogue.first_batch_section_subtitle') }}</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                {{-- Batch Number --}}
-                <div>
-                    <label class="{{ $lbl }}">{{ __('catalogue.batch_no') }} @if($batchStarted)<span class="text-rose-500">*</span>@endif</label>
-                    <input type="text" wire:model="batchNo" class="{{ $inp }} font-mono"
-                           placeholder="{{ __('catalogue.batch_no_auto_hint') }}">
-                    <p class="mt-0.5 text-[10px] text-slate-400">{{ __('catalogue.batch_no_auto_note') }}</p>
-                    @error('batchNo') <span class="{{ $err }}">{{ $message }}</span> @enderror
-                </div>
-                {{-- Quantity --}}
-                <div>
-                    <label class="{{ $lbl }}">{{ __('catalogue.quantity') }} @if($batchStarted)<span class="text-rose-500">*</span>@endif</label>
-                    <input type="number" wire:model="batchQuantity" min="1" class="{{ $inp }}">
-                    @error('batchQuantity') <span class="{{ $err }}">{{ $message }}</span> @enderror
-                </div>
-                {{-- Mfg Date --}}
-                <div>
-                    <label class="{{ $lbl }}">{{ __('catalogue.mfg_date') }} @if($batchStarted)<span class="text-rose-500">*</span>@endif</label>
-                    <input type="date" wire:model.live="batchMfgDate" class="{{ $inp }}">
-                    @error('batchMfgDate') <span class="{{ $err }}">{{ $message }}</span> @enderror
-                </div>
-                {{-- Expiry Date --}}
-                <div>
-                    <label class="{{ $lbl }}">{{ __('catalogue.expiry_date') }} @if($batchStarted)<span class="text-rose-500">*</span>@endif</label>
-                    <input type="date" wire:model.live="batchExpiryDate" class="{{ $inp }}">
-                    @error('batchExpiryDate') <span class="{{ $err }}">{{ $message }}</span> @enderror
-                </div>
-                {{-- Buying Price --}}
-                <div>
-                    <label class="{{ $lbl }}">{{ __('catalogue.buying_price') }} @if($batchStarted)<span class="text-rose-500">*</span>@endif</label>
-                    <div class="mt-1 relative">
-                        <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 text-xs font-semibold pointer-events-none">ETB</span>
-                        <input type="number" step="0.01" min="0.01" wire:model.live="batchBuyingPrice"
-                               placeholder="0.00" class="{{ $inp }} pl-10">
+        <div class="rounded-2xl border border-teal-200 bg-teal-50/60 p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-700">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                        </svg>
                     </div>
-                    @error('batchBuyingPrice') <span class="{{ $err }}">{{ $message }}</span> @enderror
-                </div>
-                {{-- Est. Profit --}}
-                <div>
-                    <label class="{{ $lbl }}">{{ __('catalogue.profit_per_unit') }}</label>
-                    @php
-                        $sp = $sellingPrice !== '' ? (float) $sellingPrice : 0;
-                        $bp = $batchBuyingPrice !== '' ? (float) $batchBuyingPrice : 0;
-                        $profit = $sp - $bp;
-                    @endphp
-                    <div class="mt-1 h-10 flex items-center px-3 rounded-xl bg-slate-50 border border-slate-200 text-sm font-mono font-semibold
-                        {{ $profit > 0 ? 'text-emerald-700' : ($profit < 0 ? 'text-rose-600' : 'text-slate-400') }}">
-                        @if ($sp > 0 && $bp > 0)
-                            {{ $profit >= 0 ? '+' : '' }}{{ number_format($profit, 2) }} ETB
-                        @else
-                            —
-                        @endif
+                    <div>
+                        <p class="text-sm font-bold text-teal-900">{{ __('catalogue.receive_stock_cta_title') }}</p>
+                        <p class="mt-0.5 text-xs text-teal-700">{{ __('catalogue.receive_stock_cta_body') }}</p>
                     </div>
                 </div>
-                {{-- Supplier --}}
-                <div>
-                    <label class="{{ $lbl }}">{{ __('catalogue.supplier') }}</label>
-                    <input type="text" wire:model="batchSupplier" class="{{ $inp }}">
-                </div>
-                {{-- Delivery Note --}}
-                <div>
-                    <label class="{{ $lbl }}">{{ __('catalogue.delivery_note_no') }}</label>
-                    <input type="text" wire:model="batchDeliveryNo" class="{{ $inp }} font-mono">
-                </div>
+                <a href="{{ route('inventory.receive') }}"
+                   class="inline-flex shrink-0 items-center gap-2 rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-700 transition">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    {{ __('catalogue.receive_stock_cta_button') }}
+                </a>
             </div>
         </div>
         @endif
