@@ -432,6 +432,8 @@ return [
     'controlled_drug' => 'Controlled Drug',
     'non_drug_consumable' => 'Non-Drug / Consumable',
     'batch_status' => 'Batch Status',
+    'batch_no_auto_hint' => 'Auto-filled from expiry date (YYYY-MM)',
+    'batch_no_auto_note' => 'Set automatically as YYYY-MM from the expiry date. Products with the same expiry month share one batch.',
     'nearest_expiry' => 'Nearest Expiry',
     'out_of_stock' => 'Out of stock',
     'integrity_mismatch_notification' => ':count batch(es) have quantity_on_hand that does not match the ledger. Run `stock:integrity-check` for details.',

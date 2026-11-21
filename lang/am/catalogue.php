@@ -432,6 +432,8 @@ return [
     'controlled_drug' => 'ቁጥጥር ስር ያለ',
     'non_drug_consumable' => 'ሌላ ዕቃ',
     'batch_status' => 'የባች ሁኔታ',
+    'batch_no_auto_hint' => 'ከማብቂያ ቀን ራሱ ይሞላል (YYYY-MM)',
+    'batch_no_auto_note' => 'ከማብቂያ ቀን ወር ራሱ ይሞላል። ተመሳሳይ ወር ማብቂያ ያላቸው ምርቶች አንድ ባች ይጋራሉ።',
     'nearest_expiry' => 'ቅርብ ማብቂያ ቀን',
     'out_of_stock' => 'ክምችት አልቋል',
     // Expiry & Stock widget (UC-32, FR-7.7)

@@ -429,7 +429,9 @@
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-700">
                         {{ __('catalogue.batch_no') }} @if($batchStarted)<span class="text-rose-500">*</span>@endif
                     </label>
-                    <input type="text" wire:model="batchNo" class="{{ $inputCls }} font-mono">
+                    <input type="text" wire:model="batchNo" class="{{ $inputCls }} font-mono"
+                           placeholder="{{ __('catalogue.batch_no_auto_hint') }}">
+                    <p class="mt-0.5 text-[10px] text-slate-400">{{ __('catalogue.batch_no_auto_note') }}</p>
                     @error('batchNo') <span class="text-xs text-rose-600 mt-1 block">{{ $message }}</span> @enderror
                 </div>
                 {{-- Quantity --}}
