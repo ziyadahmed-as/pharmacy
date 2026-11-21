@@ -9,16 +9,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Clinical drug information about a medicine (DDD 5.3).
  *
- * @property int $id
- * @property int $product_id
+ * @property int         $id
+ * @property int         $product_id
  * @property string|null $indications
  * @property string|null $dosage_guidance
+ * @property string|null $administration_instructions   (new — migration 2026_11_21_000001)
  * @property string|null $side_effects
+ * @property string|null $warnings_precautions          (new — migration 2026_11_21_000001)
  * @property string|null $contraindications
  * @property string|null $interactions
- * @property int|null $updated_by
- * @property-read Product $product
- * @property-read User|null $updater
+ * @property string|null $patient_counseling_information (new — migration 2026_11_21_000001)
+ * @property int|null    $updated_by
+ * @property-read Product    $product
+ * @property-read User|null  $updater
  *
  * @uc UC-01
  */
@@ -51,9 +54,12 @@ class DrugInformation extends Model
      * @param  array{
      *     indications?: string|null,
      *     dosage_guidance?: string|null,
+     *     administration_instructions?: string|null,
      *     side_effects?: string|null,
+     *     warnings_precautions?: string|null,
      *     contraindications?: string|null,
-     *     interactions?: string|null
+     *     interactions?: string|null,
+     *     patient_counseling_information?: string|null,
      * }  $data
      */
     public static function saveFor(Product|int $product, array $data, ?User $user = null): self
@@ -62,12 +68,15 @@ class DrugInformation extends Model
 
         $record = self::firstOrNew(['product_id' => $id]);
         $record->fill([
-            'indications' => $data['indications'] ?? $record->indications,
-            'dosage_guidance' => $data['dosage_guidance'] ?? $record->dosage_guidance,
-            'side_effects' => $data['side_effects'] ?? $record->side_effects,
-            'contraindications' => $data['contraindications'] ?? $record->contraindications,
-            'interactions' => $data['interactions'] ?? $record->interactions,
-            'updated_by' => $user?->id ?? auth()->id(),
+            'indications'                    => $data['indications']                    ?? $record->indications,
+            'dosage_guidance'                => $data['dosage_guidance']                ?? $record->dosage_guidance,
+            'administration_instructions'    => $data['administration_instructions']    ?? $record->administration_instructions,
+            'side_effects'                   => $data['side_effects']                   ?? $record->side_effects,
+            'warnings_precautions'           => $data['warnings_precautions']           ?? $record->warnings_precautions,
+            'contraindications'              => $data['contraindications']              ?? $record->contraindications,
+            'interactions'                   => $data['interactions']                   ?? $record->interactions,
+            'patient_counseling_information' => $data['patient_counseling_information'] ?? $record->patient_counseling_information,
+            'updated_by'                     => $user?->id ?? auth()->id(),
         ]);
         $record->save();
 

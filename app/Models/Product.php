@@ -15,37 +15,63 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 /**
  * Product master record (DDD 5.3).
  *
- * @property int $id
+ * --- Original columns (unchanged) ---
+ * @property int         $id
  * @property string|null $product_code
- * @property string $brand
- * @property string $generic_name
+ * @property string      $brand
+ * @property string      $generic_name
  * @property string|null $strength
  * @property string|null $dosage_form
  * @property string|null $pack_size
- * @property string $unit
+ * @property string      $unit
  * @property string|null $manufacturer
- * @property int|null $category_id
+ * @property int|null    $category_id
  * @property string|null $barcode
  * @property string|null $storage_condition
- * @property bool $is_cold_chain
- * @property string $classification
- * @property bool $loose_allowed
- * @property int $reorder_level
- * @property int $max_level
- * @property int $min_level
- * @property int|null $min_shelf_life_days
+ * @property bool        $is_cold_chain
+ * @property string      $classification
+ * @property bool        $loose_allowed
+ * @property int         $reorder_level
+ * @property int         $max_level
+ * @property int         $min_level
+ * @property int|null    $min_shelf_life_days
  * @property string|null $preferred_supplier_name
- * @property bool $is_active
+ * @property bool        $is_active
  * @property string|null $image_path          Path on the 'private' disk; null until an image is uploaded.
+ * @property string|null $thumbnail_path
  * @property int|null    $selling_price       Current selling price in minor units (santim). Null = not priced.
- * @property-read Category|null $category
- * @property-read DrugInformation|null $drugInformation
- * @property-read Collection<int, ProductUnit> $units
- * @property-read Collection<int, ProductPrice> $prices
- * @property-read Collection<int, Batch> $batches
- * @property-read Collection<int, BatchStock> $batchStocks
- * @property-read Collection<int, Product> $substitutes
- * @property-read ProductPrice|null $latestPrice
+ *
+ * --- New columns (migration 2026_11_21_000001) ---
+ * @property string      $product_type        enum: medicine|medical_device|cosmetic|supplement|other
+ * @property string|null $product_description
+ * @property int|null    $manufacturer_id     FK → manufacturers
+ * @property string|null $country_of_origin
+ * @property int|null    $dosage_form_id      FK → dosage_forms
+ * @property string|null $strength_unit       e.g. mg, mcg, IU
+ * @property int|null    $route_of_administration_id  FK → routes_of_administration
+ * @property int|null    $therapeutic_class_id        FK → therapeutic_classes
+ * @property string|null $atc_code            WHO ATC code
+ * @property string|null $registration_number
+ * @property bool        $prescription_required
+ * @property string|null $special_storage_instructions
+ * @property bool        $inventory_tracking_enabled
+ * @property bool        $batch_tracking_enabled
+ * @property bool        $expiry_tracking_enabled
+ *
+ * --- Relationships ---
+ * @property-read Category|null                                    $category
+ * @property-read Manufacturer|null                                $manufacturerEntity
+ * @property-read DosageForm|null                                  $dosageForm
+ * @property-read RouteOfAdministration|null                       $routeOfAdministration
+ * @property-read TherapeuticClass|null                            $therapeuticClass
+ * @property-read DrugInformation|null                             $drugInformation
+ * @property-read Collection<int, ProductActiveIngredient>         $activeIngredients
+ * @property-read Collection<int, ProductUnit>                     $units
+ * @property-read Collection<int, ProductPrice>                    $prices
+ * @property-read Collection<int, Batch>                           $batches
+ * @property-read Collection<int, BatchStock>                      $batchStocks
+ * @property-read Collection<int, Product>                         $substitutes
+ * @property-read ProductPrice|null                                $latestPrice
  *
  * @uc UC-01, UC-03
  */
@@ -54,6 +80,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        // --- Original columns ---
         'product_code',
         'brand',
         'generic_name',
@@ -77,19 +104,44 @@ class Product extends Model
         'image_path',
         'selling_price',
         'thumbnail_path',
+        // --- New columns (migration 2026_11_21_000001) ---
+        'product_type',
+        'product_description',
+        'manufacturer_id',
+        'country_of_origin',
+        'dosage_form_id',
+        'strength_unit',
+        'route_of_administration_id',
+        'therapeutic_class_id',
+        'atc_code',
+        'registration_number',
+        'prescription_required',
+        'special_storage_instructions',
+        'inventory_tracking_enabled',
+        'batch_tracking_enabled',
+        'expiry_tracking_enabled',
     ];
 
     protected function casts(): array
     {
         return [
-            'is_cold_chain'    => 'boolean',
-            'loose_allowed'    => 'boolean',
-            'is_active'        => 'boolean',
-            'reorder_level'    => 'integer',
-            'max_level'        => 'integer',
-            'min_level'        => 'integer',
-            'min_shelf_life_days' => 'integer',
-            'selling_price'    => 'integer',   // stored in minor units (santim)
+            'is_cold_chain'               => 'boolean',
+            'loose_allowed'               => 'boolean',
+            'is_active'                   => 'boolean',
+            'reorder_level'               => 'integer',
+            'max_level'                   => 'integer',
+            'min_level'                   => 'integer',
+            'min_shelf_life_days'         => 'integer',
+            'selling_price'               => 'integer',   // stored in minor units (santim)
+            // New casts
+            'prescription_required'       => 'boolean',
+            'inventory_tracking_enabled'  => 'boolean',
+            'batch_tracking_enabled'      => 'boolean',
+            'expiry_tracking_enabled'     => 'boolean',
+            'manufacturer_id'             => 'integer',
+            'dosage_form_id'              => 'integer',
+            'route_of_administration_id'  => 'integer',
+            'therapeutic_class_id'        => 'integer',
         ];
     }
 
@@ -166,9 +218,34 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function manufacturerEntity(): BelongsTo
+    {
+        return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
+    }
+
+    public function dosageForm(): BelongsTo
+    {
+        return $this->belongsTo(DosageForm::class, 'dosage_form_id');
+    }
+
+    public function routeOfAdministration(): BelongsTo
+    {
+        return $this->belongsTo(RouteOfAdministration::class, 'route_of_administration_id');
+    }
+
+    public function therapeuticClass(): BelongsTo
+    {
+        return $this->belongsTo(TherapeuticClass::class, 'therapeutic_class_id');
+    }
+
     public function drugInformation(): HasOne
     {
         return $this->hasOne(DrugInformation::class);
+    }
+
+    public function activeIngredients(): HasMany
+    {
+        return $this->hasMany(ProductActiveIngredient::class)->orderBy('sort_order');
     }
 
     public function substitutes(): BelongsToMany
@@ -204,6 +281,60 @@ class Product extends Model
     public function latestPrice(): HasOne
     {
         return $this->hasOne(ProductPrice::class)->latestOfMany('effective_from');
+    }
+
+    // -------------------------------------------------------------------------
+    // Scopes
+    // -------------------------------------------------------------------------
+
+    /** Active products only. */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('is_active', true);
+    }
+
+    /** Filter by product type. */
+    public function scopeOfType(Builder $query, string $type): Builder
+    {
+        return $query->where('product_type', $type);
+    }
+
+    /** Medicines only (product_type = 'medicine'). */
+    public function scopeMedicines(Builder $query): Builder
+    {
+        return $query->where('product_type', 'medicine');
+    }
+
+    /** Products that require a prescription. */
+    public function scopePrescriptionRequired(Builder $query): Builder
+    {
+        return $query->where('prescription_required', true);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Human-readable strength string built from active ingredients.
+     * Falls back to the legacy `strength` text column when no structured
+     * ingredient rows exist.
+     *
+     * Examples:
+     *   single:      "500 mg"
+     *   combination: "875 mg + 125 mg"
+     */
+    public function strengthLabel(): string
+    {
+        $ingredients = $this->activeIngredients;
+
+        if ($ingredients->isEmpty()) {
+            return $this->strength ?? '';
+        }
+
+        return $ingredients
+            ->map(fn ($i) => $i->strength_string)
+            ->implode(' + ');
     }
 
     // -------------------------------------------------------------------------

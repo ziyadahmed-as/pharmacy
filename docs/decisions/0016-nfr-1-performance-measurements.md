@@ -3,6 +3,6 @@
 ```
 NFR-1 Benchmark Results (20,000 products):
 - Barcode scan lookup: 0.29 ms (target < 100 ms)
-- Brand/name search query: 1.90 ms (target < 250 ms)
-- 5-item transactional sale completion: 44.46 ms (target < 1000 ms)
+- Brand/name search query: 1.91 ms (target < 250 ms)
+- 5-item transactional sale completion: 33.71 ms (target < 1000 ms)
 ```

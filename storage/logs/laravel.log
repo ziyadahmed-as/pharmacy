@@ -6052,3 +6052,18 @@ Low Stock: 0 items | Expiring: 0 batches
 #92 C:/Users/hp/Pictures/2019/phbarmacy/Pharmacy-Stage1/PMS12/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('C://Users//hp//Pic...')
 #93 {main}
 "} 
+[2026-11-21 17:46:44] testing.ERROR: Approval handler failed {"request":1,"type":"demo.thing","error":"boom"} 
+[2026-11-21 17:47:16] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-21 17:47:16] testing.ERROR: Approval handler failed {"request":1,"type":"stock.adjustment","error":"A physical recount must be conducted and recorded before this adjustment can be approved (BR-07)."} 
+[2026-11-21 17:47:23] testing.INFO: Refill reminder SMS sent to +251911998877 (ID: MSG-2MSTO1PTCZ): [City Central Pharmacy] Daily Summary (21 Nov 2026):
+Net Sales: 0.00 ETB (0 sales)
+Cash: 0.00 ETB | Digital: 0.00 ETB
+Low Stock: 0 items | Expiring: 0 batches  
+[2026-11-21 17:47:23] testing.INFO: Refill reminder SMS sent to +251911998877 (ID: MSG-AEMPU2TCBD): [City Central Pharmacy] Daily Summary (21 Nov 2026):
+Net Sales: 0.00 ETB (0 sales)
+Cash: 0.00 ETB | Digital: 0.00 ETB
+Low Stock: 0 items | Expiring: 0 batches  
+[2026-11-21 17:47:34] testing.INFO: Refill reminder SMS sent to +251911888888 (ID: MSG-ORFN73UFZK): Dear Derartu, your refill is due.  
+[2026-11-21 17:47:34] testing.WARNING: Refill reminder delivery failed to +251999999999: Carrier network timeout  
+[2026-11-21 17:47:34] testing.INFO: Refill reminder SMS sent to +251911000001 (ID: MSG-YFA12DNRRC): Reminder 1  
+[2026-11-21 17:47:34] testing.INFO: Refill reminder SMS sent to +251911000002 (ID: MSG-OIVCK1YBJ4): Reminder 2  

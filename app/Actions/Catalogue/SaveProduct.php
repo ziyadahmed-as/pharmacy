@@ -4,7 +4,9 @@ namespace App\Actions\Catalogue;
 
 use App\Models\Batch;
 use App\Models\DrugInformation;
+use App\Models\Manufacturer;
 use App\Models\Product;
+use App\Models\ProductActiveIngredient;
 use App\Models\ProductPrice;
 use App\Models\ProductUnit;
 use App\Models\StockReceipt;
@@ -143,25 +145,61 @@ class SaveProduct
             // ----------------------------------------------------------------
             $target = $product ?? new Product;
 
-            $target->brand                  = $data['brand'];
-            $target->generic_name           = $data['generic_name'];
-            $target->strength               = $data['strength'] ?? null;
-            $target->dosage_form            = $data['dosage_form'] ?? null;
-            $target->pack_size              = $data['pack_size'] ?? null;
-            $target->product_code           = $data['product_code'];
-            $target->unit                   = $data['unit'] ?? 'piece';
-            $target->manufacturer           = $data['manufacturer'] ?? null;
-            $target->category_id            = $data['category_id'] ?? null;
-            $target->barcode                = ! empty($data['barcode']) ? $data['barcode'] : null;
-            $target->storage_condition      = $data['storage_condition'] ?? null;
-            $target->is_cold_chain          = (bool) ($data['is_cold_chain'] ?? false);
-            $target->classification         = $data['classification'];
-            $target->loose_allowed          = (bool) ($data['loose_allowed'] ?? false);
-            $target->reorder_level          = (int) ($data['reorder_level'] ?? 0);
-            $target->max_level              = (int) ($data['max_level'] ?? 0);
-            $target->min_level              = (int) ($data['min_level'] ?? 0);
-            $target->min_shelf_life_days    = isset($data['min_shelf_life_days']) ? (int) $data['min_shelf_life_days'] : null;
-            $target->preferred_supplier_name= $data['preferred_supplier_name'] ?? null;
+            // --- Original fields ---
+            $target->brand                   = $data['brand'];
+            $target->generic_name            = $data['generic_name'];
+            $target->strength                = $data['strength'] ?? null;
+            $target->dosage_form             = $data['dosage_form'] ?? null;
+            $target->pack_size               = $data['pack_size'] ?? null;
+            $target->product_code            = $data['product_code'];
+            $target->unit                    = $data['unit'] ?? 'piece';
+            $target->manufacturer            = $data['manufacturer'] ?? null;
+            $target->category_id             = $data['category_id'] ?? null;
+            $target->barcode                 = ! empty($data['barcode']) ? $data['barcode'] : null;
+            $target->storage_condition       = $data['storage_condition'] ?? null;
+            $target->is_cold_chain           = (bool) ($data['is_cold_chain'] ?? false);
+            $target->classification          = $data['classification'];
+            $target->loose_allowed           = (bool) ($data['loose_allowed'] ?? false);
+            $target->reorder_level           = (int) ($data['reorder_level'] ?? 0);
+            $target->max_level               = (int) ($data['max_level'] ?? 0);
+            $target->min_level               = (int) ($data['min_level'] ?? 0);
+            $target->min_shelf_life_days     = isset($data['min_shelf_life_days']) ? (int) $data['min_shelf_life_days'] : null;
+            $target->preferred_supplier_name = $data['preferred_supplier_name'] ?? null;
+
+            // --- New pharmaceutical fields (all optional; null = not set) ---
+            $target->product_type                 = $data['product_type'] ?? $target->product_type ?? 'medicine';
+            $target->product_description          = $data['product_description'] ?? $target->product_description ?? null;
+            $target->country_of_origin            = $data['country_of_origin'] ?? $target->country_of_origin ?? null;
+            $target->strength_unit                = $data['strength_unit'] ?? $target->strength_unit ?? null;
+            $target->atc_code                     = $data['atc_code'] ?? $target->atc_code ?? null;
+            $target->registration_number          = $data['registration_number'] ?? $target->registration_number ?? null;
+            $target->special_storage_instructions = $data['special_storage_instructions'] ?? $target->special_storage_instructions ?? null;
+            $target->prescription_required        = (bool) ($data['prescription_required'] ?? $target->prescription_required ?? false);
+            $target->inventory_tracking_enabled   = (bool) ($data['inventory_tracking_enabled'] ?? $target->inventory_tracking_enabled ?? true);
+            $target->batch_tracking_enabled       = (bool) ($data['batch_tracking_enabled'] ?? $target->batch_tracking_enabled ?? true);
+            $target->expiry_tracking_enabled      = (bool) ($data['expiry_tracking_enabled'] ?? $target->expiry_tracking_enabled ?? true);
+
+            // FK lookups — only update when the caller explicitly passes a value
+            if (array_key_exists('manufacturer_id', $data)) {
+                $target->manufacturer_id = $data['manufacturer_id'] ?: null;
+            }
+            if (array_key_exists('dosage_form_id', $data)) {
+                $target->dosage_form_id = $data['dosage_form_id'] ?: null;
+            }
+            if (array_key_exists('route_of_administration_id', $data)) {
+                $target->route_of_administration_id = $data['route_of_administration_id'] ?: null;
+            }
+            if (array_key_exists('therapeutic_class_id', $data)) {
+                $target->therapeutic_class_id = $data['therapeutic_class_id'] ?: null;
+            }
+
+            // Auto-resolve manufacturer FK from free-text when possible
+            if (empty($target->manufacturer_id) && ! empty($target->manufacturer)) {
+                $mfr = Manufacturer::where('name', $target->manufacturer)->first();
+                if ($mfr) {
+                    $target->manufacturer_id = $mfr->id;
+                }
+            }
 
             if ($isNew) {
                 $target->is_active = true;
@@ -170,10 +208,17 @@ class SaveProduct
             $target->save();
 
             // ----------------------------------------------------------------
-            // 2. Drug Information
+            // 2. Drug Information (original + new clinical fields)
             // ----------------------------------------------------------------
             if (isset($data['drug_information']) && is_array($data['drug_information'])) {
                 DrugInformation::saveFor($target, $data['drug_information'], $actor);
+            }
+
+            // ----------------------------------------------------------------
+            // 2b. Active Ingredients
+            // ----------------------------------------------------------------
+            if (isset($data['active_ingredients']) && is_array($data['active_ingredients'])) {
+                ProductActiveIngredient::syncFor($target, $data['active_ingredients']);
             }
 
             // ----------------------------------------------------------------
